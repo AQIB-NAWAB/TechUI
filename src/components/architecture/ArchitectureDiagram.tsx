@@ -41,97 +41,147 @@ export type ArchitectureDiagramProps = z.infer<typeof ArchitectureDiagramSchema>
 type NodeType = z.infer<typeof NodeSchema>;
 type Connection = z.infer<typeof ConnectionSchema>;
 
-const NODE_CONFIG: Record<
-  NodeType["type"],
-  { icon: React.ElementType; bg: string; border: string; text: string; label: string }
-> = {
-  client:       { icon: Globe,    bg: "bg-blue-50 dark:bg-blue-950/30",    border: "border-blue-200 dark:border-blue-900",    text: "text-blue-700 dark:text-blue-400",    label: "Client" },
-  server:       { icon: Server,   bg: "bg-zinc-50 dark:bg-zinc-900",       border: "border-zinc-200 dark:border-zinc-800",    text: "text-zinc-700 dark:text-zinc-300",    label: "Server" },
-  database:     { icon: Database, bg: "bg-violet-50 dark:bg-violet-950/30",border: "border-violet-200 dark:border-violet-900",text: "text-violet-700 dark:text-violet-400",label: "Database" },
-  cache:        { icon: Zap,      bg: "bg-amber-50 dark:bg-amber-950/30",  border: "border-amber-200 dark:border-amber-900",  text: "text-amber-700 dark:text-amber-400",  label: "Cache" },
-  queue:        { icon: Activity, bg: "bg-orange-50 dark:bg-orange-950/30",border: "border-orange-200 dark:border-orange-900",text: "text-orange-700 dark:text-orange-400",label: "Queue" },
-  gateway:      { icon: Shield,   bg: "bg-emerald-50 dark:bg-emerald-950/30",border: "border-emerald-200 dark:border-emerald-900",text: "text-emerald-700 dark:text-emerald-400",label: "Gateway" },
-  loadbalancer: { icon: Router,   bg: "bg-cyan-50 dark:bg-cyan-950/30",    border: "border-cyan-200 dark:border-cyan-900",    text: "text-cyan-700 dark:text-cyan-400",    label: "Load Balancer" },
-  worker:       { icon: Cpu,      bg: "bg-pink-50 dark:bg-pink-950/30",    border: "border-pink-200 dark:border-pink-900",    text: "text-pink-700 dark:text-pink-400",    label: "Worker" },
-  service:      { icon: Box,      bg: "bg-indigo-50 dark:bg-indigo-950/30",border: "border-indigo-200 dark:border-indigo-900",text: "text-indigo-700 dark:text-indigo-400",label: "Service" },
-  cdn:          { icon: Cloud,    bg: "bg-sky-50 dark:bg-sky-950/30",      border: "border-sky-200 dark:border-sky-900",      text: "text-sky-700 dark:text-sky-400",      label: "CDN" },
-  storage:      { icon: HardDrive,bg: "bg-teal-50 dark:bg-teal-950/30",   border: "border-teal-200 dark:border-teal-900",    text: "text-teal-700 dark:text-teal-400",    label: "Storage" },
-  external:     { icon: Globe,    bg: "bg-zinc-50 dark:bg-zinc-900",       border: "border-zinc-300 dark:border-zinc-700 border-dashed",text: "text-zinc-500 dark:text-zinc-500",label: "External" },
-  function:     { icon: Lock,     bg: "bg-rose-50 dark:bg-rose-950/30",    border: "border-rose-200 dark:border-rose-900",    text: "text-rose-700 dark:text-rose-400",    label: "Function" },
+const NODE_ICON: Record<NodeType["type"], React.ElementType> = {
+  client:       Globe,
+  server:       Server,
+  database:     Database,
+  cache:        Zap,
+  queue:        Activity,
+  gateway:      Shield,
+  loadbalancer: Router,
+  worker:       Cpu,
+  service:      Box,
+  cdn:          Cloud,
+  storage:      HardDrive,
+  external:     Globe,
+  function:     Lock,
 };
 
-const STATUS_RING: Record<string, string> = {
-  active:  "ring-2 ring-emerald-400/60 dark:ring-emerald-500/40",
-  idle:    "",
-  error:   "ring-2 ring-red-400/60 dark:ring-red-500/40",
-  warning: "ring-2 ring-amber-400/60 dark:ring-amber-500/40",
+const NODE_BORDER: Record<NodeType["type"], string> = {
+  client:       "border-blue-200 dark:border-blue-800",
+  server:       "border-emerald-200 dark:border-emerald-800",
+  database:     "border-amber-200 dark:border-amber-800",
+  cache:        "border-violet-200 dark:border-violet-800",
+  queue:        "border-cyan-200 dark:border-cyan-800",
+  gateway:      "border-zinc-300 dark:border-zinc-600",
+  loadbalancer: "border-cyan-200 dark:border-cyan-800",
+  worker:       "border-emerald-200 dark:border-emerald-800",
+  service:      "border-emerald-200 dark:border-emerald-800",
+  cdn:          "border-blue-200 dark:border-blue-800",
+  storage:      "border-amber-200 dark:border-amber-800",
+  external:     "border-zinc-300 dark:border-zinc-600",
+  function:     "border-violet-200 dark:border-violet-800",
 };
 
 const STATUS_DOT: Record<string, string> = {
   active:  "bg-emerald-500",
-  idle:    "bg-zinc-400",
+  idle:    "bg-zinc-300 dark:bg-zinc-600",
   error:   "bg-red-500",
   warning: "bg-amber-500",
 };
 
-function NodeCard({ node, selected, onClick }: { node: NodeType; selected: boolean; onClick: () => void }) {
-  const cfg = NODE_CONFIG[node.type];
-  const Icon = cfg.icon;
-  const ring = node.status ? STATUS_RING[node.status] : "";
+function NodeCard({
+  node,
+  selected,
+  onClick,
+}: {
+  node: NodeType;
+  selected: boolean;
+  onClick: () => void;
+}) {
+  const Icon = NODE_ICON[node.type];
   const dot = node.status ? STATUS_DOT[node.status] : null;
+  const borderColor = NODE_BORDER[node.type];
 
   return (
     <button
       onClick={onClick}
       className={cn(
-        "relative flex flex-col items-center gap-2 px-4 py-3 rounded-xl border transition-all",
-        "min-w-[96px] max-w-[120px] cursor-pointer",
-        cfg.bg, cfg.border,
-        ring,
-        selected ? "scale-105 shadow-md" : "hover:scale-102 hover:shadow-sm",
-        node.highlight ? "shadow-lg" : ""
+        "relative flex flex-col items-center gap-1.5 px-4 py-3 rounded-lg border-2 transition-all duration-500 text-left cursor-pointer",
+        "min-w-[88px] max-w-[112px]",
+        selected
+          ? "border-blue-500 bg-blue-600 text-white shadow-md scale-105"
+          : node.highlight
+          ? "border-zinc-400 dark:border-zinc-500 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100"
+          : cn(borderColor, "bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 hover:scale-105 hover:shadow-sm")
       )}
     >
       {dot && (
-        <span className={cn("absolute -top-1 -right-1 size-2.5 rounded-full border-2 border-white dark:border-zinc-950", dot)} />
+        <span
+          className={cn(
+            "absolute -top-1 -right-1 size-2 rounded-full",
+            dot,
+            node.status === "active" && !selected && "animate-pulse",
+            selected ? "ring-2 ring-blue-600" : "ring-2 ring-white dark:ring-zinc-950"
+          )}
+        />
       )}
-      <div className={cn("size-9 flex items-center justify-center rounded-lg", cfg.bg, cfg.text)}>
-        <Icon className="size-5" />
-      </div>
+      <Icon
+        className={cn(
+          "size-5 shrink-0",
+          selected ? "text-white" : "text-zinc-400 dark:text-zinc-500"
+        )}
+      />
       <div className="text-center">
-        <p className="text-[11px] font-semibold text-zinc-900 dark:text-zinc-100 leading-tight">{node.label}</p>
+        <p className={cn(
+          "text-[12px] font-semibold leading-tight",
+          selected ? "text-white" : "text-zinc-800 dark:text-zinc-200"
+        )}>
+          {node.label}
+        </p>
         {node.sublabel && (
-          <p className="text-[10px] text-zinc-400 dark:text-zinc-500 mt-0.5 leading-tight">{node.sublabel}</p>
+          <p className={cn(
+            "text-[10px] mt-0.5 leading-tight",
+            selected ? "text-blue-200" : "text-zinc-400 dark:text-zinc-500"
+          )}>
+            {node.sublabel}
+          </p>
         )}
       </div>
-      <span className={cn("text-[9px] uppercase tracking-widest font-semibold opacity-50", cfg.text)}>
-        {cfg.label}
-      </span>
     </button>
   );
 }
 
-function Arrow({ connection, index }: { connection: Connection; index: number }) {
-  const isAnimated = connection.animated;
+function FlowConnector({ connection }: { connection: Connection }) {
+  const isDashed = connection.style === "dashed";
+  const isAnimated = connection.animated || true;
+
   return (
-    <div className="flex flex-col items-center justify-center gap-1 min-w-[48px]">
+    <div className="flex flex-col items-center justify-center gap-1 px-1" style={{ minWidth: 44 }}>
       {connection.label && (
-        <span className="text-[10px] text-zinc-400 dark:text-zinc-500 whitespace-nowrap px-1 font-mono">
+        <span className="text-[10px] text-zinc-400 dark:text-zinc-500 whitespace-nowrap font-mono">
           {connection.label}
         </span>
       )}
-      <div className="relative flex items-center w-12">
-        <div
-          className={cn(
-            "h-px flex-1",
-            connection.style === "dashed"
-              ? "border-t border-dashed border-zinc-300 dark:border-zinc-700"
-              : "bg-zinc-300 dark:bg-zinc-700"
+      <div className="flex items-center w-full">
+        {connection.direction === "backward" && (
+          <svg width="6" height="8" viewBox="0 0 6 8" className="text-zinc-300 dark:text-zinc-700 shrink-0">
+            <path d="M6 0 L0 4 L6 8" fill="currentColor" />
+          </svg>
+        )}
+        <div className="flex-1 relative overflow-hidden" style={{ height: 2 }}>
+          {isDashed || isAnimated ? (
+            <svg
+              className="absolute inset-0 w-full"
+              height="2"
+              style={{ overflow: "visible" }}
+            >
+              <line
+                x1="0" y1="1" x2="100%" y2="1"
+                strokeWidth={2}
+                className={cn(
+                  "stroke-zinc-300 dark:stroke-zinc-700",
+                  isAnimated && "flow-line"
+                )}
+              />
+            </svg>
+          ) : (
+            <div className="h-full bg-zinc-300 dark:bg-zinc-700" />
           )}
-        />
+        </div>
         {connection.direction !== "backward" && (
-          <svg width="8" height="8" viewBox="0 0 8 8" className="text-zinc-400 dark:text-zinc-600 shrink-0">
-            <path d="M0 0 L8 4 L0 8" fill="currentColor" />
+          <svg width="6" height="8" viewBox="0 0 6 8" className="text-zinc-300 dark:text-zinc-700 shrink-0">
+            <path d="M0 0 L6 4 L0 8" fill="currentColor" />
           </svg>
         )}
       </div>
@@ -145,66 +195,103 @@ export function ArchitectureDiagram({
   connections,
   layout = "horizontal",
 }: ArchitectureDiagramProps) {
-  const [selectedNode, setSelectedNode] = useState<string | null>(null);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
 
-  if (layout === "horizontal") {
-    return (
-      <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 p-6 overflow-x-auto">
-        {title && (
-          <p className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-widest mb-5">
-            {title}
-          </p>
-        )}
-        <div className="flex items-center gap-0 justify-start min-w-max">
-          {nodes.map((node, i) => {
-            const conn = connections?.[i - 1];
-            return (
-              <div key={node.id} className="flex items-center">
-                {i > 0 && conn && <Arrow connection={conn} index={i} />}
-                {i > 0 && !conn && (
-                  <div className="w-10 flex items-center justify-center">
-                    <div className="h-px w-full bg-zinc-200 dark:bg-zinc-800" />
-                    <svg width="8" height="8" viewBox="0 0 8 8" className="text-zinc-300 dark:text-zinc-700 shrink-0">
-                      <path d="M0 0 L8 4 L0 8" fill="currentColor" />
-                    </svg>
-                  </div>
-                )}
-                <NodeCard
-                  node={node}
-                  selected={selectedNode === node.id}
-                  onClick={() => setSelectedNode(selectedNode === node.id ? null : node.id)}
-                />
-              </div>
-            );
-          })}
-        </div>
-        {selectedNode && (
-          <div className="mt-4 px-3 py-2 rounded-lg bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-xs text-zinc-600 dark:text-zinc-400 font-mono">
-            Node: <span className="text-zinc-900 dark:text-zinc-100">{selectedNode}</span>
-            {" · "}Type: <span className="text-zinc-900 dark:text-zinc-100">{nodes.find(n => n.id === selectedNode)?.type}</span>
-          </div>
-        )}
-      </div>
-    );
-  }
+  const selected = nodes.find((n) => n.id === selectedId);
 
   return (
-    <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 p-6">
+    <div className="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 p-6 overflow-x-auto">
+      <style>{`
+        @keyframes flow {
+          from { stroke-dashoffset: 20; }
+          to   { stroke-dashoffset: 0; }
+        }
+        .flow-line {
+          animation: flow 1s linear infinite;
+          stroke-dasharray: 6 4;
+        }
+      `}</style>
+
       {title && (
-        <p className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-widest mb-5">
+        <p className="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-5 font-medium">
           {title}
         </p>
       )}
-      <div className="flex flex-wrap gap-4">
-        {nodes.map((node) => (
-          <NodeCard
-            key={node.id}
-            node={node}
-            selected={selectedNode === node.id}
-            onClick={() => setSelectedNode(selectedNode === node.id ? null : node.id)}
-          />
-        ))}
+
+      <div
+        className={cn(
+          "flex items-center justify-start",
+          layout === "vertical" ? "flex-col" : layout === "grid" ? "flex-wrap gap-4" : "flex-row"
+        )}
+        style={{ minWidth: layout === "horizontal" ? "max-content" : undefined }}
+      >
+        {nodes.map((node, i) => {
+          const conn = connections?.[i - 1];
+          return (
+            <div
+              key={node.id}
+              className={cn(
+                "flex items-center",
+                layout === "vertical" && "flex-col"
+              )}
+            >
+              {i > 0 && conn && <FlowConnector connection={conn} />}
+              {i > 0 && !conn && (
+                <div className="flex items-center" style={{ minWidth: 44 }}>
+                  <div className="flex-1 relative" style={{ height: 2 }}>
+                    <svg className="absolute inset-0 w-full" height="2" style={{ overflow: "visible" }}>
+                      <line x1="0" y1="1" x2="100%" y2="1" strokeWidth={2} className="stroke-zinc-200 dark:stroke-zinc-800 flow-line" />
+                    </svg>
+                  </div>
+                  <svg width="6" height="8" viewBox="0 0 6 8" className="text-zinc-300 dark:text-zinc-700 shrink-0">
+                    <path d="M0 0 L6 4 L0 8" fill="currentColor" />
+                  </svg>
+                </div>
+              )}
+              <NodeCard
+                node={node}
+                selected={selectedId === node.id}
+                onClick={() => setSelectedId(selectedId === node.id ? null : node.id)}
+              />
+            </div>
+          );
+        })}
       </div>
+
+      {/* Selected node detail popover */}
+      {selected && (
+        <div className="mt-4 flex items-start gap-3 px-3 py-2.5 rounded-lg bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-[12px] transition-all duration-500">
+          <div className={cn("size-2 rounded-full mt-1 shrink-0", selected.status ? STATUS_DOT[selected.status] : "bg-zinc-300 dark:bg-zinc-600")} />
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="font-semibold text-zinc-800 dark:text-zinc-200">{selected.label}</span>
+              <span className="text-[10px] px-1.5 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 font-mono">
+                {selected.type}
+              </span>
+              {selected.status && (
+                <span className={cn(
+                  "text-[10px] font-medium",
+                  selected.status === "active" ? "text-emerald-600 dark:text-emerald-400" :
+                  selected.status === "error" ? "text-red-600 dark:text-red-400" :
+                  selected.status === "warning" ? "text-amber-600 dark:text-amber-400" :
+                  "text-zinc-400"
+                )}>
+                  {selected.status}
+                </span>
+              )}
+            </div>
+            {selected.sublabel && (
+              <p className="text-zinc-400 dark:text-zinc-500 mt-0.5">{selected.sublabel}</p>
+            )}
+          </div>
+          <button
+            onClick={() => setSelectedId(null)}
+            className="text-zinc-300 dark:text-zinc-600 hover:text-zinc-500 transition-colors text-xs shrink-0"
+          >
+            ✕
+          </button>
+        </div>
+      )}
     </div>
   );
 }

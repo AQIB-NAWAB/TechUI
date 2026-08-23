@@ -11,7 +11,10 @@ export type ComponentCategory =
   | "containers"
   | "distributed"
   | "code"
-  | "devtools";
+  | "devtools"
+  | "ui"
+  | "ai"
+  | "edu";
 
 export type ComponentEntry<Props = Record<string, unknown>> = {
   id: string;

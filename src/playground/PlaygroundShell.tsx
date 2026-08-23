@@ -3,8 +3,9 @@
 import { useState, useMemo } from "react";
 import {
   Search, Moon, Sun, Monitor, Tablet, Smartphone,
-  Code2, Layers, ChevronRight, ChevronDown, RotateCcw,
-  Copy, Check, Braces, BookOpen, Settings2
+  Layers, ChevronRight, ChevronDown, RotateCcw,
+  Copy, Check, Braces, BookOpen, Settings2, Star,
+  Code2, Zap,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { registry, CATEGORIES } from "@/registry";
@@ -13,7 +14,7 @@ import { LivePreview } from "./LivePreview";
 import { PropsPanel } from "./PropsPanel";
 
 type ViewportSize = "desktop" | "tablet" | "mobile";
-type ActiveTab = "preview" | "json" | "schema";
+type ActiveTab = "preview" | "code" | "json" | "schema";
 
 const VIEWPORT_WIDTHS: Record<ViewportSize, string> = {
   desktop: "100%",
@@ -21,17 +22,150 @@ const VIEWPORT_WIDTHS: Record<ViewportSize, string> = {
   mobile: "390px",
 };
 
+function toComponentName(id: string): string {
+  return id.split("-").map((s) => (s[0]?.toUpperCase() ?? "") + s.slice(1)).join("");
+}
+
+const CAT_DIR: Record<ComponentCategory, string> = {
+  api: "api", architecture: "architecture", database: "database",
+  auth: "auth", networking: "networking", cloud: "cloud",
+  containers: "containers", distributed: "distributed",
+  code: "code", devtools: "devtools", ui: "ui", ai: "ai",
+  edu: "edu",
+};
+
+function generateJsx(
+  id: string,
+  category: ComponentCategory,
+  props: Record<string, unknown>
+): string {
+  const name = toComponentName(id);
+  const dir = CAT_DIR[category] ?? category;
+  const importPath = `@/components/${dir}/${name}`;
+
+  const propsLines = Object.entries(props)
+    .filter(([, v]) => v !== undefined && v !== null)
+    .map(([k, v]) => {
+      if (v === true) return `  ${k}`;
+      if (v === false) return `  ${k}={false}`;
+      if (typeof v === "string") return `  ${k}="${v}"`;
+      if (typeof v === "number") return `  ${k}={${v}}`;
+      const json = JSON.stringify(v, null, 2)
+        .split("\n")
+        .map((line, i) => (i === 0 ? line : "  " + line))
+        .join("\n");
+      return `  ${k}={${json}}`;
+    });
+
+  const selfClose = propsLines.length <= 3;
+  const lines = [
+    `import { ${name} } from "${importPath}";`,
+    "",
+    "export default function Example() {",
+    "  return (",
+    `    <${name}`,
+    ...propsLines.map((l) => "  " + l),
+    selfClose ? `    />` : `    ></${name}>`,
+    "  );",
+    "}",
+  ];
+  return lines.join("\n");
+}
+
+// Very lightweight JSX syntax highlighter
+function HighlightedCode({ code }: { code: string }) {
+  const lines = code.split("\n");
+  return (
+    <pre className="text-xs font-mono leading-relaxed whitespace-pre">
+      {lines.map((line, li) => {
+        // Colorize tokens
+        const parts: React.ReactNode[] = [];
+        let remaining = line;
+        let key = 0;
+
+        function push(text: string, cls?: string) {
+          if (!text) return;
+          parts.push(cls
+            ? <span key={key++} className={cls}>{text}</span>
+            : <span key={key++} className="text-zinc-300">{text}</span>
+          );
+        }
+
+        // Simple line-level categorization
+        if (remaining.trimStart().startsWith("import ") || remaining.trimStart().startsWith("export ")) {
+          // tokenize: import/export/from/default as keyword, strings as string
+          const segments = remaining.split(/(".*?"|'.*?'|\bimport\b|\bexport\b|\bdefault\b|\bfrom\b|\bfunction\b|\breturn\b)/g);
+          for (const seg of segments) {
+            if (!seg) continue;
+            if (/^(import|export|default|from|function|return)$/.test(seg)) push(seg, "text-violet-400");
+            else if (/^["'].*["']$/.test(seg)) push(seg, "text-emerald-400");
+            else push(seg);
+          }
+        } else if (/^\s*<[A-Z]/.test(remaining) || /^\s*\/>/.test(remaining) || /^\s*>/.test(remaining)) {
+          // JSX tag line
+          const m = remaining.match(/^(\s*)(<\/?)(([A-Z]\w*)?)(.*)$/);
+          if (m) {
+            push(m[1]!);
+            push(m[2]! + (m[3] ?? ""), "text-blue-400");
+            // parse rest for prop=value
+            let rest = m[5] ?? "";
+            const propParts = rest.split(/(\s+\w+={|\/?>|"[^"]*"|\{[^}]*\})/g);
+            for (const p of propParts) {
+              if (/^\s+\w+=\{?/.test(p)) push(p, "text-zinc-400");
+              else if (/^"[^"]*"$/.test(p)) push(p, "text-emerald-400");
+              else if (/^\{[^}]*\}$/.test(p)) push(p, "text-amber-400");
+              else if (p === "/>" || p === ">") push(p, "text-blue-400");
+              else push(p);
+            }
+          } else push(remaining);
+        } else if (/^\s+\w+(\?)?=/.test(remaining)) {
+          // prop assignment line
+          const m = remaining.match(/^(\s+)(\w+)(=)(.*)/);
+          if (m) {
+            push(m[1]!);
+            push(m[2]!, "text-zinc-300");
+            push(m[3]!);
+            const val = m[4] ?? "";
+            if (val.startsWith('"')) push(val, "text-emerald-400");
+            else if (val.startsWith("{")) push(val, "text-amber-400");
+            else push(val);
+          } else push(remaining);
+        } else if (/^\s+\w+$/.test(remaining)) {
+          // boolean shorthand prop
+          push(remaining.match(/^(\s+)/)?.[1] ?? "");
+          push(remaining.trim(), "text-zinc-300");
+        } else {
+          push(remaining);
+        }
+
+        return (
+          <div key={li} className="leading-6">
+            {parts}
+          </div>
+        );
+      })}
+    </pre>
+  );
+}
+
 export function PlaygroundShell() {
   const [selectedId, setSelectedId] = useState<string>("api-request");
   const [darkMode, setDarkMode] = useState(false);
   const [viewport, setViewport] = useState<ViewportSize>("desktop");
   const [activeTab, setActiveTab] = useState<ActiveTab>("preview");
-  const [search, setSearch] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(
     new Set(["api", "architecture", "database"])
   );
   const [props, setProps] = useState<Record<string, Record<string, unknown>>>({});
-  const [copied, setCopied] = useState(false);
+  const [copied, setCopied] = useState<string | null>(null);
+  const [favorites, setFavorites] = useState<Set<string>>(() => {
+    try {
+      return new Set<string>(JSON.parse(localStorage.getItem("techui-favorites") ?? "[]") as string[]);
+    } catch {
+      return new Set<string>();
+    }
+  });
 
   const selectedEntry = registry[selectedId];
 
@@ -52,15 +186,26 @@ export function PlaygroundShell() {
     });
   }
 
-  function copyJson() {
-    navigator.clipboard.writeText(JSON.stringify(currentProps, null, 2));
-    setCopied(true);
-    setTimeout(() => setCopied(false), 1500);
+  function copyText(text: string, key: string) {
+    navigator.clipboard.writeText(text);
+    setCopied(key);
+    setTimeout(() => setCopied(null), 1500);
+  }
+
+  function toggleFavorite(id: string) {
+    setFavorites((prev) => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      try {
+        localStorage.setItem("techui-favorites", JSON.stringify([...next]));
+      } catch { /* ignore */ }
+      return next;
+    });
   }
 
   // Group by category with search
   const grouped = useMemo(() => {
-    const q = search.toLowerCase();
+    const q = searchQuery.toLowerCase();
     const result: Partial<Record<ComponentCategory, typeof registry[string][]>> = {};
     for (const entry of Object.values(registry)) {
       if (
@@ -75,7 +220,7 @@ export function PlaygroundShell() {
       result[entry.category]!.push(entry);
     }
     return result;
-  }, [search]);
+  }, [searchQuery]);
 
   function toggleCategory(cat: string) {
     setExpandedCategories((prev) => {
@@ -85,20 +230,30 @@ export function PlaygroundShell() {
     });
   }
 
-  const jsonString = JSON.stringify(
-    { type: selectedEntry?.id, ...currentProps },
-    null,
-    2
-  );
+  const favoriteEntries = [...favorites]
+    .map((id) => registry[id])
+    .filter(Boolean) as typeof registry[string][];
+
+  const jsonString = JSON.stringify({ type: selectedEntry?.id, ...currentProps }, null, 2);
+  const codeString = selectedEntry
+    ? generateJsx(selectedEntry.id, selectedEntry.category, currentProps)
+    : "";
+
+  const TABS = [
+    { id: "preview" as const, icon: Monitor, label: "Preview" },
+    { id: "code" as const, icon: Code2, label: "Code" },
+    { id: "json" as const, icon: Braces, label: "JSON" },
+    { id: "schema" as const, icon: BookOpen, label: "Schema" },
+  ];
 
   return (
     <div className={cn("flex h-screen overflow-hidden bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100", darkMode ? "dark" : "")}>
       {/* Left Sidebar */}
-      <aside className="w-64 shrink-0 flex flex-col border-r border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950">
+      <aside className="w-60 shrink-0 flex flex-col border-r border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950">
         {/* Branding */}
         <div className="px-4 py-4 border-b border-zinc-100 dark:border-zinc-900">
           <div className="flex items-center gap-2.5">
-            <div className="size-7 rounded-lg bg-zinc-950 dark:bg-white flex items-center justify-center">
+            <div className="size-7 rounded-lg bg-zinc-950 dark:bg-white flex items-center justify-center shrink-0">
               <Layers className="size-4 text-white dark:text-zinc-950" />
             </div>
             <div>
@@ -109,60 +264,74 @@ export function PlaygroundShell() {
         </div>
 
         {/* Search */}
-        <div className="px-3 py-3 border-b border-zinc-100 dark:border-zinc-900">
+        <div className="px-3 py-2.5 border-b border-zinc-100 dark:border-zinc-900">
           <div className="relative">
             <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 size-3.5 text-zinc-400" />
             <input
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search components…"
-              className="w-full h-8 pl-8 pr-3 rounded-lg bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-xs text-zinc-700 dark:text-zinc-300 placeholder:text-zinc-400 outline-none focus:ring-1 focus:ring-zinc-400 dark:focus:ring-zinc-600 transition-shadow"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search…"
+              className="w-full h-7 pl-8 pr-3 rounded-md bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-xs text-zinc-700 dark:text-zinc-300 placeholder:text-zinc-400 outline-none focus:ring-1 focus:ring-zinc-400 dark:focus:ring-zinc-600 transition-shadow"
             />
           </div>
         </div>
 
-        {/* Categories */}
-        <nav className="flex-1 overflow-y-auto py-2">
+        {/* Nav */}
+        <nav className="flex-1 overflow-y-auto py-1.5">
+          {/* Favorites */}
+          {favoriteEntries.length > 0 && !searchQuery && (
+            <div className="mb-1">
+              <div className="flex items-center gap-2 px-3 py-1.5">
+                <Star className="size-3 text-zinc-400 fill-zinc-400 shrink-0" />
+                <span className="text-[10px] font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
+                  Favorites
+                </span>
+              </div>
+              {favoriteEntries.map((entry) => (
+                <ComponentItem
+                  key={entry.id}
+                  entry={entry}
+                  selected={selectedId === entry.id}
+                  favorited={favorites.has(entry.id)}
+                  onSelect={setSelectedId}
+                  onToggleFavorite={toggleFavorite}
+                />
+              ))}
+            </div>
+          )}
+
+          {/* Categories */}
           {(Object.keys(CATEGORIES) as ComponentCategory[]).map((cat) => {
             const items = grouped[cat];
             if (!items || items.length === 0) return null;
-            const isExpanded = expandedCategories.has(cat);
+            const isExpanded = expandedCategories.has(cat) || !!searchQuery;
             const cfg = CATEGORIES[cat];
             return (
               <div key={cat}>
                 <button
-                  className="w-full flex items-center gap-2 px-3 py-2 text-left hover:bg-zinc-50 dark:hover:bg-zinc-900/50 transition-colors"
+                  className="w-full flex items-center gap-2 px-3 py-1.5 text-left hover:bg-zinc-50 dark:hover:bg-zinc-900/50 transition-colors"
                   onClick={() => toggleCategory(cat)}
                 >
                   {isExpanded
                     ? <ChevronDown className="size-3 text-zinc-400 shrink-0" />
                     : <ChevronRight className="size-3 text-zinc-400 shrink-0" />
                   }
-                  <span className={cn("text-[11px] font-semibold uppercase tracking-wider", cfg.color)}>
+                  <span className={cn("text-[10px] font-semibold uppercase tracking-wider", cfg.color)}>
                     {cfg.label}
                   </span>
                   <span className="ml-auto text-[10px] text-zinc-400">{items.length}</span>
                 </button>
                 {isExpanded && (
-                  <div className="pb-1">
+                  <div className="pb-0.5">
                     {items.map((entry) => (
-                      <button
+                      <ComponentItem
                         key={entry.id}
-                        onClick={() => setSelectedId(entry.id)}
-                        className={cn(
-                          "w-full text-left px-4 py-2 ml-3 rounded-l-none text-xs transition-colors flex items-center gap-2",
-                          selectedId === entry.id
-                            ? "bg-zinc-950 dark:bg-white text-white dark:text-zinc-950 font-medium"
-                            : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-50 dark:hover:bg-zinc-900/50"
-                        )}
-                      >
-                        <span className="flex-1 truncate">{entry.name}</span>
-                        {entry.interactive && (
-                          <span className="text-[8px] px-1 py-0.5 rounded bg-emerald-100 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 font-bold uppercase tracking-wider">
-                            Live
-                          </span>
-                        )}
-                      </button>
+                        entry={entry}
+                        selected={selectedId === entry.id}
+                        favorited={favorites.has(entry.id)}
+                        onSelect={setSelectedId}
+                        onToggleFavorite={toggleFavorite}
+                      />
                     ))}
                   </div>
                 )}
@@ -172,37 +341,44 @@ export function PlaygroundShell() {
         </nav>
 
         {/* Footer */}
-        <div className="px-4 py-3 border-t border-zinc-100 dark:border-zinc-900 text-[10px] text-zinc-400">
-          {Object.keys(registry).length} components
+        <div className="px-4 py-2.5 border-t border-zinc-100 dark:border-zinc-900 flex items-center gap-2">
+          <span className="text-[10px] text-zinc-400 flex-1">
+            {Object.keys(registry).length} components
+          </span>
         </div>
       </aside>
 
       {/* Main area */}
       <main className="flex-1 flex flex-col min-w-0 overflow-hidden">
         {/* Toolbar */}
-        <header className="flex items-center gap-4 px-6 py-3 border-b border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 shrink-0">
-          <div>
-            <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
-              {selectedEntry?.name ?? "Select a component"}
-            </h2>
+        <header className="flex items-center gap-3 px-5 py-2.5 border-b border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 shrink-0">
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-2">
+              <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 truncate">
+                {selectedEntry?.name ?? "Select a component"}
+              </h2>
+              {selectedEntry?.interactive && (
+                <span className="shrink-0 flex items-center gap-0.5 text-[9px] px-1.5 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-700 font-bold uppercase tracking-wider">
+                  <Zap className="size-2.5" />
+                  Live
+                </span>
+              )}
+            </div>
             {selectedEntry && (
-              <p className="text-[11px] text-zinc-400 leading-tight truncate max-w-sm">
+              <p className="text-[11px] text-zinc-400 leading-tight truncate max-w-md mt-0.5">
                 {selectedEntry.description}
               </p>
             )}
           </div>
 
-          <div className="ml-auto flex items-center gap-2">
+          <div className="flex items-center gap-1.5 shrink-0">
             {/* Viewport */}
             <div className="flex items-center gap-0.5 rounded-lg border border-zinc-200 dark:border-zinc-800 p-0.5">
-              {([
-                ["desktop", Monitor],
-                ["tablet", Tablet],
-                ["mobile", Smartphone],
-              ] as const).map(([v, Icon]) => (
+              {([ ["desktop", Monitor], ["tablet", Tablet], ["mobile", Smartphone] ] as const).map(([v, Icon]) => (
                 <button
                   key={v}
                   onClick={() => setViewport(v)}
+                  title={v}
                   className={cn(
                     "p-1.5 rounded-md transition-colors",
                     viewport === v
@@ -218,6 +394,7 @@ export function PlaygroundShell() {
             {/* Dark mode */}
             <button
               onClick={() => setDarkMode((v) => !v)}
+              title={darkMode ? "Light mode" : "Dark mode"}
               className="p-2 rounded-lg border border-zinc-200 dark:border-zinc-800 text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors"
             >
               {darkMode ? <Sun className="size-3.5" /> : <Moon className="size-3.5" />}
@@ -235,21 +412,17 @@ export function PlaygroundShell() {
 
         {/* Content row */}
         <div className="flex-1 flex overflow-hidden">
-          {/* Preview + code area */}
+          {/* Center + tabs */}
           <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
             {/* Tabs */}
-            <div className="flex items-center gap-0 border-b border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-6 shrink-0">
-              {([
-                ["preview", Monitor, "Preview"],
-                ["json", Braces, "JSON"],
-                ["schema", BookOpen, "Schema"],
-              ] as const).map(([tab, Icon, label]) => (
+            <div className="flex items-center border-b border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-5 shrink-0">
+              {TABS.map(({ id, icon: Icon, label }) => (
                 <button
-                  key={tab}
-                  onClick={() => setActiveTab(tab)}
+                  key={id}
+                  onClick={() => setActiveTab(id)}
                   className={cn(
                     "flex items-center gap-1.5 px-3 py-2.5 text-xs font-medium border-b-2 transition-colors -mb-px",
-                    activeTab === tab
+                    activeTab === id
                       ? "border-zinc-900 dark:border-white text-zinc-900 dark:text-white"
                       : "border-transparent text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300"
                   )}
@@ -259,22 +432,15 @@ export function PlaygroundShell() {
               ))}
             </div>
 
-            {/* Preview area */}
+            {/* Preview */}
             {activeTab === "preview" && (
-              <div className="flex-1 overflow-auto bg-zinc-100 dark:bg-zinc-900 p-6 flex justify-center">
+              <div className="flex-1 overflow-auto bg-[#f4f4f5] dark:bg-zinc-900 p-6 flex justify-center">
                 <div
                   style={{ width: VIEWPORT_WIDTHS[viewport], maxWidth: "100%" }}
-                  className={cn(
-                    "transition-all duration-300",
-                    darkMode ? "dark" : ""
-                  )}
+                  className="transition-all duration-300"
                 >
                   {selectedEntry ? (
-                    <LivePreview
-                      entryId={selectedId}
-                      props={currentProps}
-                      darkMode={darkMode}
-                    />
+                    <LivePreview entryId={selectedId} props={currentProps} darkMode={darkMode} />
                   ) : (
                     <div className="flex items-center justify-center h-64 text-sm text-zinc-400">
                       Select a component from the sidebar
@@ -284,26 +450,38 @@ export function PlaygroundShell() {
               </div>
             )}
 
-            {/* JSON view */}
-            {activeTab === "json" && (
+            {/* Code tab */}
+            {activeTab === "code" && (
               <div className="flex-1 overflow-auto bg-zinc-950 p-6 relative">
                 <button
-                  onClick={copyJson}
-                  className="absolute top-4 right-4 flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-xs text-zinc-300 transition-colors"
+                  onClick={() => copyText(codeString, "code")}
+                  className="absolute top-4 right-4 flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-xs text-zinc-300 transition-colors z-10"
                 >
-                  {copied ? <Check className="size-3 text-emerald-400" /> : <Copy className="size-3" />}
-                  {copied ? "Copied" : "Copy"}
+                  {copied === "code" ? <Check className="size-3 text-zinc-500" /> : <Copy className="size-3" />}
+                  {copied === "code" ? "Copied" : "Copy"}
                 </button>
-                <pre className="text-sm text-zinc-300 font-mono leading-relaxed">
-                  {jsonString}
-                </pre>
+                <HighlightedCode code={codeString} />
               </div>
             )}
 
-            {/* Schema view */}
+            {/* JSON tab */}
+            {activeTab === "json" && (
+              <div className="flex-1 overflow-auto bg-zinc-950 p-6 relative">
+                <button
+                  onClick={() => copyText(jsonString, "json")}
+                  className="absolute top-4 right-4 flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-xs text-zinc-300 transition-colors z-10"
+                >
+                  {copied === "json" ? <Check className="size-3 text-zinc-500" /> : <Copy className="size-3" />}
+                  {copied === "json" ? "Copied" : "Copy"}
+                </button>
+                <pre className="text-xs text-zinc-300 font-mono leading-relaxed">{jsonString}</pre>
+              </div>
+            )}
+
+            {/* Schema tab */}
             {activeTab === "schema" && selectedEntry && (
               <div className="flex-1 overflow-auto bg-zinc-950 p-6">
-                <pre className="text-sm text-zinc-300 font-mono leading-relaxed">
+                <pre className="text-xs text-zinc-300 font-mono leading-relaxed">
                   {JSON.stringify(selectedEntry.schema._def, null, 2)}
                 </pre>
               </div>
@@ -311,14 +489,15 @@ export function PlaygroundShell() {
           </div>
 
           {/* Right panel */}
-          <aside className="w-72 shrink-0 border-l border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 flex flex-col overflow-hidden">
-            <div className="px-4 py-3 border-b border-zinc-100 dark:border-zinc-900 flex items-center gap-2">
+          <aside className="w-68 shrink-0 border-l border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 flex flex-col overflow-hidden" style={{ width: 272 }}>
+            {/* Props header */}
+            <div className="px-4 py-2.5 border-b border-zinc-100 dark:border-zinc-900 flex items-center gap-2 shrink-0">
               <Settings2 className="size-3.5 text-zinc-400" />
               <span className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">Props</span>
               {selectedEntry && (
-                <div className="ml-auto flex gap-1.5 flex-wrap justify-end">
-                  {selectedEntry.tags?.slice(0, 3).map((tag) => (
-                    <span key={tag} className="px-1.5 py-0.5 rounded text-[9px] font-medium bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-500">
+                <div className="ml-auto flex gap-1 flex-wrap justify-end">
+                  {selectedEntry.tags?.slice(0, 2).map((tag) => (
+                    <span key={tag} className="px-1.5 py-0.5 rounded text-[9px] font-medium bg-zinc-100 dark:bg-zinc-800 text-zinc-500">
                       {tag}
                     </span>
                   ))}
@@ -326,7 +505,8 @@ export function PlaygroundShell() {
               )}
             </div>
 
-            <div className="flex-1 overflow-y-auto">
+            {/* Props editor */}
+            <div className="flex-1 overflow-y-auto min-h-0">
               {selectedEntry ? (
                 <PropsPanel
                   entry={selectedEntry}
@@ -342,16 +522,18 @@ export function PlaygroundShell() {
 
             {/* Examples */}
             {selectedEntry && selectedEntry.examples.length > 0 && (
-              <div className="border-t border-zinc-100 dark:border-zinc-900 p-4">
-                <p className="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider mb-2">Examples</p>
-                <div className="space-y-1">
+              <div className="border-t border-zinc-100 dark:border-zinc-900 p-3 shrink-0">
+                <p className="text-[9px] font-semibold text-zinc-400 uppercase tracking-wider mb-2 px-1">
+                  Examples
+                </p>
+                <div className="space-y-0.5">
                   {selectedEntry.examples.map((ex, i) => (
                     <button
                       key={i}
                       onClick={() => handlePropsChange(ex.props)}
-                      className="w-full text-left px-3 py-2 rounded-lg text-xs text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-900 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors flex items-center gap-2"
+                      className="w-full text-left px-2.5 py-1.5 rounded-md text-xs text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-900 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors flex items-center gap-2"
                     >
-                      <Code2 className="size-3 shrink-0 text-zinc-400" />
+                      <span className="size-1.5 rounded-full bg-zinc-300 dark:bg-zinc-600 shrink-0" />
                       {ex.label}
                     </button>
                   ))}
@@ -361,6 +543,71 @@ export function PlaygroundShell() {
           </aside>
         </div>
       </main>
+    </div>
+  );
+}
+
+function ComponentItem({
+  entry,
+  selected,
+  favorited,
+  onSelect,
+  onToggleFavorite,
+}: {
+  entry: typeof registry[string];
+  selected: boolean;
+  favorited: boolean;
+  onSelect: (id: string) => void;
+  onToggleFavorite: (id: string) => void;
+}) {
+  return (
+    <div
+      className={cn(
+        "flex items-center group mx-2 rounded-md",
+        selected
+          ? "bg-zinc-950 dark:bg-white"
+          : "hover:bg-zinc-50 dark:hover:bg-zinc-900/50"
+      )}
+    >
+      <button
+        onClick={() => onSelect(entry.id)}
+        className={cn(
+          "flex-1 text-left px-2 py-1.5 text-xs transition-colors flex items-center gap-1.5 min-w-0",
+          selected
+            ? "text-white dark:text-zinc-950 font-medium"
+            : "text-zinc-600 dark:text-zinc-400"
+        )}
+      >
+        <span className="flex-1 truncate">{entry.name}</span>
+        {entry.interactive && (
+          <span className={cn(
+            "text-[8px] px-1 py-0.5 rounded font-bold uppercase tracking-wider shrink-0",
+            selected
+              ? "bg-white/20 text-white dark:bg-zinc-900/20 dark:text-zinc-900"
+              : "bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400"
+          )}>
+            Live
+          </span>
+        )}
+      </button>
+      <button
+        onClick={(e) => { e.stopPropagation(); onToggleFavorite(entry.id); }}
+        className={cn(
+          "p-1.5 mr-1 rounded opacity-0 group-hover:opacity-100 transition-opacity",
+          favorited && "opacity-100"
+        )}
+      >
+        <Star
+          className={cn(
+            "size-3",
+            favorited
+              ? "text-zinc-500 fill-zinc-500 dark:text-zinc-300 dark:fill-zinc-300"
+              : selected
+              ? "text-white/50 dark:text-zinc-900/50"
+              : "text-zinc-300 dark:text-zinc-600"
+          )}
+        />
+      </button>
     </div>
   );
 }
