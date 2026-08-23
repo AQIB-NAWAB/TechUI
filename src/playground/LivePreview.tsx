@@ -131,6 +131,24 @@ import { PollingVsWebhooks } from "@/components/api/PollingVsWebhooks";
 import { Immutability } from "@/components/edu/Immutability";
 import { ActorModel } from "@/components/distributed/ActorModel";
 import { DatabaseNormalization } from "@/components/database/DatabaseNormalization";
+import { PromiseCombinators } from "@/components/code/PromiseCombinators";
+import { ProxyReverseProxy } from "@/components/networking/ProxyReverseProxy";
+import { Serverless } from "@/components/cloud/Serverless";
+import { HeapDataStructure } from "@/components/edu/HeapDataStructure";
+import { DeadLetterQueue } from "@/components/distributed/DeadLetterQueue";
+import { DnsPropagation } from "@/components/networking/DnsPropagation";
+import { ReactiveStreams } from "@/components/distributed/ReactiveStreams";
+import { ServiceWorker } from "@/components/networking/ServiceWorker";
+import { KubernetesIngress } from "@/components/containers/KubernetesIngress";
+import { CursorPagination } from "@/components/api/CursorPagination";
+import { TreeShaking } from "@/components/code/TreeShaking";
+import { DarkMode } from "@/components/ui/DarkMode";
+import { SolidPrinciples } from "@/components/edu/SolidPrinciples";
+import { SloSliSla } from "@/components/devtools/SloSliSla";
+import { Http3Quic } from "@/components/networking/Http3Quic";
+import { DesignPatterns } from "@/components/architecture/DesignPatterns";
+import { DataReplication } from "@/components/distributed/DataReplication";
+import { FeatureRollout } from "@/components/devtools/FeatureRollout";
 
 const COMPONENT_MAP: Record<string, React.ComponentType<Record<string, unknown>>> = {
   "api-request":          ApiRequest as React.ComponentType<Record<string, unknown>>,
@@ -263,6 +281,24 @@ const COMPONENT_MAP: Record<string, React.ComponentType<Record<string, unknown>>
   "immutability":            Immutability as React.ComponentType<Record<string, unknown>>,
   "actor-model":             ActorModel as React.ComponentType<Record<string, unknown>>,
   "database-normalization":  DatabaseNormalization as React.ComponentType<Record<string, unknown>>,
+  "promise-combinators":  PromiseCombinators as React.ComponentType<Record<string, unknown>>,
+  "proxy-reverse-proxy":  ProxyReverseProxy as React.ComponentType<Record<string, unknown>>,
+  "serverless":           Serverless as React.ComponentType<Record<string, unknown>>,
+  "heap-data-structure":  HeapDataStructure as React.ComponentType<Record<string, unknown>>,
+  "dead-letter-queue":    DeadLetterQueue as React.ComponentType<Record<string, unknown>>,
+  "dns-propagation":      DnsPropagation as React.ComponentType<Record<string, unknown>>,
+  "reactive-streams":    ReactiveStreams as React.ComponentType<Record<string, unknown>>,
+  "service-worker":      ServiceWorker as React.ComponentType<Record<string, unknown>>,
+  "kubernetes-ingress":  KubernetesIngress as React.ComponentType<Record<string, unknown>>,
+  "cursor-pagination":   CursorPagination as React.ComponentType<Record<string, unknown>>,
+  "tree-shaking":        TreeShaking as React.ComponentType<Record<string, unknown>>,
+  "dark-mode":           DarkMode as React.ComponentType<Record<string, unknown>>,
+  "solid-principles": SolidPrinciples as React.ComponentType<Record<string, unknown>>,
+  "slo-sli-sla":      SloSliSla as React.ComponentType<Record<string, unknown>>,
+  "http3-quic":       Http3Quic as React.ComponentType<Record<string, unknown>>,
+  "design-patterns":  DesignPatterns as React.ComponentType<Record<string, unknown>>,
+  "data-replication": DataReplication as React.ComponentType<Record<string, unknown>>,
+  "feature-rollout":  FeatureRollout as React.ComponentType<Record<string, unknown>>,
 };
 
 export function LivePreview({

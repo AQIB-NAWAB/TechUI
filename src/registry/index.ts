@@ -129,6 +129,24 @@ import { PollingVsWebhooksSchema } from "@/components/api/PollingVsWebhooks";
 import { ImmutabilitySchema } from "@/components/edu/Immutability";
 import { ActorModelSchema } from "@/components/distributed/ActorModel";
 import { DatabaseNormalizationSchema } from "@/components/database/DatabaseNormalization";
+import { PromiseCombinatorSchema } from "@/components/code/PromiseCombinators";
+import { ProxyReverseProxySchema } from "@/components/networking/ProxyReverseProxy";
+import { ServerlessSchema } from "@/components/cloud/Serverless";
+import { HeapDataStructureSchema } from "@/components/edu/HeapDataStructure";
+import { DeadLetterQueueSchema } from "@/components/distributed/DeadLetterQueue";
+import { DnsPropagationSchema } from "@/components/networking/DnsPropagation";
+import { CursorPaginationSchema } from "@/components/api/CursorPagination";
+import { TreeShakingSchema } from "@/components/code/TreeShaking";
+import { DarkModeSchema } from "@/components/ui/DarkMode";
+import { ReactiveStreamsSchema } from "@/components/distributed/ReactiveStreams";
+import { ServiceWorkerSchema } from "@/components/networking/ServiceWorker";
+import { KubernetesIngressSchema } from "@/components/containers/KubernetesIngress";
+import { SolidPrinciplesSchema } from "@/components/edu/SolidPrinciples";
+import { SloSliSlaSchema } from "@/components/devtools/SloSliSla";
+import { Http3QuicSchema } from "@/components/networking/Http3Quic";
+import { DesignPatternsSchema } from "@/components/architecture/DesignPatterns";
+import { DataReplicationSchema } from "@/components/distributed/DataReplication";
+import { FeatureRolloutSchema } from "@/components/devtools/FeatureRollout";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyEntry = ComponentEntry<any>;
@@ -4949,6 +4967,333 @@ const users = await db.query(\`
     examples: [
       { label: "1NF", props: { normalForm: "1nf" as const } },
       { label: "3NF (fully normalized)", props: { normalForm: "3nf" as const } },
+    ],
+    Component: null as unknown as AnyEntry["Component"],
+  },
+  "promise-combinators": {
+    id: "promise-combinators",
+    name: "Promise Combinators",
+    category: "code" as ComponentCategory,
+    description: "Promise.all/allSettled/race/any — parallel task timeline, first-to-settle logic, error handling differences",
+    schema: PromiseCombinatorSchema,
+    tags: ["promise", "async", "javascript", "concurrency", "parallel", "code"],
+    defaultProps: {
+      combinator: "all" as const,
+      tasks: [
+        { name: "fetchUser",    durationMs: 800,  succeeds: true  },
+        { name: "fetchOrders",  durationMs: 1400, succeeds: true  },
+        { name: "fetchProfile", durationMs: 600,  succeeds: false },
+      ],
+    },
+    examples: [
+      { label: "allSettled", props: { combinator: "allSettled" as const, tasks: [{ name: "fetchUser", durationMs: 800, succeeds: true }, { name: "fetchOrders", durationMs: 1400, succeeds: true }, { name: "fetchProfile", durationMs: 600, succeeds: false }] } },
+      { label: "race", props: { combinator: "race" as const, tasks: [{ name: "fetchUser", durationMs: 800, succeeds: true }, { name: "fetchOrders", durationMs: 1400, succeeds: true }, { name: "fetchProfile", durationMs: 600, succeeds: false }] } },
+      { label: "any", props: { combinator: "any" as const, tasks: [{ name: "fetchUser", durationMs: 800, succeeds: true }, { name: "fetchOrders", durationMs: 1400, succeeds: true }, { name: "fetchProfile", durationMs: 600, succeeds: false }] } },
+    ],
+    Component: null as unknown as AnyEntry["Component"],
+  },
+
+  "proxy-reverse-proxy": {
+    id: "proxy-reverse-proxy",
+    name: "Proxy vs Reverse Proxy",
+    category: "networking" as ComponentCategory,
+    description: "Forward proxy (client-side: VPN/anonymity) vs reverse proxy (server-side: nginx/load-balance/SSL)",
+    schema: ProxyReverseProxySchema,
+    tags: ["proxy", "reverse-proxy", "nginx", "vpn", "networking", "load-balancing"],
+    defaultProps: { type: "forward" as const },
+    examples: [
+      { label: "Reverse proxy", props: { type: "reverse" as const } },
+    ],
+    Component: null as unknown as AnyEntry["Component"],
+  },
+
+  "serverless": {
+    id: "serverless",
+    name: "Serverless",
+    category: "cloud" as ComponentCategory,
+    description: "Cold start vs warm start — Lambda phases animation, auto-scaling to zero, billing vs EC2 comparison",
+    schema: ServerlessSchema,
+    tags: ["serverless", "lambda", "cloud-run", "vercel", "cloud", "cold-start"],
+    defaultProps: { provider: "lambda" as const, runtime: "Node.js 20", memoryMb: 256 },
+    examples: [
+      { label: "Cloud Run", props: { provider: "cloudrun" as const, runtime: "Node.js 20", memoryMb: 512 } },
+      { label: "Vercel Edge", props: { provider: "vercel" as const, runtime: "Edge Runtime", memoryMb: 128 } },
+    ],
+    Component: null as unknown as AnyEntry["Component"],
+  },
+
+  "heap-data-structure": {
+    id: "heap-data-structure",
+    name: "Heap / Priority Queue",
+    category: "edu" as ComponentCategory,
+    description: "Min-heap tree visualization — insert sift-up, extract-min sift-down, O(log n) operations",
+    schema: HeapDataStructureSchema,
+    tags: ["heap", "priority-queue", "data-structures", "min-heap", "sift", "algorithms"],
+    defaultProps: { type: "min" as const, initialValues: [1, 4, 2, 8, 5, 7, 3] },
+    examples: [
+      { label: "Max heap", props: { type: "max" as const, initialValues: [9, 4, 7, 2, 5, 1, 6] } },
+    ],
+    Component: null as unknown as AnyEntry["Component"],
+  },
+
+  "dead-letter-queue": {
+    id: "dead-letter-queue",
+    name: "Dead Letter Queue",
+    category: "distributed" as ComponentCategory,
+    description: "Failed message handling — retry with exponential backoff, DLQ capture, inspect and replay",
+    schema: DeadLetterQueueSchema,
+    tags: ["dlq", "dead-letter", "queue", "retry", "backoff", "distributed", "messaging"],
+    defaultProps: {
+      maxRetries: 3,
+      messages: [
+        { id: "msg-001", content: "Order #1042 payment",   willFail: false },
+        { id: "msg-002", content: "Order #1043 payment",   willFail: true  },
+        { id: "msg-003", content: "Order #1044 inventory", willFail: false },
+        { id: "msg-004", content: "Order #1045 payment",   willFail: true  },
+      ],
+    },
+    examples: [
+      { label: "5 retries", props: { maxRetries: 5, messages: [{ id: "msg-001", content: "Email notification", willFail: false }, { id: "msg-002", content: "SMS alert", willFail: true }, { id: "msg-003", content: "Push notification", willFail: true }] } },
+    ],
+    Component: null as unknown as AnyEntry["Component"],
+  },
+
+  "dns-propagation": {
+    id: "dns-propagation",
+    name: "DNS Propagation",
+    category: "networking" as ComponentCategory,
+    description: "DNS record change propagation — TTL expiry across global resolvers, old vs new value, time simulation",
+    schema: DnsPropagationSchema,
+    tags: ["dns", "propagation", "ttl", "networking", "domain", "caching"],
+    defaultProps: {
+      domain: "freshmarket.com",
+      recordType: "A" as const,
+      oldValue: "192.168.1.100",
+      newValue: "10.0.0.50",
+      ttl: 3600,
+      resolvers: [
+        { location: "New York",  flag: "🇺🇸", cachedValue: "192.168.1.100", ttlRemaining: 3200, status: "old"        as const },
+        { location: "London",    flag: "🇬🇧", cachedValue: "192.168.1.100", ttlRemaining: 800,  status: "old"        as const },
+        { location: "Singapore", flag: "🇸🇬", cachedValue: "10.0.0.50",     ttlRemaining: 3600, status: "propagated" as const },
+        { location: "São Paulo", flag: "🇧🇷", cachedValue: "192.168.1.100", ttlRemaining: 100,  status: "old"        as const },
+        { location: "Tokyo",     flag: "🇯🇵", cachedValue: "10.0.0.50",     ttlRemaining: 2800, status: "propagated" as const },
+        { location: "Sydney",    flag: "🇦🇺", cachedValue: "192.168.1.100", ttlRemaining: 450,  status: "old"        as const },
+      ],
+    },
+    examples: [
+      { label: "Low TTL (fast)", props: { domain: "api.example.com", recordType: "A" as const, oldValue: "10.0.1.1", newValue: "10.0.2.1", ttl: 60, resolvers: [{ location: "US East", flag: "🇺🇸", cachedValue: "10.0.1.1", ttlRemaining: 55, status: "old" as const }, { location: "EU West", flag: "🇪🇺", cachedValue: "10.0.2.1", ttlRemaining: 60, status: "propagated" as const }] } },
+    ],
+    Component: null as unknown as AnyEntry["Component"],
+  },
+
+  "reactive-streams": {
+    id: "reactive-streams",
+    name: "Reactive Streams",
+    category: "distributed" as ComponentCategory,
+    description: "Observable marble diagrams — map/filter/debounce/merge operators with animated event flow",
+    schema: ReactiveStreamsSchema,
+    tags: ["reactive", "rxjs", "observable", "streams", "operators", "functional"],
+    defaultProps: { pipeline: "map" as const },
+    examples: [
+      { label: "Filter", props: { pipeline: "filter" as const } },
+      { label: "Debounce", props: { pipeline: "debounce" as const } },
+      { label: "Merge", props: { pipeline: "merge" as const } },
+    ],
+    Component: null as unknown as AnyEntry["Component"],
+  },
+
+  "service-worker": {
+    id: "service-worker",
+    name: "Service Worker",
+    category: "networking" as ComponentCategory,
+    description: "SW caching strategies — cache-first/network-first/stale-while-revalidate with request flow animation",
+    schema: ServiceWorkerSchema,
+    tags: ["service-worker", "pwa", "cache", "offline", "networking", "browser"],
+    defaultProps: {
+      strategy: "cache-first" as const,
+      resources: [
+        { url: "/",             type: "html"  as const, cached: true  },
+        { url: "/styles.css",   type: "css"   as const, cached: true  },
+        { url: "/app.js",       type: "js"    as const, cached: true  },
+        { url: "/logo.png",     type: "image" as const, cached: true  },
+        { url: "/api/products", type: "api"   as const, cached: false },
+      ],
+    },
+    examples: [
+      { label: "Network-First", props: { strategy: "network-first" as const, resources: [{ url: "/api/orders", type: "api" as const, cached: true }, { url: "/api/users", type: "api" as const, cached: false }] } },
+      { label: "Stale-While-Revalidate", props: { strategy: "stale-while-revalidate" as const, resources: [{ url: "/news", type: "html" as const, cached: true }, { url: "/data.json", type: "api" as const, cached: true }] } },
+    ],
+    Component: null as unknown as AnyEntry["Component"],
+  },
+
+  "kubernetes-ingress": {
+    id: "kubernetes-ingress",
+    name: "Kubernetes Ingress",
+    category: "containers" as ComponentCategory,
+    description: "Ingress routing rules — path-based traffic routing to services, TLS termination, animated request flow",
+    schema: KubernetesIngressSchema,
+    tags: ["kubernetes", "ingress", "routing", "nginx", "tls", "containers"],
+    defaultProps: {
+      ingressName: "freshmarket-ingress",
+      tls: true,
+      rules: [
+        { path: "/api",    pathType: "Prefix" as const, serviceName: "api-service",      servicePort: 3000, color: "blue"    as const },
+        { path: "/admin",  pathType: "Prefix" as const, serviceName: "admin-service",    servicePort: 4000, color: "violet"  as const },
+        { path: "/static", pathType: "Prefix" as const, serviceName: "static-service",   servicePort: 80,   color: "amber"   as const },
+        { path: "/",       pathType: "Prefix" as const, serviceName: "frontend-service", servicePort: 3000, color: "emerald" as const },
+      ],
+    },
+    examples: [
+      { label: "Host-based routing", props: { ingressName: "multi-host", tls: true, rules: [{ host: "api.example.com", path: "/", pathType: "Prefix" as const, serviceName: "api-service", servicePort: 3000, color: "blue" as const }, { host: "www.example.com", path: "/", pathType: "Prefix" as const, serviceName: "web-service", servicePort: 80, color: "emerald" as const }] } },
+    ],
+    Component: null as unknown as AnyEntry["Component"],
+  },
+
+  "cursor-pagination": {
+    id: "cursor-pagination",
+    name: "Cursor Pagination",
+    category: "api" as ComponentCategory,
+    description: "Offset vs cursor pagination — duplicate rows on insert, cursor stability, API request comparison",
+    schema: CursorPaginationSchema,
+    tags: ["pagination", "cursor", "offset", "api", "database", "stable"],
+    defaultProps: { method: "offset" as const, pageSize: 3, totalItems: 10 },
+    examples: [
+      { label: "Cursor method", props: { method: "cursor" as const, pageSize: 3, totalItems: 10 } },
+    ],
+    Component: null as unknown as AnyEntry["Component"],
+  },
+
+  "tree-shaking": {
+    id: "tree-shaking",
+    name: "Tree Shaking",
+    category: "code" as ComponentCategory,
+    description: "Dead code elimination — named vs default imports, used vs unused exports, bundle size savings",
+    schema: TreeShakingSchema,
+    tags: ["tree-shaking", "bundler", "webpack", "rollup", "bundle", "optimization"],
+    defaultProps: {
+      bundler: "rollup" as const,
+      entryPoint: "app.js",
+      modules: [
+        { name: "lodash-es", exports: [{ name: "debounce", sizeKb: 1.2, used: true }, { name: "throttle", sizeKb: 1.1, used: false }, { name: "merge", sizeKb: 2.3, used: false }, { name: "cloneDeep", sizeKb: 3.8, used: false }] },
+        { name: "date-fns", exports: [{ name: "format", sizeKb: 0.8, used: true }, { name: "parse", sizeKb: 0.9, used: true }, { name: "addDays", sizeKb: 0.3, used: false }] },
+      ],
+    },
+    examples: [
+      { label: "Webpack", props: { bundler: "webpack" as const, entryPoint: "index.js", modules: [{ name: "lodash-es", exports: [{ name: "get", sizeKb: 0.6, used: true }, { name: "set", sizeKb: 0.7, used: false }, { name: "pick", sizeKb: 0.5, used: false }] }] } },
+    ],
+    Component: null as unknown as AnyEntry["Component"],
+  },
+
+  "dark-mode": {
+    id: "dark-mode",
+    name: "Dark Mode",
+    category: "ui" as ComponentCategory,
+    description: "CSS variables + class toggle + media query — four implementation approaches with live preview",
+    schema: DarkModeSchema,
+    tags: ["dark-mode", "css-variables", "theming", "ui", "prefers-color-scheme", "accessibility"],
+    defaultProps: { implementation: "css-variables" as const },
+    examples: [
+      { label: "Class toggle", props: { implementation: "class-toggle" as const } },
+      { label: "System preference", props: { implementation: "system" as const } },
+    ],
+    Component: null as unknown as AnyEntry["Component"],
+  },
+
+  "solid-principles": {
+    id: "solid-principles",
+    name: "SOLID Principles",
+    category: "edu" as ComponentCategory,
+    description: "S/O/L/I/D — each principle with bad vs good code side-by-side, animated transformation",
+    schema: SolidPrinciplesSchema,
+    tags: ["solid", "oop", "design-principles", "architecture", "edu", "clean-code"],
+    defaultProps: { principle: "S" as const },
+    examples: [
+      { label: "Open/Closed", props: { principle: "O" as const } },
+      { label: "Dependency Inversion", props: { principle: "D" as const } },
+    ],
+    Component: null as unknown as AnyEntry["Component"],
+  },
+
+  "slo-sli-sla": {
+    id: "slo-sli-sla",
+    name: "SLO / SLI / SLA",
+    category: "devtools" as ComponentCategory,
+    description: "Error budget, uptime nines table, SLO vs SLI vs SLA definitions, incident simulation",
+    schema: SloSliSlaSchema,
+    tags: ["slo", "sli", "sla", "error-budget", "uptime", "reliability", "devops"],
+    defaultProps: { sloPercent: 99.9, currentUptimePercent: 99.85, windowDays: 30 },
+    examples: [
+      { label: "Five nines", props: { sloPercent: 99.999, currentUptimePercent: 99.998, windowDays: 30 } },
+      { label: "Budget nearly gone", props: { sloPercent: 99.9, currentUptimePercent: 99.92, windowDays: 30 } },
+    ],
+    Component: null as unknown as AnyEntry["Component"],
+  },
+
+  "http3-quic": {
+    id: "http3-quic",
+    name: "HTTP/3 & QUIC",
+    category: "networking" as ComponentCategory,
+    description: "HTTP/2 head-of-line blocking vs HTTP/3 QUIC — packet loss simulation, 0-RTT connection setup",
+    schema: Http3QuicSchema,
+    tags: ["http3", "quic", "http2", "networking", "head-of-line", "performance"],
+    defaultProps: { protocol: "http2" as const, packetLoss: true },
+    examples: [
+      { label: "HTTP/3 QUIC", props: { protocol: "http3" as const, packetLoss: true } },
+      { label: "No packet loss", props: { protocol: "http2" as const, packetLoss: false } },
+    ],
+    Component: null as unknown as AnyEntry["Component"],
+  },
+
+  "design-patterns": {
+    id: "design-patterns",
+    name: "Design Patterns",
+    category: "architecture" as ComponentCategory,
+    description: "GoF patterns — Singleton/Observer/Factory/Strategy with visual diagrams and animated demos",
+    schema: DesignPatternsSchema,
+    tags: ["design-patterns", "singleton", "observer", "factory", "strategy", "oop"],
+    defaultProps: { pattern: "singleton" as const },
+    examples: [
+      { label: "Observer", props: { pattern: "observer" as const } },
+      { label: "Factory", props: { pattern: "factory" as const } },
+      { label: "Strategy", props: { pattern: "strategy" as const } },
+    ],
+    Component: null as unknown as AnyEntry["Component"],
+  },
+
+  "data-replication": {
+    id: "data-replication",
+    name: "Data Replication",
+    category: "distributed" as ComponentCategory,
+    description: "Leader/follower replication — async vs sync modes, lag simulation, failover animation",
+    schema: DataReplicationSchema,
+    tags: ["replication", "distributed", "primary", "replica", "lag", "database", "consistency"],
+    defaultProps: { mode: "async" as const, replicas: 2, lagMs: 150 },
+    examples: [
+      { label: "Sync mode", props: { mode: "sync" as const, replicas: 2, lagMs: 50 } },
+      { label: "High lag", props: { mode: "async" as const, replicas: 3, lagMs: 800 } },
+    ],
+    Component: null as unknown as AnyEntry["Component"],
+  },
+
+  "feature-rollout": {
+    id: "feature-rollout",
+    name: "Feature Rollout",
+    category: "devtools" as ComponentCategory,
+    description: "Progressive percentage rollout — staged deployment, advance/rollback, live metric monitoring",
+    schema: FeatureRolloutSchema,
+    tags: ["feature-rollout", "progressive-delivery", "canary", "devops", "deployment"],
+    defaultProps: {
+      featureName: "New Checkout Flow",
+      targetPercent: 10,
+      stages: [
+        { label: "Internal", percent: 1,   durationHours: 24 },
+        { label: "Beta",     percent: 10,  durationHours: 48 },
+        { label: "Canary",   percent: 25,  durationHours: 48 },
+        { label: "General",  percent: 100, durationHours: 72 },
+      ],
+    },
+    examples: [
+      { label: "Fast rollout", props: { featureName: "Dark Mode Toggle", targetPercent: 25, stages: [{ label: "Employees", percent: 5, durationHours: 4 }, { label: "Beta", percent: 20, durationHours: 12 }, { label: "Everyone", percent: 100, durationHours: 24 }] } },
     ],
     Component: null as unknown as AnyEntry["Component"],
   },
