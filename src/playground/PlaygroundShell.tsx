@@ -1,17 +1,20 @@
 "use client";
 
+import Link from "next/link";
 import { useState, useMemo } from "react";
 import {
   Search, Moon, Sun, Monitor, Tablet, Smartphone,
   Layers, ChevronRight, ChevronDown, RotateCcw,
   Copy, Check, Braces, BookOpen, Settings2, Star,
-  Code2, Zap, X,
+  Code2, Zap, X, PackagePlus,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { registry, CATEGORIES } from "@/registry";
 import type { ComponentCategory } from "@/registry/types";
 import { LivePreview } from "./LivePreview";
 import { PropsPanel } from "./PropsPanel";
+import { AddComponentDialog } from "./AddComponentDialog";
+import { toComponentName, getImportPath } from "@/lib/techui-cli";
 type ViewportSize = "desktop" | "tablet" | "mobile";
 type ActiveTab = "preview" | "code" | "json" | "schema";
 const VIEWPORT_WIDTHS: Record<ViewportSize, string> = {
@@ -19,24 +22,13 @@ const VIEWPORT_WIDTHS: Record<ViewportSize, string> = {
   tablet: "768px",
   mobile: "390px",
 };
-function toComponentName(id: string): string {
-  return id.split("-").map((s) => (s[0]?.toUpperCase() ?? "") + s.slice(1)).join("");
-}
-const CAT_DIR: Record<ComponentCategory, string> = {
-  api: "api", architecture: "architecture", database: "database",
-  auth: "auth", networking: "networking", cloud: "cloud",
-  containers: "containers", distributed: "distributed",
-  code: "code", devtools: "devtools", ui: "ui", ai: "ai",
-  edu: "edu",
-};
 function generateJsx(
   id: string,
   category: ComponentCategory,
   props: Record<string, unknown>
 ): string {
   const name = toComponentName(id);
-  const dir = CAT_DIR[category] ?? category;
-  const importPath = `@/components/${dir}/${name}`;
+  const importPath = getImportPath(category, id);
   const propsLines = Object.entries(props)
     .filter(([, v]) => v !== undefined && v !== null)
     .map(([k, v]) => {
@@ -132,6 +124,7 @@ export function PlaygroundShell() {
   );
   const [props, setProps] = useState<Record<string, Record<string, unknown>>>({});
   const [copied, setCopied] = useState<string | null>(null);
+  const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [favorites, setFavorites] = useState<Set<string>>(() => {
     try {
       return new Set<string>(JSON.parse(localStorage.getItem("techui-favorites") ?? "[]") as string[]);
@@ -228,15 +221,15 @@ export function PlaygroundShell() {
     <div className={cn("flex h-screen overflow-hidden bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100", darkMode ? "dark" : "")}>
       <aside className="w-60 shrink-0 flex flex-col border-r border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950">
         <div className="px-4 py-4 border-b border-zinc-100 dark:border-zinc-900">
-          <div className="flex items-center gap-2.5">
-            <div className="size-7 rounded-lg bg-zinc-950 dark:bg-white flex items-center justify-center shrink-0">
+          <Link href="/" className="flex items-center gap-2.5 group">
+            <div className="size-7 rounded-lg bg-zinc-950 dark:bg-white flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
               <Layers className="size-4 text-white dark:text-zinc-950" />
             </div>
             <div>
               <h1 className="text-sm font-bold text-zinc-900 dark:text-zinc-100 leading-none">TechUI</h1>
               <p className="text-[10px] text-zinc-400 mt-0.5">Component Playground</p>
             </div>
-          </div>
+          </Link>
         </div>
         <div className="px-3 py-2.5 border-b border-zinc-100 dark:border-zinc-900 space-y-2">
           <div className="relative">
@@ -386,6 +379,13 @@ export function PlaygroundShell() {
               {darkMode ? <Sun className="size-3.5" /> : <Moon className="size-3.5" />}
             </button>
             <button
+              onClick={() => setAddDialogOpen(true)}
+              disabled={!selectedEntry}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 text-xs font-medium hover:bg-zinc-800 dark:hover:bg-zinc-100 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              <PackagePlus className="size-3.5" /> Add to project
+            </button>
+            <button
               onClick={resetProps}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-zinc-200 dark:border-zinc-800 text-xs text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors"
             >
@@ -494,6 +494,18 @@ export function PlaygroundShell() {
           </aside>
         </div>
       </main>
+
+      {selectedEntry && (
+        <AddComponentDialog
+          open={addDialogOpen}
+          onClose={() => setAddDialogOpen(false)}
+          id={selectedEntry.id}
+          name={selectedEntry.name}
+          category={selectedEntry.category}
+          copied={copied}
+          onCopy={copyText}
+        />
+      )}
     </div>
   );
 }

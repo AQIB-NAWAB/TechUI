@@ -399,7 +399,7 @@ export function LivePreview({
   }
 
   return (
-    <div className={cn(darkMode ? "dark" : "")}>
+    <div data-preview="component" className={cn(darkMode ? "dark" : "")}>
       <Component {...props} />
     </div>
   );

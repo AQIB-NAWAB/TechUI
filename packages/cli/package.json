@@ -1,16 +1,17 @@
 {
-  "name": "techui",
-  "version": "0.1.0",
+  "name": "@aqib_nawab/techui",
+  "version": "0.1.4",
   "description": "Add interactive engineering education components to your project — like shadcn, but for TechUI.",
   "license": "MIT",
   "type": "module",
   "bin": {
-    "techui": "./bin/techui.js"
+    "techui": "bin/techui.js"
   },
   "files": [
     "bin",
     "lib",
-    "../../registry"
+    "assets",
+    "README.md"
   ],
   "keywords": [
     "techui",
@@ -23,9 +24,15 @@
   "engines": {
     "node": ">=18"
   },
+  "author": "AQIB NAWAB",
+  "homepage": "https://techui.vercel.app",
+  "bugs": "https://github.com/AQIB-NAWAB/TechUI/issues",
   "repository": {
     "type": "git",
-    "url": "https://github.com/AQIB-NAWAB/TechUI.git",
+    "url": "git+https://github.com/AQIB-NAWAB/TechUI.git",
     "directory": "packages/cli"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

@@ -10,9 +10,9 @@ TechUI makes software engineering concepts **visually obvious** to beginners thr
 ## Adding components to a user project
 
 ```bash
-npx techui init
-npx techui add rate-limiter
-npx techui list --category distributed
+npx @aqib_nawab/techui init
+npx @aqib_nawab/techui add rate-limiter
+npx @aqib_nawab/techui list --category distributed
 ```
 
 Components copy into `src/components/techui/{category}/` with Zod schemas and lucide icons.

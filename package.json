@@ -11,6 +11,7 @@
     "start": "next start",
     "lint": "eslint",
     "generate:registry": "node scripts/generate-registry.mjs",
+    "capture:readme": "node scripts/capture-readme-screenshots.mjs",
     "cli": "node packages/cli/bin/techui.js"
   },
   "dependencies": {
@@ -40,6 +41,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.3.1",
+    "playwright": "^1.62.1",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

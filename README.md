@@ -2,15 +2,17 @@
 
 Interactive React components that make software engineering concepts **visually obvious** — rate limiters, circuit breakers, DNS lookups, JWT flows, and 180+ more.
 
-**Live playground:** [techui.dev](https://techui.dev) (after deploy)
+**Live playground:** [techui.vercel.app/playground](https://techui.vercel.app/playground)
+
+**npm package:** [@aqib_nawab/techui](https://www.npmjs.com/package/@aqib_nawab/techui) — full docs and component screenshots in [packages/cli/README.md](./packages/cli/README.md)
 
 ## Add to your project (like shadcn)
 
 ```bash
-npx techui init
-npx techui add rate-limiter
-npx techui add circuit-breaker dns-lookup
-npx techui list --category api
+npx @aqib_nawab/techui init
+npx @aqib_nawab/techui add rate-limiter
+npx @aqib_nawab/techui add circuit-breaker dns-lookup
+npx @aqib_nawab/techui list --category api
 ```
 
 See [docs/CLI.md](./docs/CLI.md) for full CLI documentation.
@@ -26,7 +28,7 @@ techui/
 │   ├── playground/         # Interactive demo UI
 │   └── lib/                # Shared utilities (cn)
 ├── packages/
-│   └── cli/                # `npx techui` CLI
+│   └── cli/                # `@aqib_nawab/techui` npm CLI
 ├── registry/               # Public JSON registry (shadcn-style)
 │   ├── index.json
 │   └── r/*.json

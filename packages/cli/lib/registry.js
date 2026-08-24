@@ -5,9 +5,13 @@ import { fileURLToPath } from "node:url";
 const CLI_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const LOCAL_REGISTRY = path.resolve(CLI_ROOT, "../../registry");
 
+function registryBase(registryUrl) {
+  return registryUrl.replace(/\/$/, "");
+}
+
 export async function fetchRegistryIndex(registryUrl) {
   if (registryUrl.startsWith("http")) {
-    const res = await fetch(registryUrl.replace(/\/r$/, "") + "/index.json");
+    const res = await fetch(`${registryBase(registryUrl)}/index.json`);
     if (!res.ok) throw new Error(`Failed to fetch registry: ${res.status}`);
     return res.json();
   }
@@ -20,8 +24,7 @@ export async function fetchRegistryIndex(registryUrl) {
 
 export async function fetchRegistryItem(registryUrl, name) {
   if (registryUrl.startsWith("http")) {
-    const base = registryUrl.replace(/\/r$/, "");
-    const res = await fetch(`${base}/r/${name}.json`);
+    const res = await fetch(`${registryBase(registryUrl)}/${name}.json`);
     if (!res.ok) throw new Error(`Component "${name}" not found (${res.status})`);
     return res.json();
   }

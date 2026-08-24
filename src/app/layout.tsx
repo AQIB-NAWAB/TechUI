@@ -13,8 +13,14 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "TechUI — Visual Components for Technical Content",
-  description: "A UI component library for AI-generated technical content",
+  title: "TechUI — Interactive components for software engineering",
+  description:
+    "186+ interactive React components for rate limiters, circuit breakers, DNS, JWT, RAG, and more. Add to any Next.js project with npx @aqib_nawab/techui — like shadcn, but for teaching engineering.",
+  openGraph: {
+    title: "TechUI — Make engineering concepts visually obvious",
+    description: "Interactive React components + shadcn-style CLI. Docs, courses, blogs, and AI content.",
+    url: "https://techui.vercel.app",
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

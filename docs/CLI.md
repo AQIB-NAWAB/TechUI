@@ -6,19 +6,19 @@ Add interactive engineering education components to any React / Next.js project 
 
 ```bash
 # In your Next.js project
-npx techui init
-npx techui add rate-limiter
-npx techui add circuit-breaker dns-lookup jwt-flow
+npx @aqib_nawab/techui init
+npx @aqib_nawab/techui add rate-limiter
+npx @aqib_nawab/techui add circuit-breaker dns-lookup jwt-flow
 ```
 
 ## Commands
 
 | Command | Description |
 |---------|-------------|
-| `npx techui init` | Create `techui.json` config in your project |
-| `npx techui add <name>` | Copy component source into your project |
-| `npx techui list` | List all available components |
-| `npx techui list --category api` | Filter by category |
+| `npx @aqib_nawab/techui init` | Create `techui.json` config in your project |
+| `npx @aqib_nawab/techui add <name>` | Copy component source into your project |
+| `npx @aqib_nawab/techui list` | List all available components |
+| `npx @aqib_nawab/techui list --category api` | Filter by category |
 
 ## Configuration (`techui.json`)
 
@@ -44,7 +44,7 @@ Each component requires these peer dependencies (same as the TechUI playground):
 - `lucide-react`
 - `clsx` + `tailwind-merge` (for `cn()` utils)
 
-Run `npx techui add utils` first if you don't have the `cn()` helper.
+Run `npx @aqib_nawab/techui add utils` first if you don't have the `cn()` helper.
 
 ## Registry
 

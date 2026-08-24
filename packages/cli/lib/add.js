@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import { findConfig, resolveAlias } from "./config.js";
+import { findConfig, resolveAlias, DEFAULT_CONFIG } from "./config.js";
 import { fetchRegistryItem } from "./registry.js";
 
 function rewriteImports(content, config) {
@@ -32,15 +32,15 @@ function resolveTargetPath(config, registryPath) {
 export async function addComponents(names, options = {}) {
   const found = findConfig();
   if (!found && !options.yes) {
-    throw new Error('No techui.json found. Run "npx techui init" first.');
+    throw new Error('No techui.json found. Run "npx @aqib_nawab/techui init" first.');
   }
 
   const config = found?.config ?? {
     aliases: { components: "@/components/techui", utils: "@/lib/utils" },
-    registry: options.registry ?? "local",
+    registry: options.registry ?? DEFAULT_CONFIG.registry,
   };
 
-  const registryUrl = options.registry ?? config.registry ?? "local";
+  const registryUrl = options.registry ?? config.registry ?? DEFAULT_CONFIG.registry;
   const written = [];
 
   for (const name of names) {

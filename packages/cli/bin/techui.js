@@ -12,16 +12,16 @@ function usage() {
 techui — interactive engineering education components
 
 Usage:
-  npx techui init              Create techui.json in your project
-  npx techui add <component>   Add one or more components (e.g. rate-limiter)
-  npx techui list              List all available components
-  npx techui list --category api   Filter by category
+  npx @aqib_nawab/techui init              Create techui.json in your project
+  npx @aqib_nawab/techui add <component>   Add one or more components (e.g. rate-limiter)
+  npx @aqib_nawab/techui list              List all available components
+  npx @aqib_nawab/techui list --category api   Filter by category
 
 Examples:
-  npx techui init
-  npx techui add rate-limiter
-  npx techui add circuit-breaker dns-lookup jwt-flow
-  npx techui add utils rate-limiter --overwrite
+  npx @aqib_nawab/techui init
+  npx @aqib_nawab/techui add rate-limiter
+  npx @aqib_nawab/techui add circuit-breaker dns-lookup jwt-flow
+  npx @aqib_nawab/techui add utils rate-limiter --overwrite
 `);
 }
 
@@ -33,12 +33,12 @@ async function cmdInit() {
   }
   fs.writeFileSync(target, JSON.stringify(DEFAULT_CONFIG, null, 2) + "\n");
   console.log("Created techui.json");
-  console.log('Run: npx techui add rate-limiter');
+  console.log('Run: npx @aqib_nawab/techui add rate-limiter');
 }
 
 async function cmdList() {
   const found = findConfig();
-  const registry = found?.config?.registry ?? "local";
+  const registry = found?.config?.registry ?? DEFAULT_CONFIG.registry;
   const index = await fetchRegistryIndex(registry.startsWith("http") ? registry : "local");
 
   const catFlag = args.indexOf("--category");
@@ -67,12 +67,12 @@ async function cmdAdd() {
   const names = args.filter((a) => !a.startsWith("--"));
   if (names.length === 0) {
     console.error("Error: specify at least one component name.");
-    console.error('Example: npx techui add rate-limiter');
+    console.error('Example: npx @aqib_nawab/techui add rate-limiter');
     process.exit(1);
   }
 
   const found = findConfig();
-  const registry = found?.config?.registry ?? "local";
+  const registry = found?.config?.registry ?? DEFAULT_CONFIG.registry;
 
   console.log(`Adding: ${names.join(", ")}\n`);
   await addComponents(names, { overwrite, registry });
