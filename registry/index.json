@@ -1,0 +1,3170 @@
+{
+  "$schema": "https://techui.dev/schema/registry.json",
+  "name": "techui",
+  "homepage": "https://techui.dev",
+  "items": [
+    {
+      "name": "ab-test",
+      "type": "registry:component",
+      "title": "A/B Test",
+      "description": "Traffic split experiment — shows users divided between two variants with live conversion tracking",
+      "categories": [
+        "ui"
+      ],
+      "tags": [
+        "ab-test",
+        "experiment",
+        "traffic",
+        "conversion",
+        "feature-flag"
+      ]
+    },
+    {
+      "name": "acid-vs-base",
+      "type": "registry:component",
+      "title": "ACID vs BASE",
+      "description": "Compare ACID strong consistency vs BASE eventual consistency — traits, examples, and animated simulations",
+      "categories": [
+        "database"
+      ],
+      "tags": [
+        "database",
+        "acid",
+        "base",
+        "consistency",
+        "cap-theorem",
+        "nosql"
+      ]
+    },
+    {
+      "name": "actor-model",
+      "type": "registry:component",
+      "title": "Actor Model",
+      "description": "Actors as isolated message-passing units — mailboxes, no shared state, send/receive animation",
+      "categories": [
+        "distributed"
+      ],
+      "tags": [
+        "actor",
+        "akka",
+        "erlang",
+        "distributed",
+        "concurrency",
+        "messages"
+      ]
+    },
+    {
+      "name": "ai-embeddings",
+      "type": "registry:component",
+      "title": "AI Embeddings",
+      "description": "Word embeddings in 2D — semantic similarity visualized as proximity, click to see nearest neighbors",
+      "categories": [
+        "ai"
+      ],
+      "tags": [
+        "ai",
+        "embeddings",
+        "vectors",
+        "similarity",
+        "nlp",
+        "machine-learning"
+      ]
+    },
+    {
+      "name": "ai-rag",
+      "type": "registry:component",
+      "title": "RAG Pipeline",
+      "description": "Retrieval-Augmented Generation — query → embed → vector search → retrieve docs → LLM → answer",
+      "categories": [
+        "ai"
+      ],
+      "tags": [
+        "ai",
+        "rag",
+        "llm",
+        "vector",
+        "embeddings",
+        "retrieval",
+        "chatbot"
+      ]
+    },
+    {
+      "name": "api-caching",
+      "type": "registry:component",
+      "title": "API Caching",
+      "description": "Cache-Control, ETag, stale-while-revalidate — browser/CDN/Redis/DB layer-by-layer cache hit simulation",
+      "categories": [
+        "api"
+      ],
+      "tags": [
+        "caching",
+        "cache-control",
+        "etag",
+        "cdn",
+        "http",
+        "api",
+        "performance"
+      ]
+    },
+    {
+      "name": "api-gateway",
+      "type": "registry:component",
+      "title": "API Gateway",
+      "description": "Traffic flow diagram — Client → Gateway → Services with middleware badges, animated request simulation, and response outcomes",
+      "categories": [
+        "api"
+      ],
+      "tags": [
+        "api-gateway",
+        "routing",
+        "proxy",
+        "auth",
+        "rate-limit",
+        "cache",
+        "kong",
+        "nginx"
+      ]
+    },
+    {
+      "name": "api-key",
+      "type": "registry:component",
+      "title": "API Key",
+      "description": "API key card — masked key with reveal/copy, color-coded environment pill, scope tags, and amber warning callout",
+      "categories": [
+        "auth"
+      ],
+      "tags": [
+        "api-key",
+        "auth",
+        "security",
+        "permissions",
+        "scopes"
+      ]
+    },
+    {
+      "name": "api-request",
+      "type": "registry:component",
+      "title": "API Request",
+      "description": "HTTP request panel with method, URL, headers, body, and optional send interaction",
+      "categories": [
+        "api"
+      ],
+      "tags": [
+        "http",
+        "rest",
+        "request",
+        "api"
+      ]
+    },
+    {
+      "name": "api-response",
+      "type": "registry:component",
+      "title": "API Response",
+      "description": "HTTP response panel with status code, headers, latency, and body",
+      "categories": [
+        "api"
+      ],
+      "tags": [
+        "http",
+        "rest",
+        "response",
+        "api"
+      ]
+    },
+    {
+      "name": "api-versioning",
+      "type": "registry:component",
+      "title": "API Versioning",
+      "description": "URL vs Header vs Content Negotiation versioning — shows the actual request format and trade-offs of each approach",
+      "categories": [
+        "api"
+      ],
+      "tags": [
+        "api",
+        "versioning",
+        "url",
+        "header",
+        "content-negotiation",
+        "rest"
+      ]
+    },
+    {
+      "name": "architecture-diagram",
+      "type": "registry:component",
+      "title": "Architecture Diagram",
+      "description": "Visual system architecture with typed nodes, animated flow connections, and click-to-inspect details",
+      "categories": [
+        "architecture"
+      ],
+      "tags": [
+        "architecture",
+        "system",
+        "diagram",
+        "infrastructure"
+      ]
+    },
+    {
+      "name": "async-await",
+      "type": "registry:component",
+      "title": "Async/Await",
+      "description": "Callbacks vs Promises vs async/await — same operation in all three styles with execution animation",
+      "categories": [
+        "code"
+      ],
+      "tags": [
+        "async",
+        "await",
+        "promises",
+        "callbacks",
+        "javascript",
+        "concurrency"
+      ]
+    },
+    {
+      "name": "backpressure",
+      "type": "registry:component",
+      "title": "Backpressure",
+      "description": "Producer/consumer rate mismatch — queue filling, drop/block/sample/buffer strategies animated",
+      "categories": [
+        "distributed"
+      ],
+      "tags": [
+        "backpressure",
+        "distributed",
+        "queue",
+        "producer",
+        "consumer",
+        "rate-limiting"
+      ]
+    },
+    {
+      "name": "big-o-notation",
+      "type": "registry:component",
+      "title": "Big-O Notation",
+      "description": "Algorithm complexity visualized — O(1) to O(n²) bar chart with examples, scales with input size",
+      "categories": [
+        "edu"
+      ],
+      "tags": [
+        "big-o",
+        "algorithms",
+        "complexity",
+        "performance",
+        "data-structures",
+        "edu"
+      ]
+    },
+    {
+      "name": "big-word-alert",
+      "type": "registry:component",
+      "title": "Term Definition",
+      "description": "Defines a technical term in plain English with a 'why it matters here' explanation — perfect for course chapters",
+      "categories": [
+        "edu"
+      ],
+      "tags": [
+        "education",
+        "definition",
+        "term",
+        "beginner",
+        "course"
+      ]
+    },
+    {
+      "name": "binary-search",
+      "type": "registry:component",
+      "title": "Binary Search",
+      "description": "Binary search step-by-step — sorted array, mid pointer, O(log n) vs linear comparison",
+      "categories": [
+        "edu"
+      ],
+      "tags": [
+        "binary-search",
+        "algorithms",
+        "search",
+        "sorted",
+        "divide-and-conquer",
+        "edu"
+      ]
+    },
+    {
+      "name": "blob-storage",
+      "type": "registry:component",
+      "title": "Blob Storage",
+      "description": "S3/GCS/Azure blob — buckets, objects, public URLs, presigned URL generation with expiry",
+      "categories": [
+        "cloud"
+      ],
+      "tags": [
+        "s3",
+        "blob",
+        "cloud",
+        "storage",
+        "presigned-url",
+        "aws"
+      ]
+    },
+    {
+      "name": "bloom-filter",
+      "type": "registry:component",
+      "title": "Bloom Filter",
+      "description": "Probabilistic membership test — bit array, hash functions, false positives explained",
+      "categories": [
+        "distributed"
+      ],
+      "tags": [
+        "bloom-filter",
+        "distributed",
+        "probabilistic",
+        "false-positive",
+        "cache",
+        "database"
+      ]
+    },
+    {
+      "name": "cache-strategies",
+      "type": "registry:component",
+      "title": "Cache Strategies",
+      "description": "Cache-Aside vs Read-Through vs Write-Through vs Write-Behind — animated read/write paths for each strategy",
+      "categories": [
+        "distributed"
+      ],
+      "tags": [
+        "cache",
+        "cache-aside",
+        "write-through",
+        "read-through",
+        "write-behind",
+        "redis"
+      ]
+    },
+    {
+      "name": "cache-visualizer",
+      "type": "registry:component",
+      "title": "Cache Visualizer",
+      "description": "Redis cache with hit/miss flash animations, TTL countdown bars, LRU eviction slide-out, and hit count scale animation",
+      "categories": [
+        "distributed"
+      ],
+      "tags": [
+        "cache",
+        "redis",
+        "lru",
+        "lfu",
+        "distributed",
+        "performance"
+      ]
+    },
+    {
+      "name": "cap-theorem",
+      "type": "registry:component",
+      "title": "CAP Theorem",
+      "description": "Pick CP, AP, or CA — triangle visual and animated partition simulation showing consistency vs availability trade-offs",
+      "categories": [
+        "distributed"
+      ],
+      "tags": [
+        "cap-theorem",
+        "distributed",
+        "consistency",
+        "availability",
+        "partition",
+        "nosql"
+      ]
+    },
+    {
+      "name": "cdn-edge",
+      "type": "registry:component",
+      "title": "CDN Edge Network",
+      "description": "CDN edge caching — request routes to nearest edge node (cache hit = fast, miss = slower origin fetch)",
+      "categories": [
+        "cloud"
+      ],
+      "tags": [
+        "cdn",
+        "edge",
+        "cache",
+        "performance",
+        "network"
+      ]
+    },
+    {
+      "name": "ci-pipeline",
+      "type": "registry:component",
+      "title": "CI/CD Pipeline",
+      "description": "CI/CD pipeline with stages, step status, duration, and expandable logs",
+      "categories": [
+        "devtools"
+      ],
+      "tags": [
+        "ci",
+        "cd",
+        "pipeline",
+        "devops",
+        "github-actions",
+        "jenkins"
+      ]
+    },
+    {
+      "name": "circuit-breaker",
+      "type": "registry:component",
+      "title": "Circuit Breaker",
+      "description": "Interactive circuit breaker with Closed/Open/Half-Open states and request simulation",
+      "categories": [
+        "distributed"
+      ],
+      "tags": [
+        "circuit-breaker",
+        "distributed",
+        "resilience",
+        "fault-tolerance",
+        "pattern"
+      ]
+    },
+    {
+      "name": "circuit-breaker-states",
+      "type": "registry:component",
+      "title": "Circuit Breaker States",
+      "description": "Circuit breaker state machine — click each state (Closed/Open/Half-Open) to understand what it means and when it transitions",
+      "categories": [
+        "distributed"
+      ],
+      "tags": [
+        "circuit-breaker",
+        "resilience",
+        "state-machine",
+        "distributed",
+        "fault-tolerance"
+      ]
+    },
+    {
+      "name": "cloud-function",
+      "type": "registry:component",
+      "title": "Cloud Function",
+      "description": "Interactive serverless function — click Invoke to watch the execution timeline animate, cold start indicator, and live invocation counter",
+      "categories": [
+        "cloud"
+      ],
+      "tags": [
+        "lambda",
+        "serverless",
+        "cloud",
+        "function",
+        "aws",
+        "gcp",
+        "azure"
+      ]
+    },
+    {
+      "name": "code-block",
+      "type": "registry:component",
+      "title": "Code Block",
+      "description": "Syntax-highlighted code with line numbers, line highlighting, and copy support",
+      "categories": [
+        "code"
+      ],
+      "tags": [
+        "code",
+        "syntax",
+        "highlight",
+        "snippet"
+      ]
+    },
+    {
+      "name": "code-diff",
+      "type": "registry:component",
+      "title": "Code Diff",
+      "description": "Before/after code comparison with diff-style line highlighting — shows exactly what changes in a refactor",
+      "categories": [
+        "edu"
+      ],
+      "tags": [
+        "education",
+        "diff",
+        "refactor",
+        "before-after",
+        "code",
+        "course"
+      ]
+    },
+    {
+      "name": "color-palette",
+      "type": "registry:component",
+      "title": "Color Palette",
+      "description": "Design token color palette with swatches — click any color to copy its value",
+      "categories": [
+        "ui"
+      ],
+      "tags": [
+        "color",
+        "palette",
+        "design",
+        "tokens",
+        "ui",
+        "brand"
+      ]
+    },
+    {
+      "name": "comparison-table",
+      "type": "registry:component",
+      "title": "Comparison Table",
+      "description": "Interactive feature comparison — row-by-row reveal animation highlights the winning column",
+      "categories": [
+        "ui"
+      ],
+      "tags": [
+        "comparison",
+        "table",
+        "features",
+        "ui"
+      ]
+    },
+    {
+      "name": "compression",
+      "type": "registry:component",
+      "title": "HTTP Compression",
+      "description": "gzip vs Brotli — Accept-Encoding header exchange, compression ratio bars by content type",
+      "categories": [
+        "networking"
+      ],
+      "tags": [
+        "compression",
+        "gzip",
+        "brotli",
+        "http",
+        "networking",
+        "performance"
+      ]
+    },
+    {
+      "name": "concept-comparison",
+      "type": "registry:component",
+      "title": "Concept Comparison",
+      "description": "Side-by-side comparison of two approaches or technologies — shows trade-offs clearly without opinion",
+      "categories": [
+        "edu"
+      ],
+      "tags": [
+        "education",
+        "comparison",
+        "tradeoffs",
+        "sql",
+        "nosql",
+        "course"
+      ]
+    },
+    {
+      "name": "conditional-requests-etag",
+      "type": "registry:component",
+      "title": "Conditional Requests (ETag)",
+      "description": "If-None-Match conditional GET — 304 Not Modified when cache is fresh, 200 with new body when resource changed",
+      "categories": [
+        "api"
+      ],
+      "tags": [
+        "etag",
+        "conditional",
+        "cache",
+        "304",
+        "if-none-match",
+        "http",
+        "api",
+        "interactive"
+      ]
+    },
+    {
+      "name": "connection-pool",
+      "type": "registry:component",
+      "title": "Connection Pool",
+      "description": "Database connection pool — shows how requests queue when all connections are busy",
+      "categories": [
+        "database"
+      ],
+      "tags": [
+        "database",
+        "connection-pool",
+        "postgres",
+        "performance"
+      ]
+    },
+    {
+      "name": "consistent-hashing",
+      "type": "registry:component",
+      "title": "Consistent Hashing",
+      "description": "Hash ring — servers and keys on a circle, add/remove server moves only ~1/N of keys",
+      "categories": [
+        "distributed"
+      ],
+      "tags": [
+        "consistent-hashing",
+        "distributed",
+        "load-balancing",
+        "sharding",
+        "ring",
+        "cache"
+      ]
+    },
+    {
+      "name": "consistent-reads",
+      "type": "registry:component",
+      "title": "Consistent Reads",
+      "description": "Interactive strong vs eventual reads — quorum contact for latest value or fast stale read from nearest replica",
+      "categories": [
+        "distributed"
+      ],
+      "tags": [
+        "consistent-reads",
+        "consistency",
+        "replication",
+        "quorum",
+        "eventual-consistency",
+        "distributed",
+        "interactive"
+      ]
+    },
+    {
+      "name": "container-networking",
+      "type": "registry:component",
+      "title": "Container Networking",
+      "description": "Docker bridge network — containers communicate by name, ports forwarded to host",
+      "categories": [
+        "containers"
+      ],
+      "tags": [
+        "docker",
+        "containers",
+        "networking",
+        "bridge",
+        "ports"
+      ]
+    },
+    {
+      "name": "content-negotiation",
+      "type": "registry:component",
+      "title": "Content Negotiation",
+      "description": "Client Accept header vs server Content-Type — reorder preferences and see which format the API returns",
+      "categories": [
+        "api"
+      ],
+      "tags": [
+        "api",
+        "http",
+        "accept",
+        "content-type",
+        "rest",
+        "headers"
+      ]
+    },
+    {
+      "name": "context-window-overflow",
+      "type": "registry:component",
+      "title": "Context Window Overflow",
+      "description": "Interactive context limit demo — watch conversation turns fill the window and get evicted by truncation or summarization strategy",
+      "categories": [
+        "ai"
+      ],
+      "tags": [
+        "ai",
+        "llm",
+        "context-window",
+        "overflow",
+        "truncation",
+        "tokens",
+        "interactive"
+      ]
+    },
+    {
+      "name": "cors-policy",
+      "type": "registry:component",
+      "title": "CORS Policy",
+      "description": "Browser preflight flow — shows how cross-origin requests are checked before being allowed",
+      "categories": [
+        "api"
+      ],
+      "tags": [
+        "cors",
+        "security",
+        "http",
+        "browser",
+        "preflight"
+      ]
+    },
+    {
+      "name": "cqrs-pattern",
+      "type": "registry:component",
+      "title": "CQRS Pattern",
+      "description": "Command Query Responsibility Segregation — separate write/read models, event-driven sync, optimized stores",
+      "categories": [
+        "architecture"
+      ],
+      "tags": [
+        "cqrs",
+        "architecture",
+        "commands",
+        "queries",
+        "event-sourcing",
+        "patterns"
+      ]
+    },
+    {
+      "name": "csp-headers",
+      "type": "registry:component",
+      "title": "CSP Headers",
+      "description": "Content Security Policy — directive explorer showing what each rule allows and blocks, with XSS simulation",
+      "categories": [
+        "networking"
+      ],
+      "tags": [
+        "csp",
+        "security",
+        "headers",
+        "xss",
+        "content-security-policy",
+        "networking"
+      ]
+    },
+    {
+      "name": "cursor-pagination",
+      "type": "registry:component",
+      "title": "Cursor Pagination",
+      "description": "Offset vs cursor pagination — duplicate rows on insert, cursor stability, API request comparison",
+      "categories": [
+        "api"
+      ],
+      "tags": [
+        "pagination",
+        "cursor",
+        "offset",
+        "api",
+        "database",
+        "stable"
+      ]
+    },
+    {
+      "name": "dark-mode",
+      "type": "registry:component",
+      "title": "Dark Mode",
+      "description": "CSS variables + class toggle + media query — four implementation approaches with live preview",
+      "categories": [
+        "ui"
+      ],
+      "tags": [
+        "dark-mode",
+        "css-variables",
+        "theming",
+        "ui",
+        "prefers-color-scheme",
+        "accessibility"
+      ]
+    },
+    {
+      "name": "data-pipeline",
+      "type": "registry:component",
+      "title": "Data Pipeline",
+      "description": "ETL pipeline with animated record pills flowing Source → Transform → Sink, live throughput counter, failed records drop to Dead Letter Queue",
+      "categories": [
+        "distributed"
+      ],
+      "tags": [
+        "pipeline",
+        "etl",
+        "streaming",
+        "data",
+        "transform",
+        "kafka",
+        "spark",
+        "flink"
+      ]
+    },
+    {
+      "name": "data-replication",
+      "type": "registry:component",
+      "title": "Data Replication",
+      "description": "Leader/follower replication — async vs sync modes, lag simulation, failover animation",
+      "categories": [
+        "distributed"
+      ],
+      "tags": [
+        "replication",
+        "distributed",
+        "primary",
+        "replica",
+        "lag",
+        "database",
+        "consistency"
+      ]
+    },
+    {
+      "name": "database-index",
+      "type": "registry:component",
+      "title": "Database Index",
+      "description": "Sequential scan vs B-tree index — animates WHY indexes make queries 10–1000× faster",
+      "categories": [
+        "database"
+      ],
+      "tags": [
+        "database",
+        "index",
+        "b-tree",
+        "performance",
+        "query"
+      ]
+    },
+    {
+      "name": "database-normalization",
+      "type": "registry:component",
+      "title": "DB Normalization",
+      "description": "1NF → 2NF → 3NF — denormalization problems, update/delete anomalies, normalized table structure",
+      "categories": [
+        "database"
+      ],
+      "tags": [
+        "normalization",
+        "1nf",
+        "2nf",
+        "3nf",
+        "database",
+        "sql",
+        "schema"
+      ]
+    },
+    {
+      "name": "database-sharding",
+      "type": "registry:component",
+      "title": "Database Sharding",
+      "description": "Horizontal sharding — shows how a shard key routes records to different database partitions",
+      "categories": [
+        "database"
+      ],
+      "tags": [
+        "database",
+        "sharding",
+        "horizontal-scaling",
+        "partition",
+        "mongodb"
+      ]
+    },
+    {
+      "name": "database-table",
+      "type": "registry:component",
+      "title": "Database Table",
+      "description": "SQL table schema with columns, types, constraints, and sample rows",
+      "categories": [
+        "database"
+      ],
+      "tags": [
+        "database",
+        "sql",
+        "table",
+        "schema"
+      ]
+    },
+    {
+      "name": "database-transactions",
+      "type": "registry:component",
+      "title": "Database Transactions",
+      "description": "ACID transactions — commit vs rollback, what partial failure looks like without transactions",
+      "categories": [
+        "database"
+      ],
+      "tags": [
+        "database",
+        "transactions",
+        "acid",
+        "commit",
+        "rollback",
+        "sql"
+      ]
+    },
+    {
+      "name": "dead-letter-queue",
+      "type": "registry:component",
+      "title": "Dead Letter Queue",
+      "description": "Failed message handling — retry with exponential backoff, DLQ capture, inspect and replay",
+      "categories": [
+        "distributed"
+      ],
+      "tags": [
+        "dlq",
+        "dead-letter",
+        "queue",
+        "retry",
+        "backoff",
+        "distributed",
+        "messaging"
+      ]
+    },
+    {
+      "name": "deadlock-detection",
+      "type": "registry:component",
+      "title": "Deadlock Detection",
+      "description": "Simulate a database deadlock — two transactions lock rows in opposite order until the wait-for graph forms a cycle",
+      "categories": [
+        "database"
+      ],
+      "tags": [
+        "deadlock",
+        "database",
+        "transactions",
+        "locking",
+        "postgres",
+        "concurrency",
+        "interactive"
+      ]
+    },
+    {
+      "name": "dependency-injection",
+      "type": "registry:component",
+      "title": "Dependency Injection",
+      "description": "DI pattern — hard-coded deps vs constructor injection vs DI container, with mock testing demo",
+      "categories": [
+        "architecture"
+      ],
+      "tags": [
+        "dependency-injection",
+        "di",
+        "ioc",
+        "architecture",
+        "testing",
+        "decoupling"
+      ]
+    },
+    {
+      "name": "deployment-strategy",
+      "type": "registry:component",
+      "title": "Deployment Strategy",
+      "description": "Blue-Green vs Canary vs Rolling deploy — animate pod replacement to show the trade-offs of each strategy",
+      "categories": [
+        "cloud"
+      ],
+      "tags": [
+        "deployment",
+        "blue-green",
+        "canary",
+        "rolling",
+        "kubernetes",
+        "devops"
+      ]
+    },
+    {
+      "name": "design-patterns",
+      "type": "registry:component",
+      "title": "Design Patterns",
+      "description": "GoF patterns — Singleton/Observer/Factory/Strategy with visual diagrams and animated demos",
+      "categories": [
+        "architecture"
+      ],
+      "tags": [
+        "design-patterns",
+        "singleton",
+        "observer",
+        "factory",
+        "strategy",
+        "oop"
+      ]
+    },
+    {
+      "name": "distributed-tracing",
+      "type": "registry:component",
+      "title": "Distributed Tracing",
+      "description": "OpenTelemetry-style span waterfall — see where time is spent across services in a single request",
+      "categories": [
+        "devtools"
+      ],
+      "tags": [
+        "tracing",
+        "opentelemetry",
+        "jaeger",
+        "spans",
+        "observability",
+        "distributed"
+      ]
+    },
+    {
+      "name": "dns-lookup",
+      "type": "registry:component",
+      "title": "DNS Lookup",
+      "description": "Visual hop-chain diagram of DNS resolution — watch the query travel from your app through stub, recursive, root, TLD, and authoritative nameservers",
+      "categories": [
+        "networking"
+      ],
+      "tags": [
+        "dns",
+        "networking",
+        "domain",
+        "resolver",
+        "lookup"
+      ]
+    },
+    {
+      "name": "dns-propagation",
+      "type": "registry:component",
+      "title": "DNS Propagation",
+      "description": "DNS record change propagation — TTL expiry across global resolvers, old vs new value, time simulation",
+      "categories": [
+        "networking"
+      ],
+      "tags": [
+        "dns",
+        "propagation",
+        "ttl",
+        "networking",
+        "domain",
+        "caching"
+      ]
+    },
+    {
+      "name": "docker-compose",
+      "type": "registry:component",
+      "title": "Docker Compose",
+      "description": "docker-compose.yml visualized — service dependencies, startup order, ports, volumes, and healthchecks",
+      "categories": [
+        "containers"
+      ],
+      "tags": [
+        "docker",
+        "compose",
+        "containers",
+        "services",
+        "dependencies",
+        "devops"
+      ]
+    },
+    {
+      "name": "docker-container",
+      "type": "registry:component",
+      "title": "Docker Container",
+      "description": "Docker container with nested visual showing the container inside the host, tabbed port/volume/env view, and CPU/memory progress bars",
+      "categories": [
+        "containers"
+      ],
+      "tags": [
+        "docker",
+        "container",
+        "kubernetes",
+        "devops",
+        "deployment"
+      ]
+    },
+    {
+      "name": "embedding-similarity",
+      "type": "registry:component",
+      "title": "Embedding Similarity",
+      "description": "Interactive cosine similarity — compare phrase pairs side by side with vector bars and a live similarity score",
+      "categories": [
+        "ai"
+      ],
+      "tags": [
+        "ai",
+        "embeddings",
+        "similarity",
+        "cosine",
+        "vectors",
+        "nlp",
+        "interactive"
+      ]
+    },
+    {
+      "name": "env-vars",
+      "type": "registry:component",
+      "title": "Environment Variables",
+      "description": "Environment variable panel with masked secrets, copy, and reveal controls",
+      "categories": [
+        "devtools"
+      ],
+      "tags": [
+        "env",
+        "config",
+        "secrets",
+        "devtools",
+        "environment"
+      ]
+    },
+    {
+      "name": "environment-config",
+      "type": "registry:component",
+      "title": "Environment Config",
+      "description": "Side-by-side environment previews — same app with different config, animated switch between dev/staging/prod",
+      "categories": [
+        "devtools"
+      ],
+      "tags": [
+        "environment",
+        "config",
+        "12-factor",
+        "secrets",
+        "devops",
+        "env-vars"
+      ]
+    },
+    {
+      "name": "er-diagram",
+      "type": "registry:component",
+      "title": "ER Diagram",
+      "description": "Entity-Relationship diagram with animated bezier lines connecting FK columns to their PK references. Click a table to highlight its relationships.",
+      "categories": [
+        "database"
+      ],
+      "tags": [
+        "er",
+        "erd",
+        "database",
+        "schema",
+        "relationships",
+        "foreign-key"
+      ]
+    },
+    {
+      "name": "error-boundary",
+      "type": "registry:component",
+      "title": "Error Boundary",
+      "description": "React error boundary — isolates component crashes so the rest of the app keeps rendering",
+      "categories": [
+        "code"
+      ],
+      "tags": [
+        "react",
+        "error",
+        "boundary",
+        "fault-isolation",
+        "resilience"
+      ]
+    },
+    {
+      "name": "event-bus",
+      "type": "registry:component",
+      "title": "Event Bus",
+      "description": "Pub/sub event bus — click an event badge to watch it travel publisher → topic → subscribers with animated highlighting and green receipt confirmation",
+      "categories": [
+        "distributed"
+      ],
+      "tags": [
+        "event-bus",
+        "pubsub",
+        "publish-subscribe",
+        "events",
+        "messaging",
+        "rabbitmq",
+        "sns",
+        "eventbridge"
+      ]
+    },
+    {
+      "name": "event-sourcing",
+      "type": "registry:component",
+      "title": "Event Sourcing",
+      "description": "Event log as source of truth — append events, replay them to rebuild current state from scratch",
+      "categories": [
+        "distributed"
+      ],
+      "tags": [
+        "event-sourcing",
+        "cqrs",
+        "distributed",
+        "events",
+        "audit-log"
+      ]
+    },
+    {
+      "name": "feature-flag",
+      "type": "registry:component",
+      "title": "Feature Flag",
+      "description": "Toggle features per environment with rollout percentage — shows how feature flags control what users see",
+      "categories": [
+        "devtools"
+      ],
+      "tags": [
+        "feature-flag",
+        "toggle",
+        "rollout",
+        "devtools",
+        "launch-darkly"
+      ]
+    },
+    {
+      "name": "feature-rollout",
+      "type": "registry:component",
+      "title": "Feature Rollout",
+      "description": "Progressive percentage rollout — staged deployment, advance/rollback, live metric monitoring",
+      "categories": [
+        "devtools"
+      ],
+      "tags": [
+        "feature-rollout",
+        "progressive-delivery",
+        "canary",
+        "devops",
+        "deployment"
+      ]
+    },
+    {
+      "name": "file-tree",
+      "type": "registry:component",
+      "title": "File Tree",
+      "description": "Expandable file/directory tree with syntax-aware file icons and color-coded extensions",
+      "categories": [
+        "code"
+      ],
+      "tags": [
+        "files",
+        "directory",
+        "tree",
+        "project",
+        "structure"
+      ]
+    },
+    {
+      "name": "gossip-protocol",
+      "type": "registry:component",
+      "title": "Gossip Protocol",
+      "description": "Interactive gossip spread — nodes exchange state with neighbors until all converge on the same value",
+      "categories": [
+        "distributed"
+      ],
+      "tags": [
+        "gossip",
+        "epidemic",
+        "distributed",
+        "consistency",
+        "replication",
+        "interactive"
+      ]
+    },
+    {
+      "name": "graceful-shutdown",
+      "type": "registry:component",
+      "title": "Graceful Shutdown",
+      "description": "SIGTERM drain animation — block new connections, finish in-flight requests, then exit cleanly",
+      "categories": [
+        "devtools"
+      ],
+      "tags": [
+        "shutdown",
+        "sigterm",
+        "drain",
+        "deploy",
+        "kubernetes",
+        "zero-downtime"
+      ]
+    },
+    {
+      "name": "graph-traversal-bfs-dfs",
+      "type": "registry:component",
+      "title": "Graph Traversal (BFS / DFS)",
+      "description": "Interactive BFS vs DFS walkthrough — graph canvas, visit order, queue/stack visualization, step and auto-play",
+      "categories": [
+        "edu"
+      ],
+      "tags": [
+        "bfs",
+        "dfs",
+        "graph",
+        "traversal",
+        "algorithms",
+        "queue",
+        "stack",
+        "interactive",
+        "edu"
+      ]
+    },
+    {
+      "name": "graphql-query",
+      "type": "registry:component",
+      "title": "GraphQL Query",
+      "description": "GraphQL query viewer with syntax highlighting, Run Query button, operation type badge, and syntax-highlighted JSON response",
+      "categories": [
+        "api"
+      ],
+      "tags": [
+        "graphql",
+        "api",
+        "query",
+        "mutation",
+        "schema",
+        "gql"
+      ]
+    },
+    {
+      "name": "graphql-schema",
+      "type": "registry:component",
+      "title": "GraphQL Schema",
+      "description": "Visual GraphQL type tree — click types and fields to explore connections, jump between related types",
+      "categories": [
+        "api"
+      ],
+      "tags": [
+        "graphql",
+        "schema",
+        "types",
+        "api",
+        "relations"
+      ]
+    },
+    {
+      "name": "grpc-vs-rest",
+      "type": "registry:component",
+      "title": "gRPC vs REST",
+      "description": "gRPC vs REST side-by-side — payload size, latency, schema requirements, and browser support compared",
+      "categories": [
+        "api"
+      ],
+      "tags": [
+        "grpc",
+        "rest",
+        "protobuf",
+        "api",
+        "performance",
+        "schema"
+      ]
+    },
+    {
+      "name": "hash-table-collision",
+      "type": "registry:component",
+      "title": "Hash Table Collisions",
+      "description": "Chaining vs open addressing — watch keys collide and get stored differently",
+      "categories": [
+        "edu"
+      ],
+      "tags": [
+        "hash-table",
+        "collision",
+        "chaining",
+        "open-addressing",
+        "data-structure",
+        "edu"
+      ]
+    },
+    {
+      "name": "health-check",
+      "type": "registry:component",
+      "title": "Health Check",
+      "description": "Service health dashboard — polls endpoints and shows response times with pass/degraded/down status",
+      "categories": [
+        "devtools"
+      ],
+      "tags": [
+        "health",
+        "monitoring",
+        "devops",
+        "status",
+        "uptime"
+      ]
+    },
+    {
+      "name": "heap-data-structure",
+      "type": "registry:component",
+      "title": "Heap / Priority Queue",
+      "description": "Min-heap tree visualization — insert sift-up, extract-min sift-down, O(log n) operations",
+      "categories": [
+        "edu"
+      ],
+      "tags": [
+        "heap",
+        "priority-queue",
+        "data-structures",
+        "min-heap",
+        "sift",
+        "algorithms"
+      ]
+    },
+    {
+      "name": "hmac-signing",
+      "type": "registry:component",
+      "title": "HMAC Request Signing",
+      "description": "Step-by-step HMAC-SHA256 signing pipeline — canonical string, signature, header attachment, and server verification with tamper simulation",
+      "categories": [
+        "api"
+      ],
+      "tags": [
+        "hmac",
+        "signing",
+        "api",
+        "authentication",
+        "webhook",
+        "sha256",
+        "interactive"
+      ]
+    },
+    {
+      "name": "http-cache",
+      "type": "registry:component",
+      "title": "HTTP Cache",
+      "description": "HTTP caching lifecycle — from cache miss to hit to stale revalidation with Cache-Control headers",
+      "categories": [
+        "networking"
+      ],
+      "tags": [
+        "http",
+        "cache",
+        "cdn",
+        "performance",
+        "headers",
+        "etag"
+      ]
+    },
+    {
+      "name": "http-endpoint",
+      "type": "registry:component",
+      "title": "HTTP Endpoint",
+      "description": "OpenAPI-style endpoint card with bordered parameter/response panels, left-border param type accents, and colored status tab selection",
+      "categories": [
+        "api"
+      ],
+      "tags": [
+        "http",
+        "rest",
+        "api",
+        "openapi",
+        "endpoint"
+      ]
+    },
+    {
+      "name": "http-headers",
+      "type": "registry:component",
+      "title": "HTTP Headers",
+      "description": "Two-panel HTTP headers viewer — REQUEST (blue) and RESPONSE (green) — with category filter pills and inline descriptions",
+      "categories": [
+        "networking"
+      ],
+      "tags": [
+        "http",
+        "headers",
+        "networking",
+        "request",
+        "response",
+        "security"
+      ]
+    },
+    {
+      "name": "http3-quic",
+      "type": "registry:component",
+      "title": "HTTP/3 & QUIC",
+      "description": "HTTP/2 head-of-line blocking vs HTTP/3 QUIC — packet loss simulation, 0-RTT connection setup",
+      "categories": [
+        "networking"
+      ],
+      "tags": [
+        "http3",
+        "quic",
+        "http2",
+        "networking",
+        "head-of-line",
+        "performance"
+      ]
+    },
+    {
+      "name": "icmp-ping-traceroute",
+      "type": "registry:component",
+      "title": "ICMP Ping & Traceroute",
+      "description": "Interactive ICMP ping and traceroute — animated packet travel, RTT display, and hop-by-hop route reveal",
+      "categories": [
+        "networking"
+      ],
+      "tags": [
+        "icmp",
+        "ping",
+        "traceroute",
+        "network",
+        "latency",
+        "rtt",
+        "networking",
+        "interactive"
+      ]
+    },
+    {
+      "name": "idempotency-consumer",
+      "type": "registry:component",
+      "title": "Idempotency Consumer",
+      "description": "Message deduplication — consumer skips already-processed message IDs from the queue",
+      "categories": [
+        "distributed"
+      ],
+      "tags": [
+        "idempotency",
+        "consumer",
+        "deduplication",
+        "queue",
+        "messaging",
+        "distributed"
+      ]
+    },
+    {
+      "name": "idempotency-key",
+      "type": "registry:component",
+      "title": "Idempotency Key",
+      "description": "Duplicate request handling — same key returns cached response, no double charge",
+      "categories": [
+        "api"
+      ],
+      "tags": [
+        "idempotency",
+        "api",
+        "payments",
+        "retry",
+        "deduplication"
+      ]
+    },
+    {
+      "name": "immutability",
+      "type": "registry:component",
+      "title": "Immutability",
+      "description": "Mutable vs immutable data — shared reference mutation bug, spread operator fix, array patterns",
+      "categories": [
+        "edu"
+      ],
+      "tags": [
+        "immutability",
+        "mutation",
+        "functional",
+        "react",
+        "state",
+        "edu"
+      ]
+    },
+    {
+      "name": "index-types",
+      "type": "registry:component",
+      "title": "Index Types",
+      "description": "B-Tree vs Hash vs Full-Text indexes — visual representation of each structure and when to use them",
+      "categories": [
+        "database"
+      ],
+      "tags": [
+        "database",
+        "index",
+        "b-tree",
+        "hash",
+        "full-text",
+        "postgres"
+      ]
+    },
+    {
+      "name": "isolation-levels",
+      "type": "registry:component",
+      "title": "Transaction Isolation Levels",
+      "description": "Interactive dirty read demo — step through concurrent transactions at each isolation level and see what anomalies are prevented",
+      "categories": [
+        "database"
+      ],
+      "tags": [
+        "database",
+        "isolation",
+        "transactions",
+        "acid",
+        "concurrency",
+        "sql",
+        "interactive"
+      ]
+    },
+    {
+      "name": "jwt-claims",
+      "type": "registry:component",
+      "title": "JWT Claims",
+      "description": "JWT decoded into 3 color-coded parts — shows standard vs custom claims and how the signature enables stateless auth",
+      "categories": [
+        "auth"
+      ],
+      "tags": [
+        "jwt",
+        "claims",
+        "auth",
+        "token",
+        "stateless"
+      ]
+    },
+    {
+      "name": "jwt-flow",
+      "type": "registry:component",
+      "title": "JWT Auth Flow",
+      "description": "Full JWT lifecycle: login → issue → transmit → verify — shows how stateless auth works",
+      "categories": [
+        "auth"
+      ],
+      "tags": [
+        "jwt",
+        "auth",
+        "stateless",
+        "token",
+        "bearer"
+      ]
+    },
+    {
+      "name": "jwt-refresh",
+      "type": "registry:component",
+      "title": "JWT Token Refresh",
+      "description": "Access + refresh token rotation — silent refresh flow, expiry handling, revocation on logout",
+      "categories": [
+        "auth"
+      ],
+      "tags": [
+        "jwt",
+        "token-refresh",
+        "auth",
+        "access-token",
+        "refresh-token",
+        "security"
+      ]
+    },
+    {
+      "name": "jwt-viewer",
+      "type": "registry:component",
+      "title": "JWT Viewer",
+      "description": "Digital passport view of JWT tokens — verify signature with a scan animation, see identity at a glance",
+      "categories": [
+        "auth"
+      ],
+      "tags": [
+        "jwt",
+        "auth",
+        "token",
+        "security"
+      ]
+    },
+    {
+      "name": "kafka-topic",
+      "type": "registry:component",
+      "title": "Kafka Topic",
+      "description": "Kafka topic with visual partition lanes — produce colored event pills, track consumer group lag, and see read offsets update independently",
+      "categories": [
+        "distributed"
+      ],
+      "tags": [
+        "kafka",
+        "distributed",
+        "streaming",
+        "partitions",
+        "consumer-group"
+      ]
+    },
+    {
+      "name": "kubernetes-deployment",
+      "type": "registry:component",
+      "title": "Kubernetes Deployment",
+      "description": "Deployment with pod cards that animate in/out during rolling update — choose Rolling Update or Recreate strategy, watch progress bar fill",
+      "categories": [
+        "containers"
+      ],
+      "tags": [
+        "kubernetes",
+        "k8s",
+        "deployment",
+        "pods",
+        "replicaset",
+        "rolling-update",
+        "containers"
+      ]
+    },
+    {
+      "name": "kubernetes-hpa",
+      "type": "registry:component",
+      "title": "Kubernetes HPA",
+      "description": "Horizontal Pod Autoscaler — CPU spikes trigger scale-up, traffic drops trigger scale-down",
+      "categories": [
+        "containers"
+      ],
+      "tags": [
+        "kubernetes",
+        "hpa",
+        "autoscaling",
+        "containers",
+        "pods",
+        "cpu"
+      ]
+    },
+    {
+      "name": "kubernetes-ingress",
+      "type": "registry:component",
+      "title": "Kubernetes Ingress",
+      "description": "Ingress routing rules — path-based traffic routing to services, TLS termination, animated request flow",
+      "categories": [
+        "containers"
+      ],
+      "tags": [
+        "kubernetes",
+        "ingress",
+        "routing",
+        "nginx",
+        "tls",
+        "containers"
+      ]
+    },
+    {
+      "name": "kubernetes-pod",
+      "type": "registry:component",
+      "title": "Kubernetes Pod",
+      "description": "Pod outer box (dashed) with each container shown as an inner card — state badge, CPU/memory progress bars, labels as colored pills",
+      "categories": [
+        "containers"
+      ],
+      "tags": [
+        "kubernetes",
+        "k8s",
+        "pod",
+        "container",
+        "deployment",
+        "devops"
+      ]
+    },
+    {
+      "name": "leader-election",
+      "type": "registry:component",
+      "title": "Leader Election",
+      "description": "Nodes elect a leader — bully or ring algorithm with priority-based winner",
+      "categories": [
+        "distributed"
+      ],
+      "tags": [
+        "leader-election",
+        "distributed",
+        "consensus",
+        "bully",
+        "ring",
+        "cluster"
+      ]
+    },
+    {
+      "name": "load-balancer",
+      "type": "registry:component",
+      "title": "Load Balancer",
+      "description": "Interactive load balancer with request routing, distribution metrics, and backend health toggles",
+      "categories": [
+        "architecture"
+      ],
+      "tags": [
+        "load-balancer",
+        "architecture",
+        "networking",
+        "infrastructure",
+        "round-robin"
+      ]
+    },
+    {
+      "name": "load-testing",
+      "type": "registry:component",
+      "title": "Load Testing",
+      "description": "Load test ramp-up simulation — watch RPS climb, latency degrade, and errors appear at capacity",
+      "categories": [
+        "devtools"
+      ],
+      "tags": [
+        "load-test",
+        "performance",
+        "rps",
+        "latency",
+        "k6",
+        "stress-test"
+      ]
+    },
+    {
+      "name": "log-viewer",
+      "type": "registry:component",
+      "title": "Log Viewer",
+      "description": "Structured log viewer with severity filtering, field expansion, and search",
+      "categories": [
+        "devtools"
+      ],
+      "tags": [
+        "logs",
+        "logging",
+        "observability",
+        "debugging",
+        "devtools"
+      ]
+    },
+    {
+      "name": "lru-cache",
+      "type": "registry:component",
+      "title": "LRU Cache",
+      "description": "Least Recently Used cache — GET/SET operations with eviction animation, hit rate tracking",
+      "categories": [
+        "distributed"
+      ],
+      "tags": [
+        "cache",
+        "lru",
+        "eviction",
+        "memory",
+        "distributed",
+        "redis"
+      ]
+    },
+    {
+      "name": "memoization",
+      "type": "registry:component",
+      "title": "Memoization",
+      "description": "Cache function results — hit/miss table building up, hit rate, speed comparison with/without cache",
+      "categories": [
+        "edu"
+      ],
+      "tags": [
+        "memoization",
+        "cache",
+        "algorithms",
+        "optimization",
+        "fibonacci",
+        "edu"
+      ]
+    },
+    {
+      "name": "memory-leak",
+      "type": "registry:component",
+      "title": "Memory Leak",
+      "description": "Simulates a memory leak climbing over time — fix it and watch the heap flatten",
+      "categories": [
+        "devtools"
+      ],
+      "tags": [
+        "memory",
+        "leak",
+        "heap",
+        "devtools",
+        "node",
+        "debugging"
+      ]
+    },
+    {
+      "name": "message-queue-patterns",
+      "type": "registry:component",
+      "title": "Message Queue Patterns",
+      "description": "Pub/Sub vs Point-to-Point vs Request/Reply — animated message routing for each pattern",
+      "categories": [
+        "distributed"
+      ],
+      "tags": [
+        "messaging",
+        "pub-sub",
+        "queue",
+        "kafka",
+        "rabbitmq",
+        "distributed"
+      ]
+    },
+    {
+      "name": "metrics-chart",
+      "type": "registry:component",
+      "title": "Metrics Chart",
+      "description": "Time-series line chart for observability metrics — latency, error rate, throughput",
+      "categories": [
+        "devtools"
+      ],
+      "tags": [
+        "metrics",
+        "chart",
+        "observability",
+        "monitoring",
+        "timeseries",
+        "performance"
+      ]
+    },
+    {
+      "name": "microservice-boundaries",
+      "type": "registry:component",
+      "title": "Microservice Boundaries",
+      "description": "Microservice architecture — click any service to see its API contract and owned database",
+      "categories": [
+        "architecture"
+      ],
+      "tags": [
+        "microservices",
+        "architecture",
+        "domain",
+        "boundaries",
+        "api-contract"
+      ]
+    },
+    {
+      "name": "model-card",
+      "type": "registry:component",
+      "title": "Model Card",
+      "description": "AI model card with transformer block architecture diagram, context window ruler, and benchmark horizontal bar charts",
+      "categories": [
+        "ai"
+      ],
+      "tags": [
+        "ai",
+        "ml",
+        "model",
+        "llm",
+        "neural-network",
+        "benchmark",
+        "evaluation",
+        "transformer"
+      ]
+    },
+    {
+      "name": "mtls-handshake",
+      "type": "registry:component",
+      "title": "Mutual TLS Handshake",
+      "description": "Step through mutual TLS — both client and server present certificates, verify each other, then encrypt traffic",
+      "categories": [
+        "networking"
+      ],
+      "tags": [
+        "mtls",
+        "mutual-tls",
+        "tls",
+        "certificates",
+        "security",
+        "networking",
+        "interactive"
+      ]
+    },
+    {
+      "name": "multi-region",
+      "type": "registry:component",
+      "title": "Multi-Region",
+      "description": "Active-active vs active-passive — latency by user location, GeoDNS routing, failover animation",
+      "categories": [
+        "cloud"
+      ],
+      "tags": [
+        "multi-region",
+        "cloud",
+        "geo-dns",
+        "latency",
+        "failover",
+        "active-active"
+      ]
+    },
+    {
+      "name": "mutex-semaphore",
+      "type": "registry:component",
+      "title": "Mutex & Semaphore",
+      "description": "Concurrency primitives — mutex exclusive lock vs semaphore counting permits, deadlock demo",
+      "categories": [
+        "distributed"
+      ],
+      "tags": [
+        "mutex",
+        "semaphore",
+        "concurrency",
+        "lock",
+        "threads",
+        "deadlock"
+      ]
+    },
+    {
+      "name": "n-plus-one",
+      "type": "registry:component",
+      "title": "N+1 Problem",
+      "description": "Visually demonstrates the N+1 query problem vs the optimized JOIN/populate solution — the most common backend performance mistake",
+      "categories": [
+        "edu"
+      ],
+      "tags": [
+        "education",
+        "database",
+        "performance",
+        "n+1",
+        "query",
+        "orm",
+        "course"
+      ]
+    },
+    {
+      "name": "network-latency",
+      "type": "registry:component",
+      "title": "Network Latency",
+      "description": "Latency breakdown across hops — Client → CDN → LB → Server → DB, shows which hop is the bottleneck",
+      "categories": [
+        "networking"
+      ],
+      "tags": [
+        "latency",
+        "networking",
+        "performance",
+        "hops",
+        "bottleneck"
+      ]
+    },
+    {
+      "name": "oauth-flow",
+      "type": "registry:component",
+      "title": "OAuth Flow",
+      "description": "OAuth 2.0 step-by-step with fixed-height layout — participant icons (Monitor/Shield/Server/Database), animated arrows, plain-English step descriptions",
+      "categories": [
+        "auth"
+      ],
+      "tags": [
+        "oauth",
+        "oidc",
+        "auth",
+        "security",
+        "token",
+        "pkce"
+      ]
+    },
+    {
+      "name": "oauth-scopes",
+      "type": "registry:component",
+      "title": "OAuth Scopes",
+      "description": "OAuth scope consent — toggle permissions, see sensitivity levels, principle of least privilege",
+      "categories": [
+        "auth"
+      ],
+      "tags": [
+        "oauth",
+        "scopes",
+        "permissions",
+        "consent",
+        "security",
+        "auth"
+      ]
+    },
+    {
+      "name": "oauth2-pkce-flow",
+      "type": "registry:component",
+      "title": "OAuth 2.0 PKCE Flow",
+      "description": "Step through OAuth PKCE — the code_verifier stays in the app while the auth server only sees the hashed challenge",
+      "categories": [
+        "api"
+      ],
+      "tags": [
+        "oauth",
+        "oauth2",
+        "pkce",
+        "auth",
+        "security",
+        "mobile",
+        "spa",
+        "interactive"
+      ]
+    },
+    {
+      "name": "openapi-spec",
+      "type": "registry:component",
+      "title": "OpenAPI Spec",
+      "description": "OpenAPI/Swagger spec viewer — endpoints grouped by tag, click to expand request body and response schemas",
+      "categories": [
+        "api"
+      ],
+      "tags": [
+        "openapi",
+        "swagger",
+        "api",
+        "spec",
+        "documentation",
+        "rest"
+      ]
+    },
+    {
+      "name": "pagination-pattern",
+      "type": "registry:component",
+      "title": "Pagination Pattern",
+      "description": "Visual page flipper — animated item cards, Prev/Next navigation, live API call display, and offset/cursor/keyset comparison",
+      "categories": [
+        "api"
+      ],
+      "tags": [
+        "pagination",
+        "cursor",
+        "offset",
+        "keyset",
+        "api",
+        "rest",
+        "pages"
+      ]
+    },
+    {
+      "name": "password-hashing",
+      "type": "registry:component",
+      "title": "Password Hashing",
+      "description": "bcrypt / argon2 / SHA-256 — shows why password hashing is intentionally slow and how verification works",
+      "categories": [
+        "auth"
+      ],
+      "tags": [
+        "password",
+        "hashing",
+        "bcrypt",
+        "argon2",
+        "security",
+        "auth"
+      ]
+    },
+    {
+      "name": "password-strength",
+      "type": "registry:component",
+      "title": "Password Strength",
+      "description": "Interactive password strength meter with per-rule checklist and visual strength bars",
+      "categories": [
+        "auth"
+      ],
+      "tags": [
+        "password",
+        "auth",
+        "security",
+        "validation",
+        "interactive"
+      ]
+    },
+    {
+      "name": "polling-vs-webhooks",
+      "type": "registry:component",
+      "title": "Polling vs Webhooks",
+      "description": "Polling vs long-polling vs webhooks vs SSE — timeline, wasted requests, when to use each",
+      "categories": [
+        "api"
+      ],
+      "tags": [
+        "polling",
+        "webhooks",
+        "sse",
+        "realtime",
+        "api",
+        "events"
+      ]
+    },
+    {
+      "name": "priority-queue",
+      "type": "registry:component",
+      "title": "Priority Queue",
+      "description": "Higher-priority jobs dequeue first — enqueue tasks and watch the queue re-sort like ER triage",
+      "categories": [
+        "edu"
+      ],
+      "tags": [
+        "priority-queue",
+        "data-structure",
+        "heap",
+        "scheduling",
+        "algorithms",
+        "edu"
+      ]
+    },
+    {
+      "name": "promise-combinators",
+      "type": "registry:component",
+      "title": "Promise Combinators",
+      "description": "Promise.all/allSettled/race/any — parallel task timeline, first-to-settle logic, error handling differences",
+      "categories": [
+        "code"
+      ],
+      "tags": [
+        "promise",
+        "async",
+        "javascript",
+        "concurrency",
+        "parallel",
+        "code"
+      ]
+    },
+    {
+      "name": "prompt-injection-guard",
+      "type": "registry:component",
+      "title": "Prompt Injection Guard",
+      "description": "Scan user input for hidden override commands — side-by-side raw vs sanitized prompt with injection patterns blocked",
+      "categories": [
+        "ai"
+      ],
+      "tags": [
+        "ai",
+        "security",
+        "prompt-injection",
+        "llm",
+        "guardrails",
+        "sanitization"
+      ]
+    },
+    {
+      "name": "prompt-template",
+      "type": "registry:component",
+      "title": "Prompt Template",
+      "description": "Color-coded system/user/assistant blocks with amber {{variable}} highlighting, inline fill-variables mode, and token count badge",
+      "categories": [
+        "ai"
+      ],
+      "tags": [
+        "ai",
+        "llm",
+        "prompt",
+        "template",
+        "chatgpt",
+        "openai",
+        "anthropic",
+        "variables",
+        "few-shot"
+      ]
+    },
+    {
+      "name": "proxy-reverse-proxy",
+      "type": "registry:component",
+      "title": "Proxy vs Reverse Proxy",
+      "description": "Forward proxy (client-side: VPN/anonymity) vs reverse proxy (server-side: nginx/load-balance/SSL)",
+      "categories": [
+        "networking"
+      ],
+      "tags": [
+        "proxy",
+        "reverse-proxy",
+        "nginx",
+        "vpn",
+        "networking",
+        "load-balancing"
+      ]
+    },
+    {
+      "name": "query-optimizer",
+      "type": "registry:component",
+      "title": "Query Optimizer",
+      "description": "Sequential vs index scan — query planner cost comparison and EXPLAIN ANALYZE visualization",
+      "categories": [
+        "database"
+      ],
+      "tags": [
+        "database",
+        "query",
+        "optimizer",
+        "explain",
+        "index",
+        "performance"
+      ]
+    },
+    {
+      "name": "queue-visualizer",
+      "type": "registry:component",
+      "title": "Queue Visualizer",
+      "description": "Interactive FIFO message queue — Server produces task cards, Worker consumes them with sliding animations and a live capacity bar",
+      "categories": [
+        "distributed"
+      ],
+      "tags": [
+        "queue",
+        "distributed",
+        "messaging",
+        "async",
+        "worker"
+      ]
+    },
+    {
+      "name": "raft-consensus",
+      "type": "registry:component",
+      "title": "Raft Consensus",
+      "description": "Watch Raft log replication — the leader proposes a write, followers ack, and the entry commits after a majority agrees",
+      "categories": [
+        "distributed"
+      ],
+      "tags": [
+        "raft",
+        "consensus",
+        "distributed",
+        "leader",
+        "replication",
+        "log",
+        "interactive"
+      ]
+    },
+    {
+      "name": "rag-chunking",
+      "type": "registry:component",
+      "title": "RAG Document Chunking",
+      "description": "Split a document into RAG chunks — watch overlapping pieces appear before they are turned into search vectors",
+      "categories": [
+        "ai"
+      ],
+      "tags": [
+        "rag",
+        "chunking",
+        "embedding",
+        "vector",
+        "llm",
+        "retrieval",
+        "interactive"
+      ]
+    },
+    {
+      "name": "rate-limit-algorithms",
+      "type": "registry:component",
+      "title": "Rate Limit Algorithms",
+      "description": "Token Bucket vs Fixed Window vs Sliding Window — interactive comparison of how each algorithm counts requests",
+      "categories": [
+        "api"
+      ],
+      "tags": [
+        "rate-limit",
+        "algorithm",
+        "token-bucket",
+        "sliding-window",
+        "api"
+      ]
+    },
+    {
+      "name": "rate-limit-headers",
+      "type": "registry:component",
+      "title": "Rate Limit Headers",
+      "description": "Interactive X-RateLimit-* response headers — remaining quota gauge, 429 Retry-After, and request history dots",
+      "categories": [
+        "api"
+      ],
+      "tags": [
+        "rate-limit",
+        "headers",
+        "429",
+        "retry-after",
+        "api",
+        "interactive"
+      ]
+    },
+    {
+      "name": "rate-limiter",
+      "type": "registry:component",
+      "title": "Rate Limiter",
+      "description": "Interactive token bucket rate limiter — request history dots, shake animation on empty bucket, and +1 refill indicators",
+      "categories": [
+        "api"
+      ],
+      "tags": [
+        "rate-limit",
+        "throttle",
+        "token-bucket",
+        "api",
+        "interactive"
+      ]
+    },
+    {
+      "name": "reactive-streams",
+      "type": "registry:component",
+      "title": "Reactive Streams",
+      "description": "Observable marble diagrams — map/filter/debounce/merge operators with animated event flow",
+      "categories": [
+        "distributed"
+      ],
+      "tags": [
+        "reactive",
+        "rxjs",
+        "observable",
+        "streams",
+        "operators",
+        "functional"
+      ]
+    },
+    {
+      "name": "read-repair",
+      "type": "registry:component",
+      "title": "Read Repair",
+      "description": "Interactive quorum read with stale replica detection — version comparison, shake animation, and background repair sync",
+      "categories": [
+        "distributed"
+      ],
+      "tags": [
+        "read-repair",
+        "quorum",
+        "consistency",
+        "replication",
+        "distributed",
+        "eventual-consistency",
+        "interactive"
+      ]
+    },
+    {
+      "name": "real-world-event",
+      "type": "registry:component",
+      "title": "Real World Event",
+      "description": "A historical real-world tech event that illustrates the current concept — makes abstract ideas concrete",
+      "categories": [
+        "edu"
+      ],
+      "tags": [
+        "education",
+        "history",
+        "example",
+        "real-world",
+        "course"
+      ]
+    },
+    {
+      "name": "recursion",
+      "type": "registry:component",
+      "title": "Recursion",
+      "description": "Call stack frames building up and unwinding — factorial, fibonacci tree, countdown with base case",
+      "categories": [
+        "edu"
+      ],
+      "tags": [
+        "recursion",
+        "call-stack",
+        "algorithms",
+        "factorial",
+        "fibonacci",
+        "edu"
+      ]
+    },
+    {
+      "name": "red-black-tree",
+      "type": "registry:component",
+      "title": "Red-Black Tree",
+      "description": "Insert values into a red-black tree — watch nodes flip color and rotate to stay balanced after each step",
+      "categories": [
+        "edu"
+      ],
+      "tags": [
+        "red-black-tree",
+        "data-structure",
+        "algorithms",
+        "balancing",
+        "bst",
+        "edu",
+        "interactive"
+      ]
+    },
+    {
+      "name": "regex-tester",
+      "type": "registry:component",
+      "title": "Regex Tester",
+      "description": "Interactive regular expression tester with match highlighting and captured value display",
+      "categories": [
+        "code"
+      ],
+      "tags": [
+        "regex",
+        "regexp",
+        "pattern",
+        "code",
+        "interactive",
+        "validation"
+      ]
+    },
+    {
+      "name": "request-flow",
+      "type": "registry:component",
+      "title": "Request Flow",
+      "description": "HTTP request flowing through middleware layers — shows exactly what happens before the handler runs",
+      "categories": [
+        "edu"
+      ],
+      "tags": [
+        "education",
+        "middleware",
+        "http",
+        "backend",
+        "express",
+        "course"
+      ]
+    },
+    {
+      "name": "request-lifecycle",
+      "type": "registry:component",
+      "title": "Request Lifecycle",
+      "description": "Pipeline walkthrough of a browser HTTP request: DNS → TCP → TLS → HTTP → Server → Response — fixed-height detail panel, auto-play, step navigation",
+      "categories": [
+        "networking"
+      ],
+      "tags": [
+        "http",
+        "networking",
+        "dns",
+        "tcp",
+        "tls",
+        "request",
+        "lifecycle"
+      ]
+    },
+    {
+      "name": "retry-after-header",
+      "type": "registry:component",
+      "title": "Retry-After Header",
+      "description": "Interactive 429 flow — server sends Retry-After, client countdown waits, then retries successfully",
+      "categories": [
+        "api"
+      ],
+      "tags": [
+        "retry-after",
+        "429",
+        "rate-limit",
+        "headers",
+        "backoff",
+        "api",
+        "interactive"
+      ]
+    },
+    {
+      "name": "retry-policy",
+      "type": "registry:component",
+      "title": "Retry Policy",
+      "description": "Vertical timeline showing each retry attempt — spinning dot while running, red X on failure, proportional wait bars, green checkmark on success",
+      "categories": [
+        "distributed"
+      ],
+      "tags": [
+        "retry",
+        "backoff",
+        "resilience",
+        "distributed",
+        "fault-tolerance"
+      ]
+    },
+    {
+      "name": "saga-pattern",
+      "type": "registry:component",
+      "title": "Saga Pattern",
+      "description": "Distributed saga — choreography-based long transactions with compensating rollback on failure",
+      "categories": [
+        "distributed"
+      ],
+      "tags": [
+        "saga",
+        "distributed",
+        "transactions",
+        "choreography",
+        "compensating",
+        "microservices"
+      ]
+    },
+    {
+      "name": "sequence-diagram",
+      "type": "registry:component",
+      "title": "Sequence Diagram",
+      "description": "Animated step-by-step sequence diagram for flows, protocols, and interactions",
+      "categories": [
+        "architecture"
+      ],
+      "tags": [
+        "sequence",
+        "flow",
+        "diagram",
+        "protocol",
+        "interaction"
+      ]
+    },
+    {
+      "name": "server-status",
+      "type": "registry:component",
+      "title": "Server Status",
+      "description": "Service status page showing uptime, latency, and health of multiple services",
+      "categories": [
+        "cloud"
+      ],
+      "tags": [
+        "status",
+        "uptime",
+        "monitoring",
+        "cloud",
+        "health"
+      ]
+    },
+    {
+      "name": "serverless",
+      "type": "registry:component",
+      "title": "Serverless",
+      "description": "Cold start vs warm start — Lambda phases animation, auto-scaling to zero, billing vs EC2 comparison",
+      "categories": [
+        "cloud"
+      ],
+      "tags": [
+        "serverless",
+        "lambda",
+        "cloud-run",
+        "vercel",
+        "cloud",
+        "cold-start"
+      ]
+    },
+    {
+      "name": "service-discovery",
+      "type": "registry:component",
+      "title": "Service Discovery",
+      "description": "Service registry pattern — services register instances, others discover healthy endpoints",
+      "categories": [
+        "distributed"
+      ],
+      "tags": [
+        "service-discovery",
+        "consul",
+        "kubernetes",
+        "distributed",
+        "registry"
+      ]
+    },
+    {
+      "name": "service-mesh",
+      "type": "registry:component",
+      "title": "Service Mesh",
+      "description": "Service mesh with Server/CPU icons, SVG bezier connection lines, sidecar Shield badges, mTLS lock indicators, and color-coded latency request log",
+      "categories": [
+        "distributed"
+      ],
+      "tags": [
+        "service-mesh",
+        "istio",
+        "envoy",
+        "linkerd",
+        "microservices",
+        "sidecar",
+        "proxy",
+        "mtls",
+        "distributed"
+      ]
+    },
+    {
+      "name": "service-worker",
+      "type": "registry:component",
+      "title": "Service Worker",
+      "description": "SW caching strategies — cache-first/network-first/stale-while-revalidate with request flow animation",
+      "categories": [
+        "networking"
+      ],
+      "tags": [
+        "service-worker",
+        "pwa",
+        "cache",
+        "offline",
+        "networking",
+        "browser"
+      ]
+    },
+    {
+      "name": "session-vs-jwt",
+      "type": "registry:component",
+      "title": "Session vs JWT",
+      "description": "Side-by-side auth comparison — cookie + server store vs stateless signed token on every request",
+      "categories": [
+        "auth"
+      ],
+      "tags": [
+        "session",
+        "jwt",
+        "auth",
+        "cookie",
+        "token",
+        "stateless",
+        "comparison"
+      ]
+    },
+    {
+      "name": "skeleton-loading",
+      "type": "registry:component",
+      "title": "Skeleton Loading",
+      "description": "Skeleton loading states — animated shimmer placeholders for cards, lists, profiles, and tables",
+      "categories": [
+        "ui"
+      ],
+      "tags": [
+        "skeleton",
+        "loading",
+        "ux",
+        "ui",
+        "shimmer",
+        "placeholder"
+      ]
+    },
+    {
+      "name": "slo-sli-sla",
+      "type": "registry:component",
+      "title": "SLO / SLI / SLA",
+      "description": "Error budget, uptime nines table, SLO vs SLI vs SLA definitions, incident simulation",
+      "categories": [
+        "devtools"
+      ],
+      "tags": [
+        "slo",
+        "sli",
+        "sla",
+        "error-budget",
+        "uptime",
+        "reliability",
+        "devops"
+      ]
+    },
+    {
+      "name": "solid-principles",
+      "type": "registry:component",
+      "title": "SOLID Principles",
+      "description": "S/O/L/I/D — each principle with bad vs good code side-by-side, animated transformation",
+      "categories": [
+        "edu"
+      ],
+      "tags": [
+        "solid",
+        "oop",
+        "design-principles",
+        "architecture",
+        "edu",
+        "clean-code"
+      ]
+    },
+    {
+      "name": "sql-joins",
+      "type": "registry:component",
+      "title": "SQL Joins",
+      "description": "INNER / LEFT / RIGHT / FULL OUTER joins — click a join type to see which rows are included with visual highlighting",
+      "categories": [
+        "database"
+      ],
+      "tags": [
+        "sql",
+        "joins",
+        "database",
+        "inner",
+        "left",
+        "right",
+        "full-outer"
+      ]
+    },
+    {
+      "name": "sql-query",
+      "type": "registry:component",
+      "title": "SQL Query",
+      "description": "SQL query with syntax highlighting, interactive execution, and results table",
+      "categories": [
+        "database"
+      ],
+      "tags": [
+        "sql",
+        "database",
+        "query",
+        "postgres",
+        "mysql"
+      ]
+    },
+    {
+      "name": "ssh-tunnel",
+      "type": "registry:component",
+      "title": "SSH Tunnel",
+      "description": "SSH port forwarding — local/remote/SOCKS5 tunnel types with encrypted packet animation",
+      "categories": [
+        "networking"
+      ],
+      "tags": [
+        "ssh",
+        "tunnel",
+        "port-forwarding",
+        "bastion",
+        "socks",
+        "networking"
+      ]
+    },
+    {
+      "name": "stack-trace",
+      "type": "registry:component",
+      "title": "Stack Trace",
+      "description": "Error stack trace with expandable source context, app vs framework frame differentiation",
+      "categories": [
+        "devtools"
+      ],
+      "tags": [
+        "stack-trace",
+        "error",
+        "debugging",
+        "exception",
+        "devtools"
+      ]
+    },
+    {
+      "name": "stack-vs-queue",
+      "type": "registry:component",
+      "title": "Stack vs Queue",
+      "description": "LIFO stack vs FIFO queue — side-by-side visual showing different removal order",
+      "categories": [
+        "edu"
+      ],
+      "tags": [
+        "stack",
+        "queue",
+        "data-structure",
+        "lifo",
+        "fifo",
+        "edu",
+        "algorithm"
+      ]
+    },
+    {
+      "name": "status-code",
+      "type": "registry:component",
+      "title": "Status Code",
+      "description": "Color-coded HTTP status code badge with description",
+      "categories": [
+        "api"
+      ],
+      "tags": [
+        "http",
+        "status",
+        "badge"
+      ]
+    },
+    {
+      "name": "tcp-handshake",
+      "type": "registry:component",
+      "title": "TCP Handshake",
+      "description": "TCP 3-way handshake — SYN → SYN-ACK → ACK animated step-by-step with plain English explanations",
+      "categories": [
+        "networking"
+      ],
+      "tags": [
+        "tcp",
+        "networking",
+        "handshake",
+        "connection",
+        "protocol"
+      ]
+    },
+    {
+      "name": "tcp-vs-udp",
+      "type": "registry:component",
+      "title": "TCP vs UDP",
+      "description": "Compare reliable ordered TCP (handshake + ACKs) vs fast best-effort UDP datagrams — send packets and watch delivery",
+      "categories": [
+        "networking"
+      ],
+      "tags": [
+        "tcp",
+        "udp",
+        "networking",
+        "protocol",
+        "datagram",
+        "reliability",
+        "interactive"
+      ]
+    },
+    {
+      "name": "tech-decision",
+      "type": "registry:component",
+      "title": "Tech Decision",
+      "description": "Architecture Decision Record (ADR) card — shows what was chosen, why, and what trade-offs were accepted",
+      "categories": [
+        "edu"
+      ],
+      "tags": [
+        "education",
+        "adr",
+        "architecture",
+        "decision",
+        "tradeoffs",
+        "course"
+      ]
+    },
+    {
+      "name": "terminal",
+      "type": "registry:component",
+      "title": "Terminal",
+      "description": "Terminal panel with command/output lines, copy support, and optional interactive input",
+      "categories": [
+        "devtools"
+      ],
+      "tags": [
+        "terminal",
+        "cli",
+        "shell",
+        "command"
+      ]
+    },
+    {
+      "name": "timeline",
+      "type": "registry:component",
+      "title": "Timeline",
+      "description": "Chronological event timeline with typed entries, badges, and optional descriptions",
+      "categories": [
+        "ui"
+      ],
+      "tags": [
+        "timeline",
+        "events",
+        "changelog",
+        "history",
+        "ui"
+      ]
+    },
+    {
+      "name": "tls-handshake",
+      "type": "registry:component",
+      "title": "TLS Handshake",
+      "description": "4-step animated TLS handshake — Say Hello, Share Keys, Verify Certificate, Encrypted! — beginner-friendly with optional technical details",
+      "categories": [
+        "networking"
+      ],
+      "tags": [
+        "tls",
+        "ssl",
+        "https",
+        "security",
+        "networking",
+        "cryptography"
+      ]
+    },
+    {
+      "name": "token-counter",
+      "type": "registry:component",
+      "title": "Token Counter",
+      "description": "Color-coded token visualization (6-color cycling), segmented context window bar with danger zones at 80%/95%, and per-model cost comparison table",
+      "categories": [
+        "ai"
+      ],
+      "tags": [
+        "ai",
+        "llm",
+        "tokens",
+        "tokenizer",
+        "context-window",
+        "cost",
+        "bpe",
+        "tiktoken"
+      ]
+    },
+    {
+      "name": "tool-calling-flow",
+      "type": "registry:component",
+      "title": "Tool Calling Flow",
+      "description": "Animated LLM function calling — model picks a tool, executes it, injects the result, and composes a grounded answer",
+      "categories": [
+        "ai"
+      ],
+      "tags": [
+        "tool-calling",
+        "function-calling",
+        "llm",
+        "agents",
+        "ai",
+        "interactive"
+      ]
+    },
+    {
+      "name": "tree-shaking",
+      "type": "registry:component",
+      "title": "Tree Shaking",
+      "description": "Dead code elimination — named vs default imports, used vs unused exports, bundle size savings",
+      "categories": [
+        "code"
+      ],
+      "tags": [
+        "tree-shaking",
+        "bundler",
+        "webpack",
+        "rollup",
+        "bundle",
+        "optimization"
+      ]
+    },
+    {
+      "name": "trie-prefix-tree",
+      "type": "registry:component",
+      "title": "Trie (Prefix Tree)",
+      "description": "Interactive prefix tree — insert words, search by prefix, autocomplete-style match highlighting",
+      "categories": [
+        "edu"
+      ],
+      "tags": [
+        "trie",
+        "prefix-tree",
+        "autocomplete",
+        "strings",
+        "data-structures",
+        "edu"
+      ]
+    },
+    {
+      "name": "two-factor-auth",
+      "type": "registry:component",
+      "title": "Two-Factor Auth",
+      "description": "TOTP / SMS / Email 2FA — shows the time-based code algorithm and verification flow",
+      "categories": [
+        "auth"
+      ],
+      "tags": [
+        "2fa",
+        "totp",
+        "mfa",
+        "auth",
+        "security",
+        "otp"
+      ]
+    },
+    {
+      "name": "two-phase-commit",
+      "type": "registry:component",
+      "title": "Two-Phase Commit",
+      "description": "Interactive 2PC coordinator flow — prepare, vote, commit or abort with participant state tracking and protocol log",
+      "categories": [
+        "distributed"
+      ],
+      "tags": [
+        "2pc",
+        "distributed",
+        "transactions",
+        "consensus",
+        "commit",
+        "abort",
+        "interactive"
+      ]
+    },
+    {
+      "name": "union-find-disjoint-set",
+      "type": "registry:component",
+      "title": "Union-Find (Disjoint Set)",
+      "description": "Interactive disjoint-set union and find — click nodes to merge groups or detect shared roots with path compression",
+      "categories": [
+        "edu"
+      ],
+      "tags": [
+        "union-find",
+        "disjoint-set",
+        "data-structure",
+        "graph",
+        "algorithms",
+        "edu",
+        "interactive"
+      ]
+    },
+    {
+      "name": "utils",
+      "type": "registry:lib",
+      "title": "Utils",
+      "description": "cn() helper for Tailwind class merging",
+      "categories": [
+        "lib"
+      ]
+    },
+    {
+      "name": "vector-clock",
+      "type": "registry:component",
+      "title": "Vector Clock",
+      "description": "Simplified vector clocks — one-click event simulation with color-coded causality (before, after, concurrent)",
+      "categories": [
+        "distributed"
+      ],
+      "tags": [
+        "vector-clock",
+        "causality",
+        "distributed",
+        "ordering",
+        "lamport",
+        "interactive"
+      ]
+    },
+    {
+      "name": "virtual-dom",
+      "type": "registry:component",
+      "title": "Virtual DOM",
+      "description": "React VDOM diffing — before/after tree comparison, minimal patch operations highlighted",
+      "categories": [
+        "ui"
+      ],
+      "tags": [
+        "react",
+        "virtual-dom",
+        "vdom",
+        "diffing",
+        "rendering",
+        "ui"
+      ]
+    },
+    {
+      "name": "wal-write-ahead-log",
+      "type": "registry:component",
+      "title": "Write-Ahead Log (WAL)",
+      "description": "WAL durability demo — append to log before DB write, crash recovery by replaying committed entries",
+      "categories": [
+        "database"
+      ],
+      "tags": [
+        "wal",
+        "write-ahead-log",
+        "database",
+        "durability",
+        "recovery",
+        "postgres",
+        "acid"
+      ]
+    },
+    {
+      "name": "webhook-event",
+      "type": "registry:component",
+      "title": "Webhook Event",
+      "description": "Webhook delivery flow — animated sender→receiver, signature verification badge, and syntax-highlighted payload",
+      "categories": [
+        "api"
+      ],
+      "tags": [
+        "webhook",
+        "api",
+        "event",
+        "signature",
+        "http",
+        "delivery"
+      ]
+    },
+    {
+      "name": "webhook-replay",
+      "type": "registry:component",
+      "title": "Webhook Replay",
+      "description": "Interactive webhook replay queue — failed events stored for manual retry with delivery animation and status tracking",
+      "categories": [
+        "api"
+      ],
+      "tags": [
+        "webhook",
+        "replay",
+        "retry",
+        "dead-letter",
+        "api",
+        "interactive"
+      ]
+    },
+    {
+      "name": "webhook-security",
+      "type": "registry:component",
+      "title": "Webhook Security",
+      "description": "Webhook signature verification — HMAC-SHA256 computation and signature comparison to authenticate incoming webhooks",
+      "categories": [
+        "api"
+      ],
+      "tags": [
+        "webhook",
+        "security",
+        "hmac",
+        "signature",
+        "stripe",
+        "verification"
+      ]
+    },
+    {
+      "name": "websocket-connection",
+      "type": "registry:component",
+      "title": "WebSocket Connection",
+      "description": "Chat-style WebSocket demo — click Connect for handshake animation, then exchange real-time messages with auto server replies",
+      "categories": [
+        "api"
+      ],
+      "tags": [
+        "websocket",
+        "realtime",
+        "ws",
+        "wss",
+        "connection",
+        "bidirectional"
+      ]
+    },
+    {
+      "name": "websocket-lifecycle",
+      "type": "registry:component",
+      "title": "WebSocket Lifecycle",
+      "description": "HTTP Upgrade → open → bidirectional messages → close — the full WebSocket protocol lifecycle",
+      "categories": [
+        "api"
+      ],
+      "tags": [
+        "websocket",
+        "http-upgrade",
+        "realtime",
+        "lifecycle",
+        "protocol",
+        "api"
+      ]
+    },
+    {
+      "name": "websocket-vs-sse",
+      "type": "registry:component",
+      "title": "WebSocket vs SSE",
+      "description": "Bidirectional WebSocket vs server-sent events — compare direction, overhead, reconnect, and live message flow",
+      "categories": [
+        "networking"
+      ],
+      "tags": [
+        "websocket",
+        "sse",
+        "realtime",
+        "streaming",
+        "http",
+        "networking"
+      ]
+    }
+  ]
+}

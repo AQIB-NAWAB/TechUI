@@ -7,7 +7,7 @@ import { Gauge, RefreshCw } from "lucide-react";
 
 export const RateLimitHeadersSchema = z.object({
   name: z.string().optional().default("API Rate Limit Headers"),
-  limit: z.number().int().min(1).max(20).optional().default(10),
+  limit: z.number().int().min(1).max(20).optional().default(6),
   windowSeconds: z.number().optional().default(60),
   headerStyle: z.enum(["standard", "draft-6"]).optional().default("standard"),
   interactive: z.boolean().optional().default(true),
@@ -26,7 +26,7 @@ function formatReset(seconds: number): string {
 
 export function RateLimitHeaders({
   name = "API Rate Limit Headers",
-  limit = 10,
+  limit = 6,
   windowSeconds = 60,
   headerStyle = "standard",
   interactive = true,
@@ -112,21 +112,25 @@ export function RateLimitHeaders({
         }
       `}</style>
       <div className={cn(
-        "rounded-xl border bg-white dark:bg-zinc-950 overflow-hidden transition-all duration-500",
+        "rounded-xl border bg-white dark:bg-zinc-900 overflow-hidden transition-all duration-500",
         flash === "limited" ? "border-red-300 dark:border-red-800" : "border-zinc-200 dark:border-zinc-800"
       )}>
-        <div className="flex items-center gap-3 px-4 h-12 border-b border-zinc-100 dark:border-zinc-900 bg-zinc-50 dark:bg-zinc-900/50">
+        <div className="flex items-center gap-3 px-4 h-12 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50">
           <Gauge className="size-4 text-zinc-400 shrink-0" />
           <span className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 flex-1">{name}</span>
           <span className="text-[10px] font-mono text-zinc-400 bg-zinc-100 dark:bg-zinc-800 px-2 py-0.5 rounded">{headerStyle}</span>
           {interactive && (
-            <button onClick={reset} className="p-1 rounded text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-all duration-500">
+            <button type="button" onClick={reset} className="p-1 rounded text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-all duration-500">
               <RefreshCw className="size-3.5" />
             </button>
           )}
         </div>
 
-        <div className="p-4 min-h-[240px] flex gap-5 items-start">
+        <div className="text-sm text-zinc-500 dark:text-zinc-400 px-4 py-2 border-b border-zinc-100 dark:border-zinc-800">
+          Every response includes quota headers — when you hit the limit, the server returns 429 with Retry-After.
+        </div>
+
+        <div className="p-4 min-h-[220px] flex gap-5 items-start">
           {/* Remaining gauge */}
           <div className="flex flex-col items-center gap-2 shrink-0">
             <span className="text-[10px] font-semibold text-zinc-400 uppercase tracking-wide">Remaining</span>
@@ -222,13 +226,16 @@ export function RateLimitHeaders({
         </div>
 
         {interactive && (
-          <div className="border-t border-zinc-100 dark:border-zinc-900 px-4 py-3 flex items-center gap-3 bg-zinc-50 dark:bg-zinc-900/30">
+          <div className="border-t border-zinc-100 dark:border-zinc-800 px-4 py-3 flex items-center gap-3 bg-zinc-50 dark:bg-zinc-900/30 min-h-[52px]">
             <span className="text-sm text-zinc-500 dark:text-zinc-400 flex-1">
               {flash === "limited"
                 ? "Rate limited — check Retry-After header before retrying."
+                : headerStyle === "draft-6"
+                ? "Each request decrements RateLimit-Remaining. Quota resets when the window expires."
                 : "Each request decrements X-RateLimit-Remaining. Quota resets when the window expires."}
             </span>
             <button
+              type="button"
               onClick={makeRequest}
               className={cn(
                 "px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-500 shrink-0 hover:opacity-90",

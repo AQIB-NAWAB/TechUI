@@ -178,82 +178,60 @@ export function CacheVisualizer({
   const hitRate = total > 0 ? Math.round((stats.hits / total) * 100) : null;
   const displayed = [...entries].sort((a, b) => b.order - a.order);
 
+  const statusText = lastAccess
+    ? lastAccess.hit
+      ? `Cache HIT on ${lastAccess.key} — served instantly from memory`
+      : `Cache MISS on ${lastAccess.key} — fetched from DB and stored`
+    : "Pick a key and GET to see a hit (green flash) or miss (red flash)";
+
   return (
-    <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 overflow-hidden">
-      {/* Header */}
-      <div className="flex items-center gap-3 px-4 py-2.5 border-b border-zinc-100 dark:border-zinc-900 bg-zinc-50 dark:bg-zinc-900/50">
-        <Zap className="size-3.5 text-amber-500 shrink-0" />
-        <span className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 flex-1">{name}</span>
+    <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden">
+      <div className="flex items-center gap-3 px-4 h-12 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50">
+        <Zap className="size-4 text-amber-500 shrink-0" />
+        <span className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 flex-1">{name}</span>
         <span className="text-[10px] font-medium text-zinc-400 bg-zinc-100 dark:bg-zinc-800 px-2 py-0.5 rounded-full uppercase tracking-wide">
           {policy}
         </span>
-        <span className="text-[10px] text-zinc-400">{entries.length}/{capacity} keys</span>
+        <span className="text-[10px] text-zinc-400">{entries.length}/{capacity}</span>
         {interactive && (
-          <button onClick={reset} className="p-1 rounded text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors">
+          <button type="button" onClick={reset} className="p-1 rounded text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-all duration-500">
             <RefreshCw className="size-3.5" />
           </button>
         )}
       </div>
 
-      {/* Stats bar — always reserved height */}
-      <div className={cn(
-        "flex items-center gap-4 px-4 py-2 border-b border-zinc-50 dark:border-zinc-900 bg-zinc-50/50 dark:bg-zinc-900/20 min-h-[36px] transition-all duration-500",
-        total === 0 && "opacity-0"
-      )}>
-          <div className="flex items-center gap-1.5">
-            <span className="size-1.5 rounded-full bg-emerald-500" />
-            <span className="text-[10px] font-medium text-zinc-500 dark:text-zinc-400">{stats.hits} hits</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <span className="size-1.5 rounded-full bg-amber-500" />
-            <span className="text-[10px] font-medium text-zinc-500 dark:text-zinc-400">{stats.misses} misses</span>
-          </div>
-          {hitRate !== null && (
-            <div className="ml-auto flex items-center gap-1.5">
-              <div className="w-20 h-1.5 rounded-full bg-zinc-200 dark:bg-zinc-800 overflow-hidden">
-                <div
-                  className="h-full bg-emerald-500 rounded-full transition-all duration-500"
-                  style={{ width: `${hitRate}%` }}
-                />
-              </div>
-              <span className="text-[10px] font-semibold text-zinc-500 dark:text-zinc-400">{hitRate}% hit</span>
-            </div>
-          )}
+      <div className="text-sm text-zinc-500 dark:text-zinc-400 px-4 py-2 border-b border-zinc-100 dark:border-zinc-800">
+        A fast in-memory store. Hits return instantly; misses fetch from the database and fill the cache.
       </div>
 
-      {/* Last access banner — always reserved height */}
       <div className={cn(
-        "flex items-center gap-2 px-4 py-2 border-b text-[11px] font-medium min-h-[36px] transition-all duration-500",
-        lastAccess?.hit
-          ? "bg-emerald-50 dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-900/50 text-emerald-700 dark:text-emerald-400"
-          : lastAccess && !lastAccess.hit
-          ? "bg-red-50 dark:bg-red-950/20 border-red-200 dark:border-red-900/50 text-red-700 dark:text-red-400"
-          : "bg-transparent border-transparent text-transparent"
+        "flex items-center gap-4 px-4 py-2 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/20 min-h-[36px] transition-all duration-500",
+        total === 0 && "opacity-40"
       )}>
-        {lastAccess ? (
-          <>
-            <span className={cn(
-              "font-bold text-[10px] px-1.5 py-0.5 rounded",
-              lastAccess.hit
-                ? "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300"
-                : "bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300"
-            )}>
-              {lastAccess.hit ? "✓ HIT" : "✗ MISS"}
-            </span>
-            <code className="font-mono text-[11px]">{lastAccess.key}</code>
-            {!lastAccess.hit && (
-              <span className="text-[10px] font-normal opacity-70">— fetching from DB and caching</span>
-            )}
-          </>
-        ) : (
-          <span>—</span>
+        <div className="flex items-center gap-1.5">
+          <span className="size-1.5 rounded-full bg-emerald-500" />
+          <span className="text-[10px] font-medium text-zinc-500 dark:text-zinc-400">{stats.hits} hits</span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <span className="size-1.5 rounded-full bg-amber-500" />
+          <span className="text-[10px] font-medium text-zinc-500 dark:text-zinc-400">{stats.misses} misses</span>
+        </div>
+        {hitRate !== null && (
+          <div className="ml-auto flex items-center gap-1.5">
+            <div className="w-20 h-1.5 rounded-full bg-zinc-200 dark:bg-zinc-800 overflow-hidden">
+              <div
+                className="h-full bg-emerald-500 rounded-full transition-all duration-500"
+                style={{ width: `${hitRate}%` }}
+              />
+            </div>
+            <span className="text-[10px] font-semibold text-zinc-500 dark:text-zinc-400">{hitRate}% hit</span>
+          </div>
         )}
       </div>
 
-      {/* Entries list */}
-      <div className="min-h-[160px] divide-y divide-zinc-50 dark:divide-zinc-900/60">
+      <div className="min-h-[200px] divide-y divide-zinc-50 dark:divide-zinc-900/60">
         {displayed.length === 0 && (
-          <div className="flex items-center justify-center h-40 text-xs text-zinc-400 border-2 border-dashed border-zinc-200 dark:border-zinc-800 m-4 rounded-lg">
+          <div className="flex items-center justify-center h-[200px] text-xs text-zinc-400 border-2 border-dashed border-zinc-200 dark:border-zinc-800 m-4 rounded-lg">
             Cache is empty
           </div>
         )}
@@ -311,8 +289,9 @@ export function CacheVisualizer({
                 </span>
                 {interactive && (
                   <button
+                    type="button"
                     onClick={() => remove(entry.key)}
-                    className="p-1 rounded text-zinc-300 hover:text-red-500 dark:text-zinc-700 dark:hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100"
+                    className="p-1 rounded text-zinc-300 hover:text-red-500 dark:text-zinc-700 dark:hover:text-red-400 transition-all duration-500 opacity-0 group-hover:opacity-100"
                   >
                     <X className="size-3" />
                   </button>
@@ -323,30 +302,32 @@ export function CacheVisualizer({
         })}
       </div>
 
-      {/* Interactive lookup */}
       {interactive && (
         <div className={cn(
-          "border-t border-zinc-100 dark:border-zinc-900 px-4 py-3 flex items-center gap-2 transition-all duration-500",
+          "border-t border-zinc-100 dark:border-zinc-800 px-4 py-3 flex items-center gap-3 bg-zinc-50 dark:bg-zinc-900/30 transition-all duration-500",
           searchFlash === "hit" && "bg-emerald-50 dark:bg-emerald-950/20",
           searchFlash === "miss" && "bg-red-50 dark:bg-red-950/20",
-          !searchFlash && "bg-zinc-50 dark:bg-zinc-900/30"
         )}>
-          <Search className="size-3.5 text-zinc-400 shrink-0" />
-          <select
-            value={lookupKey}
-            onChange={(e) => setLookupKey(e.target.value)}
-            className="flex-1 bg-transparent text-xs font-mono text-zinc-700 dark:text-zinc-300 outline-none cursor-pointer"
-          >
-            {LOOKUP_KEYS.map((k) => (
-              <option key={k} value={k}>{k}</option>
-            ))}
-          </select>
-          <button
-            onClick={() => access(lookupKey)}
-            className="px-3 py-1 rounded-md bg-amber-500 hover:bg-amber-600 text-white text-xs font-semibold transition-colors shrink-0"
-          >
-            GET
-          </button>
+          <span className="text-sm text-zinc-500 dark:text-zinc-400 flex-1 min-w-0 truncate">{statusText}</span>
+          <div className="flex items-center gap-2 shrink-0">
+            <Search className="size-3.5 text-zinc-400 shrink-0" />
+            <select
+              value={lookupKey}
+              onChange={(e) => setLookupKey(e.target.value)}
+              className="bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-md px-2 py-1.5 text-xs font-mono text-zinc-700 dark:text-zinc-300 outline-none cursor-pointer max-w-[120px]"
+            >
+              {LOOKUP_KEYS.map((k) => (
+                <option key={k} value={k}>{k}</option>
+              ))}
+            </select>
+            <button
+              type="button"
+              onClick={() => access(lookupKey)}
+              className="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-opacity shrink-0"
+            >
+              GET
+            </button>
+          </div>
         </div>
       )}
     </div>

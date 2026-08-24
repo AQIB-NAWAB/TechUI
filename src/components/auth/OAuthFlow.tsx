@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { z } from "zod";
 import { cn } from "@/lib/utils";
 import { Monitor, Shield, Server, Database, ChevronRight, Check } from "lucide-react";
@@ -156,35 +156,23 @@ export function OAuthFlow({
   const actors = ACTORS[grant] ?? ACTORS.authorization_code;
 
   const [activeStep, setActiveStep] = useState(0);
-  const [autoPlay, setAutoPlay] = useState(false);
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const step = steps[activeStep]!;
   const fromIdx = actors.indexOf(step.from);
   const toIdx = actors.indexOf(step.to);
 
   useEffect(() => {
-    if (!autoPlay) return;
-    timerRef.current = setTimeout(() => {
-      setActiveStep((s) => (s < steps.length - 1 ? s + 1 : 0));
-    }, 1500);
-    return () => {
-      if (timerRef.current) clearTimeout(timerRef.current);
-    };
-  }, [activeStep, autoPlay, steps.length]);
-
-  useEffect(() => {
     setActiveStep(0);
-    setAutoPlay(false);
   }, [grant]);
 
   return (
     <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden text-sm">
 
       <div className="flex items-center justify-between h-12 px-4 border-b border-zinc-100 dark:border-zinc-800">
-        <div>
+        <div className="flex items-center gap-2">
+          <Shield className="size-4 text-zinc-400 shrink-0" />
           <span className="font-semibold text-zinc-800 dark:text-zinc-200">OAuth 2.0</span>
-          <span className="ml-2 text-[11px] text-zinc-400 font-mono">
+          <span className="text-[11px] text-zinc-400 font-mono">
             {grant === "authorization_code" ? "Authorization Code" + (pkce ? " + PKCE" : "") :
              grant === "client_credentials" ? "Client Credentials" : "Implicit"}
           </span>
@@ -196,6 +184,10 @@ export function OAuthFlow({
             </span>
           ))}
         </div>
+      </div>
+
+      <div className="text-sm text-zinc-500 dark:text-zinc-400 px-4 py-2 border-b border-zinc-100 dark:border-zinc-800">
+        Third-party login flow — browser, auth server, your app, and the resource API exchange tokens.
       </div>
 
       <div className="grid border-b border-zinc-100 dark:border-zinc-800" style={{ gridTemplateColumns: `repeat(${actors.length}, 1fr)` }}>
@@ -263,53 +255,33 @@ export function OAuthFlow({
         <div className="px-4 py-3 mt-auto flex items-center gap-3 border-t border-zinc-100 dark:border-zinc-800">
           <div className="flex gap-2 flex-1 items-center">
             {steps.map((_, i) => (
-              <button
+              <div
                 key={i}
-                onClick={() => { setAutoPlay(false); setActiveStep(i); }}
                 className={cn(
                   "size-2 rounded-full transition-all duration-500",
                   i === activeStep
                     ? "bg-blue-500 scale-125"
                     : i < activeStep
-                      ? "bg-blue-300 dark:bg-blue-700 hover:bg-blue-400"
-                      : "bg-zinc-200 dark:bg-zinc-700 hover:bg-zinc-300 dark:hover:bg-zinc-600"
+                      ? "bg-blue-300 dark:bg-blue-700"
+                      : "bg-zinc-200 dark:bg-zinc-700"
                 )}
-                aria-label={`Step ${i + 1}`}
               />
             ))}
           </div>
-          <button
-            onClick={() => setAutoPlay((v) => !v)}
-            className={cn(
-              "text-[11px] px-2.5 py-1 rounded font-medium transition-all duration-500",
-              autoPlay
-                ? "bg-blue-100 dark:bg-blue-950/40 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-800"
-                : "border border-zinc-200 dark:border-zinc-700 text-zinc-500 hover:border-zinc-300 dark:hover:border-zinc-600"
-            )}
-          >
-            {autoPlay ? "Pause" : "Auto-play"}
-          </button>
-          <span className="text-[11px] text-zinc-400 tabular-nums">Step {activeStep + 1} of {steps.length}</span>
-          <button
-            onClick={() => { setAutoPlay(false); setActiveStep((s) => Math.max(0, s - 1)); }}
-            disabled={activeStep === 0}
-            className="text-[11px] px-2.5 py-1 rounded border border-zinc-200 dark:border-zinc-800 text-zinc-500 disabled:opacity-30 hover:border-zinc-300 dark:hover:border-zinc-700 transition-all duration-500"
-          >
-            Back
-          </button>
+          <span className="text-sm text-zinc-500 dark:text-zinc-400 shrink-0">{step.label}</span>
           {activeStep < steps.length - 1 ? (
             <button
-              onClick={() => { setAutoPlay(false); setActiveStep((s) => Math.min(steps.length - 1, s + 1)); }}
-              className="text-[11px] px-2.5 py-1 rounded bg-zinc-900 dark:bg-white hover:opacity-90 text-white dark:text-zinc-900 font-semibold transition-all duration-500 flex items-center gap-1"
+              onClick={() => setActiveStep((s) => Math.min(steps.length - 1, s + 1))}
+              className="bg-zinc-900 dark:bg-white hover:opacity-90 text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold transition-all duration-500 flex items-center gap-1 shrink-0"
             >
-              Next <ChevronRight className="size-3" />
+              Next <ChevronRight className="size-3.5" />
             </button>
           ) : (
             <button
-              onClick={() => { setAutoPlay(false); setActiveStep(0); }}
-              className="text-[11px] px-2.5 py-1 rounded bg-zinc-900 dark:bg-white hover:opacity-90 text-white dark:text-zinc-900 font-semibold transition-all duration-500 flex items-center gap-1"
+              onClick={() => setActiveStep(0)}
+              className="bg-zinc-900 dark:bg-white hover:opacity-90 text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold transition-all duration-500 flex items-center gap-1 shrink-0"
             >
-              <Check className="size-3" /> Restart
+              <Check className="size-3.5" /> Restart
             </button>
           )}
         </div>

@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { z } from "zod";
 import { cn } from "@/lib/utils";
-import { Brain, Database, Server } from "lucide-react";
+import { Brain, Database, Server, RefreshCw } from "lucide-react";
 
 export const AiRagSchema = z.object({
   query: z.string().default("What is our return policy?"),
@@ -19,6 +19,7 @@ export const AiRagSchema = z.object({
     { id: "doc3", title: "Customer Support", snippet: "Contact us at support@freshmarket.com...", similarity: 0.58 },
   ]),
   answer: z.string().default("Based on our policy, you can return items within 30 days of purchase with a valid receipt. Refunds are processed within 3-5 business days."),
+  interactive: z.boolean().optional().default(true),
 });
 
 export type AiRagProps = z.infer<typeof AiRagSchema>;
@@ -42,6 +43,7 @@ export function AiRag({
     { id: "doc3", title: "Customer Support", snippet: "Contact us at support@freshmarket.com...", similarity: 0.58 },
   ],
   answer = "Based on our policy, you can return items within 30 days of purchase with a valid receipt. Refunds are processed within 3-5 business days.",
+  interactive = true,
 }: AiRagProps) {
   const [activeStep, setActiveStep] = useState(0);
   const [running, setRunning] = useState(false);
@@ -75,14 +77,21 @@ export function AiRag({
             if (typeTimerRef.current) clearInterval(typeTimerRef.current);
             setRunning(false);
           }
-        }, 18);
+        }, 12);
         return;
       }
       step++;
-      timerRef.current = setTimeout(advance, 1200);
+      timerRef.current = setTimeout(advance, 550);
     };
 
-    timerRef.current = setTimeout(advance, 500);
+    timerRef.current = setTimeout(advance, 400);
+  };
+
+  const reset = () => {
+    clearTimers();
+    setRunning(false);
+    setActiveStep(0);
+    setTypedAnswer("");
   };
 
   useEffect(() => () => clearTimers(), []);
@@ -95,19 +104,29 @@ export function AiRag({
 
   const stepLabels = ["", "User asks a question", "Query becomes a vector", "Find similar documents", "Build prompt with context", "LLM generates answer"];
   const footerStatus = activeStep === 0
-    ? "Click Ask to walk through the RAG pipeline"
+    ? "Ask runs the full pipeline in ~3 seconds"
     : activeStep === 5 && !running
-    ? "Answer grounded in your documents — no fine-tuning needed"
+    ? "Answer grounded in your docs — no fine-tuning needed"
     : `Step ${activeStep}/5: ${stepLabels[activeStep]}`;
 
   return (
     <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden">
-      <div className="flex items-center gap-3 px-4 h-12 border-b border-zinc-100 dark:border-zinc-800">
+      <div className="flex items-center gap-3 px-4 h-12 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50">
         <Brain className="size-4 text-zinc-400 shrink-0" />
         <span className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 flex-1">RAG Pipeline</span>
         <span className="text-[10px] font-mono text-zinc-400 border border-zinc-200 dark:border-zinc-700 px-2 py-0.5 rounded">
           top-{topK}
         </span>
+        {interactive && (
+          <button
+            type="button"
+            onClick={reset}
+            className="p-1 rounded text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-all duration-500"
+            title="Reset"
+          >
+            <RefreshCw className="size-3.5" />
+          </button>
+        )}
       </div>
 
       <p className="text-sm text-zinc-500 dark:text-zinc-400 px-4 py-2 border-b border-zinc-100 dark:border-zinc-800">
@@ -136,23 +155,32 @@ export function AiRag({
         ))}
       </div>
 
-      <div className="min-h-[220px] p-4">
+      <div className="min-h-[220px] max-h-[220px] overflow-y-auto p-4">
         {activeStep === 0 ? (
           <div className="h-full flex flex-col items-center justify-center text-center gap-3 min-h-[180px]">
-            <div className="flex items-center gap-3 text-zinc-400">
-              <Database className="size-6" />
-              <span className="text-xs">→</span>
-              <Brain className="size-6" />
-              <span className="text-xs">→</span>
-              <Server className="size-6" />
+            <div className="flex items-center gap-2 text-zinc-500">
+              <div className="flex flex-col items-center gap-1">
+                <Database className="size-5" />
+                <span className="text-[9px] font-semibold">Docs</span>
+              </div>
+              <span className="text-xs text-zinc-300">→</span>
+              <div className="flex flex-col items-center gap-1">
+                <Brain className="size-5 text-blue-500" />
+                <span className="text-[9px] font-semibold">Search</span>
+              </div>
+              <span className="text-xs text-zinc-300">→</span>
+              <div className="flex flex-col items-center gap-1">
+                <Server className="size-5" />
+                <span className="text-[9px] font-semibold">LLM</span>
+              </div>
             </div>
-            <p className="text-xs text-zinc-400 max-w-[240px]">Documents → Vector search → LLM answer</p>
+            <p className="text-xs text-zinc-400 max-w-[260px]">Look up relevant docs, then generate an answer</p>
             <div className="px-3 py-2 rounded-lg bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 text-sm text-blue-900 dark:text-blue-200">
               &ldquo;{query}&rdquo;
             </div>
           </div>
         ) : (
-          <div className="space-y-3 min-h-[180px]">
+          <div className="space-y-3">
             {activeStep >= 1 && (
               <div className="border border-zinc-100 dark:border-zinc-800 rounded-lg p-3 bg-zinc-50 dark:bg-zinc-800/50 transition-all duration-500">
                 <p className="text-[10px] font-semibold uppercase tracking-widest text-zinc-400 mb-1">Query</p>
@@ -202,16 +230,19 @@ export function AiRag({
         )}
       </div>
 
-      <div className="px-4 py-3 border-t border-zinc-100 dark:border-zinc-800 flex items-center gap-3">
-        <span className="text-sm text-zinc-500 dark:text-zinc-400 flex-1 truncate">{footerStatus}</span>
-        <button
-          onClick={runAnimation}
-          disabled={running}
-          className="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-50 shrink-0"
-        >
-          {running ? "Running…" : activeStep >= 5 ? "Re-run" : "Ask"}
-        </button>
-      </div>
+      {interactive && (
+        <div className="px-4 py-3 border-t border-zinc-100 dark:border-zinc-800 flex items-center gap-3 bg-zinc-50 dark:bg-zinc-900/30">
+          <span className="text-sm text-zinc-500 dark:text-zinc-400 flex-1 truncate">{footerStatus}</span>
+          <button
+            type="button"
+            onClick={runAnimation}
+            disabled={running}
+            className="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-50 shrink-0"
+          >
+            {running ? "Running…" : activeStep >= 5 ? "Re-run" : "Ask"}
+          </button>
+        </div>
+      )}
     </div>
   );
 }

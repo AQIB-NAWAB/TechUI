@@ -96,6 +96,10 @@ export function Terminal({ title, shell = "bash", lines, theme = "dark", interac
         <span className="text-[10px] font-semibold uppercase tracking-widest text-zinc-400">{shell}</span>
       </div>
 
+      <div className="text-sm text-zinc-500 dark:text-zinc-400 px-4 py-2 border-b border-zinc-100 dark:border-zinc-800">
+        A command-line window showing commands you run and the output they produce.
+      </div>
+
       <div className={cn("min-h-[220px] p-4 space-y-1 font-mono text-[13px] leading-relaxed", themeClasses[theme])}>
         {lines.map((line, i) => (
           <TerminalLineView key={i} line={line} theme={theme} />

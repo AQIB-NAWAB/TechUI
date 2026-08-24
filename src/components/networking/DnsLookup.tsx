@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { z } from "zod";
 import { cn } from "@/lib/utils";
-import { Globe, Monitor, Server, RefreshCw, MapPin, CheckCircle2, Clock } from "lucide-react";
+import { Globe, Monitor, Server, RefreshCw, MapPin, CheckCircle2 } from "lucide-react";
 
 export const DnsLookupSchema = z.object({
   domain: z.string().optional().default("api.example.com"),
@@ -172,37 +172,20 @@ export function DnsLookup({
         .dns-dot-forward { animation: dns-forward 800ms ease-in-out infinite; }
         .dns-dot-back { animation: dns-back 800ms ease-in-out infinite; }
       `}</style>
-      {/* Header */}
-      <div className="flex items-center gap-3 px-4 h-12 border-b border-zinc-100 dark:border-zinc-900 bg-zinc-50 dark:bg-zinc-900/50">
-        <Globe className="size-3.5 text-zinc-400 shrink-0" />
-        <code className="text-xs font-mono font-semibold text-zinc-800 dark:text-zinc-200 flex-1">{domain}</code>
-        <span className="text-[10px] font-mono font-semibold text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 px-2 py-0.5 rounded">
+      <div className="flex items-center gap-3 px-4 h-12 border-b border-zinc-100 dark:border-zinc-900">
+        <Globe className="size-4 text-zinc-400 shrink-0" />
+        <span className="text-sm font-semibold text-zinc-800 dark:text-zinc-200 flex-1">DNS Lookup</span>
+        <code className="text-[10px] font-mono text-zinc-500 dark:text-zinc-400 truncate max-w-[140px]">{domain}</code>
+        <span className="text-[10px] font-mono font-semibold text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 px-2 py-0.5 rounded shrink-0">
           {recordType}
         </span>
-        {interactive && (
-          <div className="flex items-center gap-1.5">
-            {(done || activeHop >= 0) && (
-              <button onClick={reset} className="p-1 rounded text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors duration-500">
-                <RefreshCw className="size-3.5" />
-              </button>
-            )}
-            <button
-              onClick={resolve}
-              disabled={running}
-              className={cn(
-                "flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-semibold transition-all duration-500",
-                "bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 hover:opacity-90 disabled:opacity-50"
-              )}
-            >
-              {running ? <RefreshCw className="size-3 animate-spin" /> : <Globe className="size-3" />}
-              {running ? "Resolving…" : done ? "Replay" : "Resolve"}
-            </button>
-          </div>
-        )}
       </div>
 
-      {/* Hop chain diagram */}
-      <div className="px-4 py-5 flex items-center justify-center gap-1 overflow-x-auto min-h-[120px]">
+      <div className="text-sm text-zinc-500 dark:text-zinc-400 px-4 py-2 border-b border-zinc-100 dark:border-zinc-900">
+        Your app asks a chain of nameservers to turn a domain name into an IP address.
+      </div>
+
+      <div className="px-4 py-5 flex items-center justify-center gap-1 overflow-x-auto min-h-[200px]">
         {HOPS.map((hop, i) => (
           <div key={hop.id} className="flex items-center gap-1">
             <HopBox
@@ -247,34 +230,30 @@ export function DnsLookup({
         )}
       </div>
 
-      {/* Result banner */}
-      <div
-        className={cn(
-          "border-t px-4 py-3 flex items-center gap-3 transition-all duration-700",
-          done
-            ? "border-emerald-200 dark:border-emerald-900/40 bg-emerald-50 dark:bg-emerald-950/10"
-            : "border-zinc-100 dark:border-zinc-900 bg-zinc-50 dark:bg-zinc-900/20"
-        )}
-      >
-        {done ? (
-          <>
-            <CheckCircle2 className="size-4 text-emerald-500 shrink-0" />
-            <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-400 flex-1">
+      <div className="border-t border-zinc-100 dark:border-zinc-900 px-4 py-3 flex items-center gap-3">
+        <span className={cn(
+          "text-sm flex-1 transition-all duration-500",
+          done ? "text-emerald-700 dark:text-emerald-400 font-semibold" : "text-zinc-500 dark:text-zinc-400"
+        )}>
+          {done ? (
+            <span className="flex items-center gap-2 flex-wrap">
+              <CheckCircle2 className="size-4 shrink-0" />
               Resolved: <code className="font-mono">{result}</code>
+              <span className="text-xs font-normal text-emerald-600 dark:text-emerald-500">TTL {ttl}s · {TOTAL_MS}ms</span>
             </span>
-            <div className="flex items-center gap-3 shrink-0 text-[10px] text-emerald-600 dark:text-emerald-500">
-              <span>TTL {ttl}s</span>
-              <span className="flex items-center gap-1">
-                <Clock className="size-3" />
-                {TOTAL_MS}ms total
-              </span>
-            </div>
-          </>
-        ) : (
-          <p className="text-[11px] text-zinc-400">
-            Step {Math.max(0, activeHop + 1)} of {HOPS.length}
-            {running ? " — resolving…" : ""}
-          </p>
+          ) : (
+            <>Step {Math.max(0, activeHop + 1)} of {HOPS.length}{running ? " — resolving…" : ""}</>
+          )}
+        </span>
+        {interactive && (
+          <button
+            onClick={done ? reset : resolve}
+            disabled={running}
+            className="flex items-center gap-1.5 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-50 shrink-0"
+          >
+            {running ? <RefreshCw className="size-3.5 animate-spin" /> : <Globe className="size-3.5" />}
+            {running ? "Resolving…" : done ? "Resolve Again" : "Resolve"}
+          </button>
         )}
       </div>
     </div>

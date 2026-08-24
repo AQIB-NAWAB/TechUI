@@ -211,13 +211,20 @@ export function LruCache({
             {hits}/{total} hits ({hitRate}%)
           </span>
         )}
+        <button
+          onClick={handleReset}
+          className="p-1 rounded text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-all duration-500"
+          title="Reset"
+        >
+          <RotateCcw className="size-3.5" />
+        </button>
       </div>
 
       <p className="text-sm text-zinc-500 dark:text-zinc-400 px-4 py-2 border-b border-zinc-100 dark:border-zinc-800">
         Least-recently-used entries get evicted when the cache is full.
       </p>
 
-      <div className="min-h-[220px] px-4 pt-4 pb-2 space-y-4">
+      <div className="min-h-[240px] px-4 pt-4 pb-2 space-y-4">
         {/* Slot labels */}
         <div className="flex items-center gap-1 justify-between px-1">
           <span className="text-[10px] font-semibold text-zinc-400">MRU</span>
@@ -272,9 +279,9 @@ export function LruCache({
           })}
         </div>
 
-        {/* Message */}
+        {/* Message — fixed height */}
         <div className={cn(
-          "rounded-lg px-3 py-2.5 text-[11px] font-medium transition-all duration-500",
+          "rounded-lg px-3 py-2.5 text-[11px] font-medium transition-all duration-500 min-h-[44px] flex items-center",
           messageType === "hit"   && "bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800/40 text-emerald-700 dark:text-emerald-400",
           messageType === "miss"  && "bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800/40 text-red-700 dark:text-red-400",
           messageType === "evict" && "bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/40 text-amber-700 dark:text-amber-400",
@@ -300,6 +307,15 @@ export function LruCache({
           </div>
         )}
 
+        <button
+          onClick={handleBack}
+          disabled={stepIndex < 0}
+          className="self-start p-1.5 rounded-lg border border-zinc-200 dark:border-zinc-700 text-zinc-500 hover:bg-zinc-50 dark:hover:bg-zinc-800 disabled:opacity-30 transition-all duration-500"
+          title="Step back"
+        >
+          <ChevronLeft className="size-3.5" />
+        </button>
+
         <div className="flex items-center gap-1">
           {operations.map((_, i) => (
             <div
@@ -314,22 +330,9 @@ export function LruCache({
       </div>
 
       <div className="px-4 py-3 border-t border-zinc-100 dark:border-zinc-800 flex items-center gap-2">
-        <button
-          onClick={handleBack}
-          disabled={stepIndex < 0}
-          className="p-2 rounded-lg border border-zinc-200 dark:border-zinc-700 text-zinc-500 hover:bg-zinc-50 dark:hover:bg-zinc-800 disabled:opacity-30 transition-all duration-500"
-          title="Step back"
-        >
-          <ChevronLeft className="size-4" />
-        </button>
-        <button
-          onClick={handleReset}
-          className="p-2 rounded-lg border border-zinc-200 dark:border-zinc-700 text-zinc-500 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all duration-500"
-          title="Reset"
-        >
-          <RotateCcw className="size-3.5" />
-        </button>
-        <span className="text-sm text-zinc-500 dark:text-zinc-400 flex-1 truncate">{message}</span>
+        <span className="text-sm text-zinc-500 dark:text-zinc-400 flex-1 truncate">
+          {stepIndex < 0 ? "Step through cache operations — oldest entries get evicted first" : message}
+        </span>
         <button
           onClick={isDone ? handleReset : handleStep}
           className="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-opacity shrink-0"

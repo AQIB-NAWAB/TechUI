@@ -1,0 +1,31 @@
+{
+  "name": "techui",
+  "version": "0.1.0",
+  "description": "Add interactive engineering education components to your project — like shadcn, but for TechUI.",
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "techui": "./bin/techui.js"
+  },
+  "files": [
+    "bin",
+    "lib",
+    "../../registry"
+  ],
+  "keywords": [
+    "techui",
+    "components",
+    "react",
+    "nextjs",
+    "cli",
+    "registry"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/AQIB-NAWAB/TechUI.git",
+    "directory": "packages/cli"
+  }
+}

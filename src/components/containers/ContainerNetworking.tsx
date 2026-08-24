@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { z } from "zod";
 import { cn } from "@/lib/utils";
-import { Network, ArrowRight } from "lucide-react";
+import { Network, ArrowRight, Box } from "lucide-react";
 
 const ContainerColorEnum = z.enum(["blue", "emerald", "violet", "amber"]);
 const PortSchema = z.object({ host: z.number(), container: z.number() });
@@ -67,6 +67,7 @@ function ContainerBox({
       )}
     >
       <div className="flex items-center gap-1.5 mb-1">
+        <Box className="size-3 shrink-0 text-zinc-400" />
         <span className={cn("size-2 rounded-full shrink-0", cfg.dot)} />
         <span className="text-xs font-bold text-zinc-800 dark:text-zinc-200 font-mono">{container.name}</span>
       </div>
@@ -202,9 +203,9 @@ export function ContainerNetworking({
         </div>
 
         {/* Detail panel — fixed height slot */}
-        <div className="min-h-[100px]">
-          {selected !== null && selectedIdx !== null && (
-            <div className="rounded-lg border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800/50 p-3 space-y-2 transition-all duration-500">
+        <div className="min-h-[72px] rounded-lg border border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/30 p-3 transition-all duration-500">
+          {selected !== null && selectedIdx !== null ? (
+            <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold text-zinc-700 dark:text-zinc-300 font-mono">{selected.name}</span>
                 <span className="text-[11px] font-mono text-zinc-400">{containerIp(selectedIdx)}</span>
@@ -230,6 +231,8 @@ export function ContainerNetworking({
                 </div>
               )}
             </div>
+          ) : (
+            <p className="text-xs text-zinc-400 text-center py-2">Click a container to inspect it</p>
           )}
         </div>
       </div>

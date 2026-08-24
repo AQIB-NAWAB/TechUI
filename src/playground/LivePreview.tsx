@@ -164,6 +164,30 @@ import { GraphTraversalBfsDfs } from "@/components/edu/GraphTraversalBfsDfs";
 import { ReadRepair } from "@/components/distributed/ReadRepair";
 import { AcidVsBase } from "@/components/database/AcidVsBase";
 import { WebSocketVsSse } from "@/components/networking/WebSocketVsSse";
+import { PriorityQueue } from "@/components/edu/PriorityQueue";
+import { ContentNegotiation } from "@/components/api/ContentNegotiation";
+import { PromptInjectionGuard } from "@/components/ai/PromptInjectionGuard";
+import { CapTheorem } from "@/components/distributed/CapTheorem";
+import { TriePrefixTree } from "@/components/edu/TriePrefixTree";
+import { WalWriteAheadLog } from "@/components/database/WalWriteAheadLog";
+import { GossipProtocol } from "@/components/distributed/GossipProtocol";
+import { ConditionalRequestsEtag } from "@/components/api/ConditionalRequestsEtag";
+import { TcpVsUdp } from "@/components/networking/TcpVsUdp";
+import { UnionFindDisjointSet } from "@/components/edu/UnionFindDisjointSet";
+import { RetryAfterHeader } from "@/components/api/RetryAfterHeader";
+import { ToolCallingFlow } from "@/components/ai/ToolCallingFlow";
+import { IsolationLevels } from "@/components/database/IsolationLevels";
+import { VectorClock } from "@/components/distributed/VectorClock";
+import { RagChunking } from "@/components/ai/RagChunking";
+import { RaftConsensus } from "@/components/distributed/RaftConsensus";
+import { OAuth2PkceFlow } from "@/components/api/OAuth2PkceFlow";
+import { DeadlockDetection } from "@/components/database/DeadlockDetection";
+import { MtlsHandshake } from "@/components/networking/MtlsHandshake";
+import { RedBlackTree } from "@/components/edu/RedBlackTree";
+import { EmbeddingSimilarity } from "@/components/ai/EmbeddingSimilarity";
+import { WebhookReplay } from "@/components/api/WebhookReplay";
+import { ConsistentReads } from "@/components/distributed/ConsistentReads";
+import { IcmpPingTraceroute } from "@/components/networking/IcmpPingTraceroute";
 
 const COMPONENT_MAP: Record<string, React.ComponentType<Record<string, unknown>>> = {
   "api-request":          ApiRequest as React.ComponentType<Record<string, unknown>>,
@@ -329,6 +353,30 @@ const COMPONENT_MAP: Record<string, React.ComponentType<Record<string, unknown>>
   "read-repair":          ReadRepair as React.ComponentType<Record<string, unknown>>,
   "acid-vs-base":         AcidVsBase as React.ComponentType<Record<string, unknown>>,
   "websocket-vs-sse":     WebSocketVsSse as React.ComponentType<Record<string, unknown>>,
+  "priority-queue":         PriorityQueue as React.ComponentType<Record<string, unknown>>,
+  "content-negotiation":    ContentNegotiation as React.ComponentType<Record<string, unknown>>,
+  "prompt-injection-guard": PromptInjectionGuard as React.ComponentType<Record<string, unknown>>,
+  "cap-theorem":            CapTheorem as React.ComponentType<Record<string, unknown>>,
+  "trie-prefix-tree":       TriePrefixTree as React.ComponentType<Record<string, unknown>>,
+  "wal-write-ahead-log":    WalWriteAheadLog as React.ComponentType<Record<string, unknown>>,
+  "gossip-protocol":        GossipProtocol as React.ComponentType<Record<string, unknown>>,
+  "conditional-requests-etag": ConditionalRequestsEtag as React.ComponentType<Record<string, unknown>>,
+  "tcp-vs-udp":                TcpVsUdp as React.ComponentType<Record<string, unknown>>,
+  "union-find-disjoint-set":   UnionFindDisjointSet as React.ComponentType<Record<string, unknown>>,
+  "retry-after-header":       RetryAfterHeader as React.ComponentType<Record<string, unknown>>,
+  "tool-calling-flow":        ToolCallingFlow as React.ComponentType<Record<string, unknown>>,
+  "isolation-levels":         IsolationLevels as React.ComponentType<Record<string, unknown>>,
+  "vector-clock":             VectorClock as React.ComponentType<Record<string, unknown>>,
+  "rag-chunking":             RagChunking as React.ComponentType<Record<string, unknown>>,
+  "raft-consensus":           RaftConsensus as React.ComponentType<Record<string, unknown>>,
+  "oauth2-pkce-flow":         OAuth2PkceFlow as React.ComponentType<Record<string, unknown>>,
+  "deadlock-detection":       DeadlockDetection as React.ComponentType<Record<string, unknown>>,
+  "mtls-handshake":           MtlsHandshake as React.ComponentType<Record<string, unknown>>,
+  "red-black-tree":           RedBlackTree as React.ComponentType<Record<string, unknown>>,
+  "embedding-similarity":     EmbeddingSimilarity as React.ComponentType<Record<string, unknown>>,
+  "webhook-replay":           WebhookReplay as React.ComponentType<Record<string, unknown>>,
+  "consistent-reads":         ConsistentReads as React.ComponentType<Record<string, unknown>>,
+  "icmp-ping-traceroute":     IcmpPingTraceroute as React.ComponentType<Record<string, unknown>>,
 };
 
 export function LivePreview({

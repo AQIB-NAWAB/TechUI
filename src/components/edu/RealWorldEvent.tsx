@@ -39,12 +39,14 @@ export function RealWorldEvent({ title, when, summary, lesson, company, outcome 
       </div>
 
       <p className="text-sm text-zinc-500 dark:text-zinc-400 px-4 py-2 border-b border-zinc-100 dark:border-zinc-800">
-        {title}{company ? ` · ${company}` : ""} · {when}
+        A real incident from the industry — see what happened and what you can learn from it.
       </p>
 
       <div className="min-h-[220px] px-4 pt-4 pb-2 flex flex-col gap-3">
-        <div className="border border-zinc-100 dark:border-zinc-800 rounded-lg p-3 bg-zinc-50 dark:bg-zinc-800/50 flex-1">
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-zinc-400 mb-1.5">What happened</p>
+        <div className="border border-zinc-100 dark:border-zinc-800 rounded-lg p-3 bg-zinc-50 dark:bg-zinc-800/50 min-h-[88px]">
+          <p className="text-[10px] font-semibold uppercase tracking-widest text-zinc-400 mb-1.5">
+            What happened · {title}{company ? ` · ${company}` : ""} · {when}
+          </p>
           <p className="text-sm text-zinc-700 dark:text-zinc-300">{summary}</p>
         </div>
 
@@ -64,13 +66,13 @@ export function RealWorldEvent({ title, when, summary, lesson, company, outcome 
         </div>
       </div>
 
-      <div className="px-4 py-3 border-t border-zinc-100 dark:border-zinc-800 flex items-center gap-3">
+      <div className="px-4 py-3 border-t border-zinc-100 dark:border-zinc-800 flex items-center gap-3 bg-zinc-50 dark:bg-zinc-900/30">
         <span className="text-sm text-zinc-500 dark:text-zinc-400 flex-1">
           {showLesson ? "Lesson revealed — apply this to your own work" : "What can we learn from this?"}
         </span>
         <button
           onClick={() => setShowLesson((s) => !s)}
-          className="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-opacity shrink-0"
+          className="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-all duration-500 shrink-0"
         >
           {showLesson ? "Hide Lesson" : "Show Lesson"}
         </button>

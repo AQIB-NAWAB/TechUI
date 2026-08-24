@@ -143,6 +143,20 @@ export function MultiRegion({
         <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400">
           {tab === "active-active" ? "Active-Active" : "Active-Passive"}
         </span>
+        {tab === "active-passive" && (
+          <button
+            type="button"
+            onClick={triggerFailover}
+            className={cn(
+              "text-[10px] font-semibold px-2 py-0.5 rounded transition-all duration-500",
+              failoverState === "normal"
+                ? "bg-red-100 dark:bg-red-950 text-red-700 dark:text-red-400"
+                : "bg-zinc-200 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-300"
+            )}
+          >
+            {failoverState === "normal" ? "Simulate Failover" : "Reset Failover"}
+          </button>
+        )}
       </div>
 
       <div className="px-4 py-2 border-b border-zinc-100 dark:border-zinc-800">
@@ -273,33 +287,20 @@ export function MultiRegion({
       </div>
 
       {/* Footer */}
-      <div className="px-4 py-3 border-t border-zinc-100 dark:border-zinc-800 flex items-center gap-2 flex-wrap bg-zinc-50 dark:bg-zinc-900/30">
-        <span className="text-xs text-zinc-500 flex-1">
+      <div className="px-4 py-3 border-t border-zinc-100 dark:border-zinc-800 flex items-center gap-3 bg-zinc-50 dark:bg-zinc-900/30">
+        <span className="text-sm text-zinc-500 dark:text-zinc-400 flex-1">
           {requestAnim ? "Sending request to nearest region…" : rtt ? `Response received in ${rtt}ms` : "Send a request to see GeoDNS routing"}
         </span>
         <button
           onClick={sendRequest}
           disabled={requestAnim}
           className={cn(
-            "bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-opacity",
-            requestAnim && "opacity-60"
+            "bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-all duration-500 shrink-0",
+            requestAnim && "opacity-60 cursor-not-allowed"
           )}
         >
           {requestAnim ? "Sending…" : "Send Request"}
         </button>
-        {tab === "active-passive" && (
-          <button
-            onClick={triggerFailover}
-            className={cn(
-              "rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-opacity",
-              failoverState === "normal"
-                ? "bg-red-600 text-white"
-                : "bg-zinc-200 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-300"
-            )}
-          >
-            {failoverState === "normal" ? "Simulate Failover" : "Reset"}
-          </button>
-        )}
       </div>
       <style>{`
         @keyframes travel {

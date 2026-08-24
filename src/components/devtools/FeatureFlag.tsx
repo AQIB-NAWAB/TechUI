@@ -97,12 +97,17 @@ export function FeatureFlag({
         </span>
       </div>
 
-      <div className="px-4 py-2 border-b border-zinc-100 dark:border-zinc-800">
-        <div className="font-mono text-sm font-bold text-zinc-800 dark:text-zinc-100">{name}</div>
-        <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-0.5">{description}</p>
-      </div>
+      <p className="text-sm text-zinc-500 dark:text-zinc-400 px-4 py-2 border-b border-zinc-100 dark:border-zinc-800">
+        Turn features on or off per environment — without redeploying your whole app.
+      </p>
 
       <div className="min-h-[260px] px-4 py-3">
+        <div className="mb-3 rounded-lg border border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/50 px-3 py-2">
+          <div className="text-[10px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500 mb-0.5">Flag</div>
+          <div className="font-mono text-sm font-bold text-zinc-800 dark:text-zinc-100">{name}</div>
+          <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">{description}</p>
+        </div>
+
         {(killActive || killBanner) && (
           <div
             className={cn(
@@ -211,7 +216,7 @@ export function FeatureFlag({
         ) : (
           <button
             onClick={toggleAll}
-            className="bg-amber-500 text-white rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-opacity shrink-0"
+            className="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-opacity shrink-0"
           >
             Kill Switch
           </button>

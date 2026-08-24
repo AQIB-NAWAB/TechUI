@@ -50,7 +50,11 @@ export function PasswordStrength({
         <span className="text-sm font-semibold text-zinc-800 dark:text-zinc-200">Password Strength Checker</span>
       </div>
 
-      <div className="p-4 space-y-4">
+      <div className="text-sm text-zinc-500 dark:text-zinc-400 px-4 py-2 border-b border-zinc-100 dark:border-zinc-800">
+        Type a password to see how strength is measured in real time.
+      </div>
+
+      <div className="min-h-[220px] p-4 space-y-4">
         {/* Password input */}
         <div className="relative">
           <input
@@ -115,8 +119,10 @@ export function PasswordStrength({
       </div>
 
       {interactive && (
-        <div className="px-4 py-2 border-t border-zinc-50 dark:border-zinc-900 bg-zinc-50/50 dark:bg-zinc-900/20">
-          <p className="text-[10px] text-zinc-400">Type in the field above to see your password strength in real time.</p>
+        <div className="px-4 py-3 border-t border-zinc-100 dark:border-zinc-800 flex items-center gap-3">
+          <span className="text-sm text-zinc-500 dark:text-zinc-400 flex-1">
+            {strength ? `${strength.label} — ${passed}/${RULES.length} rules met` : "Start typing to check strength"}
+          </span>
         </div>
       )}
     </div>

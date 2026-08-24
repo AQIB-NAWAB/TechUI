@@ -121,16 +121,17 @@ export function GrpcVsRest({
               <JsonLine indent={1}><JKey k="name" /><span className="text-zinc-400">: </span><JStr v="Alice Smith" /></JsonLine>
               <JsonLine><span className="text-zinc-400">{"}"}</span></JsonLine>
             </div>
-            <div className="space-y-1 min-h-[28px]">
+            <div className="space-y-1 min-h-[36px]">
               <div className="h-1.5 bg-zinc-100 dark:bg-zinc-800 rounded-full overflow-hidden">
                 <div className="h-full bg-amber-400 rounded-full transition-all duration-500" style={{ width: `${restProgress}%` }} />
               </div>
-              {animState === "done" && (
-                <div className="flex items-center gap-1 text-[10px] text-amber-500 transition-all duration-500">
-                  <CheckCircle className="size-3" />
-                  <span>{restLatencyMs}ms · {restPayloadBytes} bytes</span>
-                </div>
-              )}
+              <div className={cn(
+                "flex items-center gap-1 text-[10px] text-amber-500 min-h-[16px] transition-all duration-500",
+                animState === "done" ? "opacity-100" : "opacity-0"
+              )}>
+                <CheckCircle className="size-3" />
+                <span>{restLatencyMs}ms · {restPayloadBytes} bytes</span>
+              </div>
             </div>
           </div>
 
@@ -149,16 +150,17 @@ export function GrpcVsRest({
               </div>
               <div className="text-zinc-400 text-[10px] mt-1">id: &quot;1234&quot; · name: &quot;Alice Smith&quot;</div>
             </div>
-            <div className="space-y-1 min-h-[28px]">
+            <div className="space-y-1 min-h-[36px]">
               <div className="h-1.5 bg-zinc-100 dark:bg-zinc-800 rounded-full overflow-hidden">
                 <div className="h-full bg-blue-500 rounded-full transition-all duration-500" style={{ width: `${grpcProgress}%` }} />
               </div>
-              {animState === "done" && (
-                <div className="flex items-center gap-1 text-[10px] text-blue-500 transition-all duration-500">
-                  <CheckCircle className="size-3" />
-                  <span>{grpcLatencyMs}ms · {grpcPayloadBytes} bytes</span>
-                </div>
-              )}
+              <div className={cn(
+                "flex items-center gap-1 text-[10px] text-blue-500 min-h-[16px] transition-all duration-500",
+                animState === "done" ? "opacity-100" : "opacity-0"
+              )}>
+                <CheckCircle className="size-3" />
+                <span>{grpcLatencyMs}ms · {grpcPayloadBytes} bytes</span>
+              </div>
             </div>
           </div>
         </div>
@@ -196,7 +198,7 @@ export function GrpcVsRest({
           onClick={sendRequest}
           disabled={animState === "running"}
           className={cn(
-            "flex items-center gap-1.5 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-opacity",
+            "flex items-center gap-1.5 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-all duration-500",
             animState === "running" && "opacity-50 cursor-not-allowed"
           )}
         >

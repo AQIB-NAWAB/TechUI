@@ -165,10 +165,10 @@ export function ReadRepair({
         }
       `}</style>
       <div className={cn(
-        "rounded-xl border bg-white dark:bg-zinc-950 overflow-hidden transition-all duration-500",
+        "rounded-xl border bg-white dark:bg-zinc-900 overflow-hidden transition-all duration-500",
         flash === "stale" ? "border-amber-300 dark:border-amber-800" : flash === "ok" ? "border-emerald-300 dark:border-emerald-800" : "border-zinc-200 dark:border-zinc-800"
       )}>
-        <div className="flex items-center gap-3 px-4 h-12 border-b border-zinc-100 dark:border-zinc-900 bg-zinc-50 dark:bg-zinc-900/50">
+        <div className="flex items-center gap-3 px-4 h-12 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50">
           <Database className="size-4 text-zinc-400 shrink-0" />
           <span className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 flex-1">{name}</span>
           <span className={cn(
@@ -176,10 +176,14 @@ export function ReadRepair({
             phase === "done" ? "text-emerald-600 dark:text-emerald-400" : phase === "idle" ? "text-zinc-400" : "text-amber-600 dark:text-amber-400"
           )}>{phaseLabel}</span>
           {interactive && (
-            <button onClick={reset} className="p-1 rounded text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-all duration-500">
+            <button type="button" onClick={reset} className="p-1 rounded text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-all duration-500">
               <RefreshCw className="size-3.5" />
             </button>
           )}
+        </div>
+
+        <div className="text-sm text-zinc-500 dark:text-zinc-400 px-4 py-2 border-b border-zinc-100 dark:border-zinc-800">
+          A read contacts multiple replicas — stale copies are detected and repaired in the background.
         </div>
 
         <div className="p-4 min-h-[240px] space-y-4">
@@ -239,28 +243,27 @@ export function ReadRepair({
         </div>
 
         {interactive && (
-          <div className="border-t border-zinc-100 dark:border-zinc-900 px-4 py-3 flex items-center gap-3 bg-zinc-50 dark:bg-zinc-900/30">
+          <div className="border-t border-zinc-100 dark:border-zinc-800 px-4 py-3 flex items-center gap-3 bg-zinc-50 dark:bg-zinc-900/30 min-h-[52px]">
             <span className="text-sm text-zinc-500 dark:text-zinc-400 flex-1">
               {phase === "done"
                 ? "All replicas now hold the latest version."
                 : phase === "repairing"
                 ? "Background repair syncing stale replicas…"
-                : `Replica ${staleIdx + 1} is stale. Read triggers quorum check and automatic repair.`}
+                : phase === "reading"
+                ? "Reading replicas to find the latest version…"
+                : `Replica ${staleIdx + 1} is stale — read triggers quorum check and repair.`}
             </span>
             <button
-              onClick={runReadRepair}
+              type="button"
+              onClick={phase === "done" ? reset : runReadRepair}
               disabled={phase === "reading" || phase === "repairing"}
               className={cn(
-                "px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-500 shrink-0 hover:opacity-90 disabled:opacity-50 flex items-center gap-2",
-                flash === "stale"
-                  ? "bg-amber-500 text-white"
-                  : phase === "done"
-                  ? "bg-emerald-500 text-white"
-                  : "bg-zinc-900 dark:bg-white text-white dark:text-zinc-900"
+                "px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-500 shrink-0 hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2",
+                "bg-zinc-900 dark:bg-white text-white dark:text-zinc-900"
               )}
             >
               <Wrench className="size-3.5" />
-              {phase === "reading" || phase === "repairing" ? "Running…" : "Read & Repair"}
+              {phase === "reading" || phase === "repairing" ? "Running…" : phase === "done" ? "Run Again" : "Read & Repair"}
             </button>
           </div>
         )}

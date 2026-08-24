@@ -255,34 +255,33 @@ export function CdnEdge({
               </button>
             ))}
           </div>
-          <p className="text-[10px] text-zinc-400 mt-1">Click to select · Click again to toggle cache status</p>
+          <p className="text-[10px] text-zinc-400 mt-1">
+            Click to select · Click again to toggle cache status ·{" "}
+            <button type="button" onClick={forceMiss} className="text-amber-600 dark:text-amber-400 hover:underline transition-all duration-500">
+              Force all MISS
+            </button>
+          </p>
         </div>
       </div>
 
       {interactive && (
-        <div className="px-4 py-3 border-t border-zinc-100 dark:border-zinc-800 flex items-center gap-2 flex-wrap bg-zinc-50 dark:bg-zinc-900/30">
-          <span className="text-xs text-zinc-500 flex-1">
+        <div className="px-4 py-3 border-t border-zinc-100 dark:border-zinc-800 flex items-center gap-3 bg-zinc-50 dark:bg-zinc-900/30 min-h-[52px]">
+          <span className="text-sm text-zinc-500 dark:text-zinc-400 flex-1">
             {animPhase === "edge" && "Routing to edge node…"}
             {animPhase === "origin" && "Cache miss — fetching from origin…"}
             {animPhase === "done" && result?.hit && "Cache hit! Served from edge."}
             {animPhase === "done" && result && !result.hit && "Cache miss. Origin served the response."}
-            {animPhase === "idle" && !result && `Selected: ${selectedAsset?.path ?? "—"}`}
+            {animPhase === "idle" && !result && `Ready — ${selectedAsset?.path ?? "select an asset"}`}
           </span>
-          <button
-            onClick={forceMiss}
-            className="border border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 rounded-lg px-3 py-2 text-xs font-semibold hover:opacity-80 transition-opacity"
-          >
-            Force MISS
-          </button>
           <button
             onClick={animPhase === "done" ? () => { setResult(null); setAnimPhase("idle"); } : sendRequest}
             disabled={animPhase === "edge" || animPhase === "origin"}
             className={cn(
-              "bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-opacity",
+              "bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-all duration-500 shrink-0",
               (animPhase === "edge" || animPhase === "origin") && "opacity-50 cursor-not-allowed"
             )}
           >
-            {animPhase === "done" ? "Reset" : `Request ${selectedAsset?.path ?? ""}`}
+            {animPhase === "edge" || animPhase === "origin" ? "Sending…" : animPhase === "done" ? "Reset" : "Send Request"}
           </button>
         </div>
       )}

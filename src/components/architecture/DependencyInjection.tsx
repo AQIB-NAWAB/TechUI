@@ -69,7 +69,7 @@ export function DependencyInjection({
   const handleTest = () => {
     setTestMode(true);
     setTestPassing(false);
-    setTimeout(() => setTestPassing(true), 600);
+    setTimeout(() => setTestPassing(true), 1000);
   };
 
   const resetTest = () => {

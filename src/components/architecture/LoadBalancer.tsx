@@ -177,7 +177,11 @@ export function LoadBalancer({
         )}
       </div>
 
-      <div className="px-4 py-4 min-h-[140px] flex items-center">
+      <div className="text-sm text-zinc-500 dark:text-zinc-400 px-4 py-2 border-b border-zinc-100 dark:border-zinc-800">
+        Spreads incoming requests across multiple servers so no single machine gets overloaded.
+      </div>
+
+      <div className="px-4 py-4 min-h-[220px] flex items-center">
         <div className="flex items-center gap-4 w-full">
           <div className="shrink-0 flex flex-col items-center gap-1">
             <div className="size-10 rounded-lg border-2 border-blue-300 dark:border-blue-700 bg-blue-50 dark:bg-blue-950/30 flex items-center justify-center">
@@ -259,48 +263,52 @@ export function LoadBalancer({
         </div>
       </div>
 
-      {showMetrics && totalRequests > 0 && (
-        <div className="border-t border-zinc-100 dark:border-zinc-800 px-4 py-3">
+      {showMetrics && (
+        <div className="border-t border-zinc-100 dark:border-zinc-800 px-4 py-3 min-h-[100px]">
           <div className="text-[10px] font-semibold text-zinc-400 uppercase tracking-widest mb-2">
             Request Distribution
           </div>
-          <div className="space-y-2">
-            {backends.map((b) => {
-              const pct = Math.round((b.requests / totalRequests) * 100);
-              const isRecent = b.id === lastTarget;
-              return (
-                <div key={b.id} className="flex items-center gap-3">
-                  <span className="text-[10px] font-mono text-zinc-500 w-20 truncate shrink-0">{b.label}</span>
-                  <div className="flex-1 h-1.5 rounded-full bg-zinc-100 dark:bg-zinc-800 overflow-hidden">
-                    <div
-                      className={cn(
-                        "h-full rounded-full transition-all duration-500",
-                        isRecent ? "bg-blue-500" : "bg-zinc-400 dark:bg-zinc-600"
-                      )}
-                      style={{ width: `${pct}%` }}
-                    />
+          {totalRequests > 0 ? (
+            <div className="space-y-2">
+              {backends.map((b) => {
+                const pct = Math.round((b.requests / totalRequests) * 100);
+                const isRecent = b.id === lastTarget;
+                return (
+                  <div key={b.id} className="flex items-center gap-3">
+                    <span className="text-[10px] font-mono text-zinc-500 w-20 truncate shrink-0">{b.label}</span>
+                    <div className="flex-1 h-1.5 rounded-full bg-zinc-100 dark:bg-zinc-800 overflow-hidden">
+                      <div
+                        className={cn(
+                          "h-full rounded-full transition-all duration-500",
+                          isRecent ? "bg-blue-500" : "bg-zinc-400 dark:bg-zinc-600"
+                        )}
+                        style={{ width: `${pct}%` }}
+                      />
+                    </div>
+                    <div className="flex items-center gap-1.5 shrink-0 w-16 justify-end">
+                      <span className="text-[10px] font-mono text-zinc-500">{b.requests}</span>
+                      <span className="text-[10px] font-mono text-zinc-400">({pct}%)</span>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-1.5 shrink-0 w-16 justify-end">
-                    <span className="text-[10px] font-mono text-zinc-500">{b.requests}</span>
-                    <span className="text-[10px] font-mono text-zinc-400">({pct}%)</span>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+                );
+              })}
+            </div>
+          ) : (
+            <p className="text-xs text-zinc-400">Send a request to see distribution across backends</p>
+          )}
         </div>
       )}
 
       {interactive && (
-        <div className="border-t border-zinc-100 dark:border-zinc-800 px-4 py-3 flex items-center gap-2">
-          <span className="text-[10px] text-zinc-400 flex-1">
+        <div className="border-t border-zinc-100 dark:border-zinc-800 px-4 py-3 flex items-center gap-2 bg-zinc-50 dark:bg-zinc-900/30">
+          <span className="text-sm text-zinc-500 dark:text-zinc-400 flex-1">
             {healthyBackends.length}/{backends.length} backends healthy
-            {" · click backend to toggle"}
+            {lastTarget ? ` · last routed to ${backends.find((b) => b.id === lastTarget)?.label}` : " · click backend to toggle health"}
           </span>
           <button
             onClick={sendRequest}
             disabled={animating || healthyBackends.length === 0}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-50"
+            className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 text-sm font-semibold hover:opacity-90 transition-all duration-500 disabled:opacity-50 shrink-0"
           >
             <ArrowRight className="size-3" />
             Send Request

@@ -113,6 +113,10 @@ export function RateLimiter({
           )}
         </div>
 
+        <p className="text-sm text-zinc-500 dark:text-zinc-400 px-4 py-2 border-b border-zinc-100 dark:border-zinc-900">
+          Limits how many requests a client can make — when the bucket runs dry, extra requests get rejected until tokens refill.
+        </p>
+
         <div className="p-4 min-h-[220px] flex gap-5 items-start">
           {/* Token bucket visual */}
           <div className="flex flex-col items-center gap-2 shrink-0 relative">
@@ -204,7 +208,7 @@ export function RateLimiter({
 
         {/* Controls */}
         {interactive && (
-          <div className="border-t border-zinc-100 dark:border-zinc-900 px-4 py-3 flex items-center gap-3 bg-zinc-50 dark:bg-zinc-900/30">
+          <div className="border-t border-zinc-100 dark:border-zinc-900 px-4 py-3 flex items-center gap-3 bg-zinc-50 dark:bg-zinc-900/30 min-h-[52px]">
             <span className="text-sm text-zinc-500 dark:text-zinc-400 flex-1">
               {flash === "blocked"
                 ? "Rate limited! Bucket is empty — wait for tokens to refill."

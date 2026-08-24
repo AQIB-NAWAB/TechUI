@@ -146,6 +146,20 @@ export function HealthCheck({
       </p>
 
       <div className="min-h-[260px] px-4 py-3">
+        <div className="mb-3 flex gap-2">
+          {[
+            { label: "Healthy", count: healthyCount, color: "bg-emerald-500" },
+            { label: "Slow", count: degradedCount, color: "bg-amber-500" },
+            { label: "Down", count: downCount, color: "bg-red-500" },
+          ].map(({ label, count, color }) => (
+            <div key={label} className="flex-1 rounded-lg border border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/50 px-3 py-2 text-center">
+              <div className={cn("size-2 rounded-full mx-auto mb-1", color, count > 0 && label !== "Healthy" && "animate-pulse")} />
+              <div className="text-lg font-bold text-zinc-800 dark:text-zinc-100">{count}</div>
+              <div className="text-[10px] text-zinc-400">{label}</div>
+            </div>
+          ))}
+        </div>
+
         <div className="border border-zinc-100 dark:border-zinc-800 rounded-lg divide-y divide-zinc-100 dark:divide-zinc-800">
           {states.map((ep, idx) => (
             <div

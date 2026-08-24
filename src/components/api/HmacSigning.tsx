@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 import { KeyRound, RefreshCw, CheckCircle2, XCircle, ArrowRight } from "lucide-react";
 
 export const HmacSigningSchema = z.object({
-  name: z.string().optional().default("API Request Signing"),
+  name: z.string().optional().default("Payment API Signing"),
   algorithm: z.enum(["HMAC-SHA256", "HMAC-SHA512"]).optional().default("HMAC-SHA256"),
   secretKey: z.string().optional().default("sk_live_a1b2c3d4e5f6"),
   method: z.enum(["GET", "POST", "PUT", "DELETE"]).optional().default("POST"),
@@ -33,7 +33,7 @@ function buildCanonicalString(method: string, path: string, timestamp: string, b
 }
 
 export function HmacSigning({
-  name = "API Request Signing",
+  name = "Payment API Signing",
   algorithm = "HMAC-SHA256",
   secretKey = "sk_live_a1b2c3d4e5f6",
   method = "POST",
@@ -104,19 +104,23 @@ export function HmacSigning({
   return (
     <div
       className={cn(
-        "rounded-xl border bg-white dark:bg-zinc-950 overflow-hidden transition-all duration-500",
+        "rounded-xl border bg-white dark:bg-zinc-900 overflow-hidden transition-all duration-500",
         flash === "fail" ? "border-red-300 dark:border-red-800" : flash === "ok" ? "border-emerald-300 dark:border-emerald-800" : "border-zinc-200 dark:border-zinc-800"
       )}
     >
-      <div className="flex items-center gap-3 px-4 h-12 border-b border-zinc-100 dark:border-zinc-900 bg-zinc-50 dark:bg-zinc-900/50">
+      <div className="flex items-center gap-3 px-4 h-12 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50">
         <KeyRound className="size-4 text-zinc-400 shrink-0" />
         <span className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 flex-1">{name}</span>
         <span className="text-[10px] font-mono text-zinc-400 bg-zinc-100 dark:bg-zinc-800 px-2 py-0.5 rounded">{algorithm}</span>
         {interactive && (
-          <button onClick={reset} className="p-1 rounded text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-all duration-500">
+          <button type="button" onClick={reset} className="p-1 rounded text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-all duration-500">
             <RefreshCw className="size-3.5" />
           </button>
         )}
+      </div>
+
+      <div className="text-sm text-zinc-500 dark:text-zinc-400 px-4 py-2 border-b border-zinc-100 dark:border-zinc-800">
+        Sign each request with a shared secret — the server recomputes the HMAC to verify nothing was tampered with.
       </div>
 
       <div className="p-4 min-h-[220px] space-y-4">
@@ -179,6 +183,7 @@ export function HmacSigning({
         {interactive && (
           <div className="flex items-center gap-2">
             <button
+              type="button"
               onClick={toggleTamper}
               className={cn(
                 "text-[10px] px-2.5 py-1 rounded-full font-semibold transition-all duration-500",
@@ -194,7 +199,7 @@ export function HmacSigning({
       </div>
 
       {interactive && (
-        <div className="border-t border-zinc-100 dark:border-zinc-900 px-4 py-3 flex items-center gap-3 bg-zinc-50 dark:bg-zinc-900/30">
+        <div className="border-t border-zinc-100 dark:border-zinc-800 px-4 py-3 flex items-center gap-3 bg-zinc-50 dark:bg-zinc-900/30 min-h-[52px]">
           <span className="text-sm text-zinc-500 dark:text-zinc-400 flex-1">
             {flash === "fail"
               ? "HMAC mismatch! Server rejects the request."
@@ -203,6 +208,7 @@ export function HmacSigning({
               : "Walk through canonical string → HMAC → header → server verification."}
           </span>
           <button
+            type="button"
             onClick={runSigning}
             disabled={running}
             className={cn(

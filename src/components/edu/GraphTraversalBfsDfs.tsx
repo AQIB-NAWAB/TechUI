@@ -99,7 +99,7 @@ export function GraphTraversalBfsDfs({
         setTimeout(() => setFlash(null), 500);
         return next;
       });
-    }, 800);
+    }, 1200);
     return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
   }, [playing, steps]);
 
@@ -129,19 +129,41 @@ export function GraphTraversalBfsDfs({
 
   return (
     <div className={cn(
-      "rounded-xl border bg-white dark:bg-zinc-950 overflow-hidden transition-all duration-500",
+      "rounded-xl border bg-white dark:bg-zinc-900 overflow-hidden transition-all duration-500",
       flash ? "border-blue-300 dark:border-blue-800" : "border-zinc-200 dark:border-zinc-800"
     )}>
-      <div className="flex items-center gap-3 px-4 h-12 border-b border-zinc-100 dark:border-zinc-900 bg-zinc-50 dark:bg-zinc-900/50">
+      <div className="flex items-center gap-3 px-4 h-12 border-b border-zinc-100 dark:border-zinc-800">
         <GitBranch className="size-4 text-zinc-400 shrink-0" />
         <span className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 flex-1">{name}</span>
-        <span className="text-[10px] font-mono text-zinc-400 bg-zinc-100 dark:bg-zinc-800 px-2 py-0.5 rounded uppercase">{algorithm}</span>
+        <span className="text-[10px] font-mono text-zinc-400 bg-zinc-100 dark:bg-zinc-800 px-2 py-0.5 rounded uppercase">
+          {algorithm === "bfs" ? "Breadth-first" : "Depth-first"}
+        </span>
         {interactive && (
-          <button onClick={reset} className="p-1 rounded text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-all duration-500">
-            <RefreshCw className="size-3.5" />
-          </button>
+          <>
+            <button
+              onClick={stepOnce}
+              disabled={playing || isDone}
+              className="p-1 rounded text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-all duration-500 disabled:opacity-40"
+              title="Step forward"
+            >
+              <StepForward className="size-3.5" />
+            </button>
+            <button
+              onClick={reset}
+              className="p-1 rounded text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-all duration-500"
+              title="Reset"
+            >
+              <RefreshCw className="size-3.5" />
+            </button>
+          </>
         )}
       </div>
+
+      <p className="text-sm text-zinc-500 dark:text-zinc-400 px-4 py-2 border-b border-zinc-100 dark:border-zinc-800">
+        {algorithm === "bfs"
+          ? "BFS explores neighbors level by level — like ripples spreading outward."
+          : "DFS goes as deep as possible first — like exploring one branch to the end."}
+      </p>
 
       <div className="p-4 min-h-[240px] flex gap-5 items-start">
         {/* Graph canvas */}
@@ -259,21 +281,14 @@ export function GraphTraversalBfsDfs({
       </div>
 
       {interactive && (
-        <div className="border-t border-zinc-100 dark:border-zinc-900 px-4 py-3 flex items-center gap-3 bg-zinc-50 dark:bg-zinc-900/30">
+        <div className="border-t border-zinc-100 dark:border-zinc-800 px-4 py-3 flex items-center gap-3 bg-zinc-50 dark:bg-zinc-900/30">
           <span className="text-sm text-zinc-500 dark:text-zinc-400 flex-1">
             {isDone
               ? `${algorithm.toUpperCase()} complete — visited ${visited.length} nodes.`
               : stepIndex < 0
-              ? `${algorithm === "bfs" ? "BFS explores level-by-level using a queue." : "DFS dives deep using a stack."} Step through or auto-play.`
+              ? "Auto-play to watch nodes get visited in order."
               : `Visiting node ${current?.node} — ${algorithm === "bfs" ? "dequeue front, enqueue neighbors" : "pop top, push neighbors"}.`}
           </span>
-          <button
-            onClick={stepOnce}
-            disabled={playing || isDone}
-            className="px-3 py-2 rounded-lg text-sm font-semibold border border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-300 transition-all duration-500 shrink-0 hover:opacity-90 disabled:opacity-50"
-          >
-            <StepForward className="size-4" />
-          </button>
           <button
             onClick={autoPlay}
             disabled={playing}

@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import {
-  Server, Database, Globe, Shield, Zap, Box, HardDrive,
-  Cpu, Cloud, Monitor, GitBranch, Mail
+  Server, Database, Globe, Shield, Zap, HardDrive,
+  Cpu, Cloud, Monitor, GitBranch, Mail, Network, RefreshCw
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { z } from "zod";
@@ -216,8 +216,17 @@ export function ArchitectureDiagram({
   layout = "horizontal",
 }: ArchitectureDiagramProps) {
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [cycleIdx, setCycleIdx] = useState(0);
 
   const selected = nodes.find((n) => n.id === selectedId);
+
+  function exploreNext() {
+    const next = nodes[cycleIdx % nodes.length];
+    if (next) {
+      setSelectedId(next.id);
+      setCycleIdx((i) => (i + 1) % nodes.length);
+    }
+  }
 
   return (
     <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden">
@@ -232,13 +241,26 @@ export function ArchitectureDiagram({
         }
       `}</style>
 
-      {title && (
-        <div className="px-4 h-12 flex items-center border-b border-zinc-100 dark:border-zinc-800">
-          <p className="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wider font-medium">
-            {title}
-          </p>
-        </div>
-      )}
+      <div className="px-4 h-12 flex items-center gap-3 border-b border-zinc-100 dark:border-zinc-800">
+        <Network className="size-4 text-zinc-400 shrink-0" />
+        <p className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 flex-1">
+          {title ?? "Architecture Diagram"}
+        </p>
+        <span className="text-[10px] font-mono text-zinc-400 bg-zinc-100 dark:bg-zinc-800 px-2 py-0.5 rounded">
+          {nodes.length} nodes
+        </span>
+        <button
+          onClick={() => { setSelectedId(null); setCycleIdx(0); }}
+          className="p-1 rounded text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-all duration-500"
+          title="Reset"
+        >
+          <RefreshCw className="size-3.5" />
+        </button>
+      </div>
+
+      <div className="text-sm text-zinc-500 dark:text-zinc-400 px-4 py-2 border-b border-zinc-100 dark:border-zinc-800">
+        A map of system parts and how data flows between them — click any node to inspect it.
+      </div>
 
       <div className="min-h-[220px] flex flex-col justify-center px-6 py-5">
         <div
@@ -283,58 +305,51 @@ export function ArchitectureDiagram({
             );
           })}
         </div>
+
+        <div className="min-h-[72px] mt-4 rounded-lg border border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/50 px-3 py-2.5">
+          {selected ? (
+            <div className="flex items-start gap-3 transition-all duration-500">
+              <div className={cn("size-2 rounded-full mt-1 shrink-0 animate-pulse", selected.status === "active" ? STATUS_DOT_BY_TYPE[selected.type] : selected.status ? STATUS_DOT[selected.status] : "bg-zinc-300")} />
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-sm font-semibold text-zinc-800 dark:text-zinc-200">{selected.label}</span>
+                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 font-mono uppercase">
+                    {selected.type}
+                  </span>
+                </div>
+                <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
+                  {selected.type === "client" && "Entry point — users and browsers connect here"}
+                  {selected.type === "gateway" && "Routes and authenticates incoming API traffic"}
+                  {selected.type === "loadbalancer" && "Distributes requests across healthy backends"}
+                  {selected.type === "service" && "Runs business logic and handles requests"}
+                  {selected.type === "database" && "Persistent data storage — SQL or NoSQL"}
+                  {selected.type === "cache" && "Fast in-memory store for frequently accessed data"}
+                  {selected.type === "queue" && "Buffers messages between producers and consumers"}
+                  {selected.type === "worker" && "Background processor for async jobs"}
+                  {selected.type === "cdn" && "Edge cache serving static assets globally"}
+                  {selected.type === "function" && "Serverless function — runs on demand"}
+                  {!["client","gateway","loadbalancer","service","database","cache","queue","worker","cdn","function"].includes(selected.type) && "Part of the system architecture"}
+                </p>
+              </div>
+            </div>
+          ) : (
+            <p className="text-xs text-zinc-400 text-center py-2">Click a node or use Explore Next to inspect its role</p>
+          )}
+        </div>
       </div>
 
-      {/* Detail panel — fixed height to prevent layout shift */}
-      <div className="min-h-[72px] border-t border-zinc-100 dark:border-zinc-800 px-4 py-3">
-        {selected ? (
-          <div className="flex items-start gap-3 transition-all duration-500">
-            <div className={cn("size-2 rounded-full mt-1 shrink-0 animate-pulse", selected.status === "active" ? STATUS_DOT_BY_TYPE[selected.type] : selected.status ? STATUS_DOT[selected.status] : "bg-zinc-300")} />
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-sm font-semibold text-zinc-800 dark:text-zinc-200">{selected.label}</span>
-                <span className="text-[10px] px-1.5 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 font-mono uppercase">
-                  {selected.type}
-                </span>
-                {selected.status && (
-                  <span className={cn(
-                    "text-[10px] font-medium",
-                    selected.status === "active" ? "text-emerald-600 dark:text-emerald-400" :
-                    selected.status === "error" ? "text-red-600 dark:text-red-400" :
-                    selected.status === "warning" ? "text-amber-600 dark:text-amber-400" :
-                    "text-zinc-400"
-                  )}>
-                    {selected.status}
-                  </span>
-                )}
-              </div>
-              {selected.sublabel && (
-                <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">{selected.sublabel}</p>
-              )}
-              <p className="text-[11px] text-zinc-400 dark:text-zinc-500 mt-1">
-                {selected.type === "client" && "Entry point — users and browsers connect here"}
-                {selected.type === "gateway" && "Routes and authenticates incoming API traffic"}
-                {selected.type === "loadbalancer" && "Distributes requests across healthy backends"}
-                {selected.type === "service" && "Runs business logic and handles requests"}
-                {selected.type === "database" && "Persistent data storage — SQL or NoSQL"}
-                {selected.type === "cache" && "Fast in-memory store for frequently accessed data"}
-                {selected.type === "queue" && "Buffers messages between producers and consumers"}
-                {selected.type === "worker" && "Background processor for async jobs"}
-                {selected.type === "cdn" && "Edge cache serving static assets globally"}
-                {selected.type === "function" && "Serverless function — runs on demand"}
-                {!["client","gateway","loadbalancer","service","database","cache","queue","worker","cdn","function"].includes(selected.type) && "Part of the system architecture"}
-              </p>
-            </div>
-            <button
-              onClick={() => setSelectedId(null)}
-              className="text-zinc-300 dark:text-zinc-600 hover:text-zinc-500 transition-colors duration-500 text-xs shrink-0"
-            >
-              ✕
-            </button>
-          </div>
-        ) : (
-          <p className="text-xs text-zinc-400 text-center py-1">Click a node to inspect its role</p>
-        )}
+      <div className="border-t border-zinc-100 dark:border-zinc-800 px-4 py-3 flex items-center gap-3 bg-zinc-50 dark:bg-zinc-900/30">
+        <span className="text-sm text-zinc-500 dark:text-zinc-400 flex-1">
+          {selected
+            ? `${selected.label} (${selected.type}) — ${selected.sublabel ?? "part of the system"}`
+            : "Click any node to see what it does in the system"}
+        </span>
+        <button
+          onClick={exploreNext}
+          className="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-all duration-500 shrink-0"
+        >
+          Explore Next
+        </button>
       </div>
     </div>
   );

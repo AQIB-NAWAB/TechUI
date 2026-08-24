@@ -1,36 +1,63 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# TechUI
 
-## Getting Started
+Interactive React components that make software engineering concepts **visually obvious** — rate limiters, circuit breakers, DNS lookups, JWT flows, and 180+ more.
 
-First, run the development server:
+**Live playground:** [techui.dev](https://techui.dev) (after deploy)
+
+## Add to your project (like shadcn)
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npx techui init
+npx techui add rate-limiter
+npx techui add circuit-breaker dns-lookup
+npx techui list --category api
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+See [docs/CLI.md](./docs/CLI.md) for full CLI documentation.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Project structure
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```
+techui/
+├── app/                    # Next.js App Router (playground site)
+├── src/
+│   ├── components/         # Component source library (185+)
+│   ├── registry/           # Runtime registry for playground
+│   ├── playground/         # Interactive demo UI
+│   └── lib/                # Shared utilities (cn)
+├── packages/
+│   └── cli/                # `npx techui` CLI
+├── registry/               # Public JSON registry (shadcn-style)
+│   ├── index.json
+│   └── r/*.json
+├── skills/
+│   └── techui/             # Cursor / agent skill
+├── docs/
+│   ├── CLI.md
+│   └── COMPONENT_SPEC.md   # Design system for contributors
+└── scripts/
+    └── generate-registry.mjs
+```
 
-## Learn More
+## Development
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+npm install
+npm run dev          # http://localhost:3000/playground
+npm run build
+npm run generate:registry   # rebuild registry/r/*.json from src/
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## For AI agents & IDEs
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- **Skill:** `skills/techui/SKILL.md` — add to Cursor or copy to `.cursor/skills/`
+- **Spec:** `docs/COMPONENT_SPEC.md` — design system all components must follow
+- **Registry:** `registry/index.json` — machine-readable component catalog
 
-## Deploy on Vercel
+## Categories
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+API · Architecture · Database · Auth · Networking · Cloud · Containers · Distributed · Code · DevTools · UI · AI · Education
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## License
+
+MIT

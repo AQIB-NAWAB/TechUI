@@ -105,19 +105,35 @@ export function EventBus({
 
   useEffect(() => () => clearTimers(), []);
 
+  function publishSample() {
+    const pub = publishers[0];
+    const evt = pub?.events[0];
+    if (pub && evt) publish(pub.id, evt);
+  }
+
+  const statusText = phase !== "idle"
+    ? activeTopic
+      ? `Delivering "${activeTopic}" through the bus…`
+      : "Event delivered to subscribers"
+    : log.length > 0
+    ? `Last event: ${log[0]?.topic} → ${log[0]?.to}`
+    : "Click an event badge or Publish Sample to see message travel";
+
   return (
-    <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 overflow-hidden text-sm">
-      {/* Header */}
-      <div className="flex items-center gap-2 px-4 py-2.5 border-b border-zinc-100 dark:border-zinc-900 bg-zinc-50 dark:bg-zinc-900/40">
-        <Radio className="size-3.5 text-violet-500 shrink-0" />
-        <span className="text-xs font-semibold text-zinc-800 dark:text-zinc-200 flex-1">{name}</span>
+    <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden text-sm">
+      <div className="flex items-center gap-2 px-4 h-12 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50">
+        <Radio className="size-4 text-violet-500 shrink-0" />
+        <span className="text-sm font-semibold text-zinc-800 dark:text-zinc-200 flex-1">{name}</span>
         <span className="text-[10px] text-zinc-400">
-          {topics.length} topics · {publishers.length} publishers · {subscribers.length} subscribers
+          {topics.length} topics · {publishers.length} pubs · {subscribers.length} subs
         </span>
       </div>
 
-      {/* 3-column layout */}
-      <div className="relative grid grid-cols-[1fr_auto_1fr] divide-x divide-zinc-100 dark:divide-zinc-900 min-h-[200px]">
+      <div className="text-sm text-zinc-500 dark:text-zinc-400 px-4 py-2 border-b border-zinc-100 dark:border-zinc-800">
+        Publishers emit events to topics; subscribers listen and react — no direct coupling.
+      </div>
+
+      <div className="relative grid grid-cols-[1fr_auto_1fr] divide-x divide-zinc-100 dark:divide-zinc-800 min-h-[220px]">
         {/* Traveling dot overlay */}
         {phase !== "idle" && (
           <div className="absolute top-0 left-0 right-0 h-1 z-20 pointer-events-none mx-4 mt-16">
@@ -272,27 +288,37 @@ export function EventBus({
         </div>
       </div>
 
-      {/* Event log */}
-      {log.length > 0 ? (
-        <div className="border-t border-zinc-100 dark:border-zinc-900">
-          <div className="px-4 py-1.5 text-[10px] font-semibold text-zinc-400 uppercase tracking-wider">Event Log</div>
-          <div className="px-4 pb-3 space-y-1 max-h-24 overflow-y-auto">
-            {log.map((entry, i) => (
-              <div key={i} className="flex items-center gap-2 text-[10px] font-mono">
-                <span className="text-zinc-300 dark:text-zinc-700 shrink-0">{entry.ts}</span>
-                <span className="text-violet-600 dark:text-violet-400 shrink-0">{entry.topic}</span>
-                <span className="text-zinc-400 shrink-0">{entry.from}</span>
-                <span className="text-zinc-300 dark:text-zinc-600">→</span>
-                <span className="text-zinc-500 dark:text-zinc-400 truncate">{entry.to}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      ) : (
-        <div className="border-t border-zinc-100 dark:border-zinc-900 px-4 py-2.5 text-[10px] text-zinc-400 min-h-[36px]">
-          {interactive
-            ? "Click an event badge on a publisher to see it travel through the bus to subscribers"
-            : "\u00a0"}
+      {/* Event log — fixed height */}
+      <div className="border-t border-zinc-100 dark:border-zinc-800 min-h-[72px]">
+        {log.length > 0 ? (
+          <>
+            <div className="px-4 py-1.5 text-[10px] font-semibold text-zinc-400 uppercase tracking-widest">Event Log</div>
+            <div className="px-4 pb-3 space-y-1 max-h-20 overflow-y-auto">
+              {log.map((entry, i) => (
+                <div key={i} className="flex items-center gap-2 text-[10px] font-mono">
+                  <span className="text-zinc-300 dark:text-zinc-700 shrink-0">{entry.ts}</span>
+                  <span className="text-violet-600 dark:text-violet-400 shrink-0">{entry.topic}</span>
+                  <span className="text-zinc-400 shrink-0">{entry.from}</span>
+                  <span className="text-zinc-300 dark:text-zinc-600">→</span>
+                  <span className="text-zinc-500 dark:text-zinc-400 truncate">{entry.to}</span>
+                </div>
+              ))}
+            </div>
+          </>
+        ) : null}
+      </div>
+
+      {interactive && (
+        <div className="border-t border-zinc-100 dark:border-zinc-800 px-4 py-3 flex items-center gap-3 bg-zinc-50 dark:bg-zinc-900/30">
+          <span className="text-sm text-zinc-500 dark:text-zinc-400 flex-1">{statusText}</span>
+          <button
+            type="button"
+            onClick={publishSample}
+            disabled={phase !== "idle" || !publishers[0]?.events[0]}
+            className="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-50 shrink-0"
+          >
+            Publish Sample
+          </button>
         </div>
       )}
     </div>

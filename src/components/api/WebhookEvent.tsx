@@ -199,13 +199,6 @@ export function WebhookEvent({
           {verified && (
             <span className="text-[10px] font-mono text-zinc-400">t=1716239022</span>
           )}
-          <button
-            onClick={replay}
-            className="ml-auto p-1.5 rounded-lg text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all duration-500"
-            title="Replay delivery"
-          >
-            <RefreshCw className="size-3.5" />
-          </button>
         </div>
       </div>
 
@@ -218,23 +211,25 @@ export function WebhookEvent({
       </div>
 
       {/* Footer */}
-      <div className="border-t border-zinc-100 dark:border-zinc-800 px-4 py-3 flex items-center justify-between bg-zinc-50/50 dark:bg-zinc-900/30">
-        <div className="flex items-center gap-3 text-xs text-zinc-500">
+      <div className="border-t border-zinc-100 dark:border-zinc-800 px-4 py-3 flex items-center gap-3 bg-zinc-50/50 dark:bg-zinc-900/30">
+        <div className="flex items-center gap-3 text-xs text-zinc-500 flex-1">
           <span>Response:</span>
           <span className={cn("font-mono font-bold", responseColor)}>{responseCode}</span>
           {responseCode < 300 && <span className="text-zinc-400">OK</span>}
-          {responseCode >= 400 && <span className="text-zinc-400">{responseCode >= 500 ? "Error" : "Client Error"}</span>}
           <span className="text-zinc-300 dark:text-zinc-700">·</span>
           <span className="flex items-center gap-1 text-zinc-400">
             <Clock className="size-3" />{latency}ms
           </span>
+          <span className="text-zinc-300 dark:text-zinc-700">·</span>
+          <span className="font-mono">{attempt}/{maxAttempts}</span>
         </div>
-        <div className="flex items-center gap-1 text-xs text-zinc-400">
-          <span>Attempt</span>
-          <span className="font-mono font-semibold text-zinc-600 dark:text-zinc-300">{attempt}</span>
-          <span>of</span>
-          <span className="font-mono font-semibold text-zinc-600 dark:text-zinc-300">{maxAttempts}</span>
-        </div>
+        <button
+          onClick={replay}
+          className="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-opacity flex items-center gap-1.5"
+        >
+          <RefreshCw className="size-3.5" />
+          Replay Delivery
+        </button>
       </div>
     </div>
   );

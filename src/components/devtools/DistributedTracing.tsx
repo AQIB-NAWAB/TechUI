@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { z } from "zod";
 import { cn } from "@/lib/utils";
-import { GitBranch, RefreshCw, Play, AlertTriangle, Clock, XCircle } from "lucide-react";
+import { GitBranch, Play, AlertTriangle, Clock, XCircle } from "lucide-react";
 
 export const DistributedTracingSchema = z.object({
   traceId: z.string().default("abc123"),
@@ -122,13 +122,6 @@ export function DistributedTracing({
         <span className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 flex-1">Distributed Tracing</span>
         <span className="text-[10px] font-mono text-zinc-400">{shortTraceId}</span>
         <span className="text-[10px] font-semibold text-zinc-600 dark:text-zinc-300">{totalMs}ms</span>
-        <button
-          onClick={reset}
-          className="p-1 rounded text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-all duration-500"
-          aria-label="Reset trace"
-        >
-          <RefreshCw className="size-3.5" />
-        </button>
       </div>
 
       <p className="text-sm text-zinc-500 dark:text-zinc-400 px-4 py-2 border-b border-zinc-100 dark:border-zinc-800">
@@ -215,6 +208,12 @@ export function DistributedTracing({
             </div>
             <div className="w-10" />
           </div>
+
+          <div className="mt-2 flex gap-3 text-[10px] text-zinc-400 px-1">
+            <span className="flex items-center gap-1"><span className="size-2 rounded-full bg-blue-500 inline-block" /> ok</span>
+            <span className="flex items-center gap-1"><span className="size-2 rounded-full bg-amber-500 inline-block" /> slow</span>
+            <span className="flex items-center gap-1"><span className="size-2 rounded-full bg-red-500 inline-block" /> error</span>
+          </div>
         </div>
 
         <div
@@ -251,25 +250,17 @@ export function DistributedTracing({
       </div>
 
       <div className="border-t border-zinc-100 dark:border-zinc-800 px-4 py-3 flex items-center gap-3">
+        <span className="text-sm text-zinc-500 dark:text-zinc-400 flex-1">
+          {replaying ? "Spans appear one at a time — like a request traveling" : selectedSpanDef ? `Selected: ${selectedSpanDef.name}` : "Click a bar for details, or replay the trace"}
+        </span>
         <button
           onClick={replay}
           disabled={replaying}
-          className={cn(
-            "flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-500 shrink-0",
-            replaying
-              ? "bg-zinc-200 dark:bg-zinc-800 text-zinc-400 cursor-not-allowed"
-              : "bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 hover:opacity-90"
-          )}
+          className="flex items-center gap-1.5 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-opacity shrink-0 disabled:opacity-40"
         >
           <Play className="size-3.5" />
-          {replaying ? "Replaying…" : "Replay"}
+          {replaying ? "Replaying…" : "Replay Trace"}
         </button>
-        <div className="flex gap-3 text-[10px] text-zinc-400">
-          <span className="flex items-center gap-1"><span className="size-2 rounded-full bg-blue-500 inline-block" /> ok</span>
-          <span className="flex items-center gap-1"><span className="size-2 rounded-full bg-amber-500 inline-block" /> slow</span>
-          <span className="flex items-center gap-1"><span className="size-2 rounded-full bg-red-500 inline-block" /> error</span>
-        </div>
-        <span className="ml-auto text-sm text-zinc-500 dark:text-zinc-400">Click a span for details</span>
       </div>
     </div>
   );

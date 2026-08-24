@@ -135,32 +135,27 @@ export function ServiceMesh({
   const svgWidth = containerRef.current?.offsetWidth ?? 600;
   const svgHeight = containerRef.current?.offsetHeight ?? 300;
 
+  const statusText = simulating
+    ? "Sending traffic through the mesh…"
+    : log.length > 0
+    ? `Last: ${svc(log[0]?.from ?? "")?.name ?? log[0]?.from} → ${svc(log[0]?.to ?? "")?.name ?? log[0]?.to} (${log[0]?.ok ? "ok" : "fail"})`
+    : "Send traffic to watch packets travel between services";
+
   return (
-    <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 overflow-hidden text-sm">
-      {/* Header */}
-      <div className="flex items-center gap-3 px-4 py-2.5 border-b border-zinc-100 dark:border-zinc-900 bg-zinc-50 dark:bg-zinc-900/40">
-        <Server className="size-3.5 text-zinc-400 shrink-0" />
-        <span className="text-xs font-semibold text-zinc-800 dark:text-zinc-200 flex-1">{title}</span>
+    <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden text-sm">
+      <div className="flex items-center gap-3 px-4 h-12 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50">
+        <Server className="size-4 text-zinc-400 shrink-0" />
+        <span className="text-sm font-semibold text-zinc-800 dark:text-zinc-200 flex-1">{title}</span>
         {mtls && (
           <span className="flex items-center gap-1 text-[10px] font-mono text-amber-600 dark:text-amber-400 border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/30 px-1.5 py-0.5 rounded">
             <Lock className="size-2.5" />
             mTLS
           </span>
         )}
-        {interactive && (
-          <button
-            onClick={simulate}
-            disabled={simulating}
-            className={cn(
-              "text-[11px] px-2.5 py-1 rounded font-semibold transition-colors",
-              simulating
-                ? "bg-zinc-100 dark:bg-zinc-800 text-zinc-400 cursor-not-allowed"
-                : "bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 hover:opacity-90"
-            )}
-          >
-            {simulating ? "Sending…" : "Send traffic"}
-          </button>
-        )}
+      </div>
+
+      <div className="text-sm text-zinc-500 dark:text-zinc-400 px-4 py-2 border-b border-zinc-100 dark:border-zinc-800">
+        Every service gets a sidecar proxy that handles routing, retries, and encrypted traffic between services.
       </div>
 
       <div className="grid grid-cols-[1fr_auto] divide-x divide-zinc-100 dark:divide-zinc-900">
@@ -376,6 +371,20 @@ export function ServiceMesh({
           )}
         </div>
       </div>
+
+      {interactive && (
+        <div className="border-t border-zinc-100 dark:border-zinc-800 px-4 py-3 flex items-center gap-3 bg-zinc-50 dark:bg-zinc-900/30">
+          <span className="text-sm text-zinc-500 dark:text-zinc-400 flex-1 min-w-0 truncate">{statusText}</span>
+          <button
+            type="button"
+            onClick={simulate}
+            disabled={simulating}
+            className="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-50 shrink-0"
+          >
+            {simulating ? "Sending…" : "Send Traffic"}
+          </button>
+        </div>
+      )}
     </div>
   );
 }

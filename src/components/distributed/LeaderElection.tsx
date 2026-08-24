@@ -136,7 +136,7 @@ export function LeaderElection({
     setTimeout(() => {
       if (algorithm === "bully") runBullyElection();
       else runRingElection();
-    }, 300);
+    }, 1000);
   }
 
   const stateStyles: Record<NodeState, string> = {
@@ -148,21 +148,21 @@ export function LeaderElection({
   };
 
   return (
-    <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 overflow-hidden">
-      <div className="flex items-center gap-3 px-4 h-12 border-b border-zinc-100 dark:border-zinc-900 bg-zinc-50 dark:bg-zinc-900/50">
+    <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden">
+      <div className="flex items-center gap-3 px-4 h-12 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50">
         <Crown className="size-4 text-amber-500 shrink-0" />
         <span className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 flex-1">{title}</span>
         <span className="text-[10px] font-mono text-zinc-400 bg-zinc-100 dark:bg-zinc-800 px-2 py-0.5 rounded">
           {algorithm}
         </span>
         {interactive && (
-          <button onClick={reset} className="p-1 rounded text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-all duration-500">
+          <button type="button" onClick={reset} className="p-1 rounded text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-all duration-500">
             <RefreshCw className="size-3.5" />
           </button>
         )}
       </div>
 
-      <div className="px-4 py-2 text-sm text-zinc-500 dark:text-zinc-400 border-b border-zinc-100 dark:border-zinc-900">
+      <div className="px-4 py-2 text-sm text-zinc-500 dark:text-zinc-400 border-b border-zinc-100 dark:border-zinc-800">
         Distributed nodes elect one leader to coordinate work — no single point of failure.
       </div>
 
@@ -221,9 +221,10 @@ export function LeaderElection({
       </div>
 
       {interactive && (
-        <div className="border-t border-zinc-100 dark:border-zinc-900 px-4 py-3 flex items-center gap-3 bg-zinc-50 dark:bg-zinc-900/30">
+        <div className="border-t border-zinc-100 dark:border-zinc-800 px-4 py-3 flex items-center gap-3 bg-zinc-50 dark:bg-zinc-900/30 min-h-[52px]">
           <span className="text-sm text-zinc-500 dark:text-zinc-400 flex-1">{statusText}</span>
           <button
+            type="button"
             onClick={startElection}
             disabled={phase === "running"}
             className={cn(

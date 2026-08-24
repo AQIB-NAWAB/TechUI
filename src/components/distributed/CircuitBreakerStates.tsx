@@ -132,7 +132,7 @@ export function CircuitBreakerStates({
 
       <div className="flex flex-col md:flex-row gap-0 min-h-[280px]">
         {/* State diagram column */}
-        <div className="flex-1 px-5 py-4 flex flex-col items-start gap-0">
+        <div className="flex-1 px-5 py-4 flex flex-col items-start gap-0 min-h-[240px]">
           {states.map((state, i) => {
             const cfg = STATE_DETAILS[state];
             const isSelected = selected === state;

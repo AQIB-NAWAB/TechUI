@@ -152,7 +152,7 @@ export function ServiceWorker({
   const [isOffline, setIsOffline] = useState(false);
   const [flowSteps, setFlowSteps] = useState<FlowStep[]>([]);
   const [visibleSteps, setVisibleSteps] = useState(0);
-  const [selectedUrl, setSelectedUrl] = useState<string | null>(null);
+  const [selectedUrl, setSelectedUrl] = useState<string | null>(resources[0]?.url ?? null);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const strategies = (["cache-first", "network-first", "stale-while-revalidate", "cache-only"] as Strategy[]);
@@ -187,7 +187,7 @@ export function ServiceWorker({
 
   return (
     <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden">
-      <div className="flex items-center gap-3 px-4 h-12 border-b border-zinc-100 dark:border-zinc-800">
+      <div className="flex items-center gap-3 px-4 h-12 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50">
         <Cpu className="size-4 text-zinc-400 shrink-0" />
         <span className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 flex-1">Service Worker</span>
         <button
@@ -204,11 +204,11 @@ export function ServiceWorker({
         </button>
       </div>
 
-      <p className="text-sm text-zinc-500 px-4 py-2 border-b border-zinc-100 dark:border-zinc-800">
+      <p className="text-sm text-zinc-500 dark:text-zinc-400 px-4 py-2 border-b border-zinc-100 dark:border-zinc-800">
         A service worker intercepts requests and decides: cache or network?
       </p>
 
-      <div className="min-h-[280px] px-4 py-3 flex flex-col gap-3">
+      <div className="min-h-[220px] px-4 py-3 flex flex-col gap-3">
         <div className="flex gap-1 overflow-x-auto">
           {strategies.map((s) => (
             <button
@@ -289,7 +289,7 @@ export function ServiceWorker({
             </div>
           ) : (
             <div className="flex items-center justify-center h-full text-xs text-zinc-400">
-              Click a resource below to see the fetch flow
+              Select a resource, then click Fetch Resource
             </div>
           )}
         </div>
@@ -317,10 +317,23 @@ export function ServiceWorker({
         </div>
       </div>
 
-      <div className="border-t border-zinc-100 dark:border-zinc-800 px-4 py-3">
-        <p className="text-sm text-zinc-500 dark:text-zinc-400">
-          <span className="font-semibold text-violet-500">Tip: </span>{cfg.insight}
-        </p>
+      <div className="border-t border-zinc-100 dark:border-zinc-800 px-4 py-3 flex items-center gap-3 bg-zinc-50 dark:bg-zinc-900/30">
+        <span className="text-sm text-zinc-500 dark:text-zinc-400 flex-1">
+          {flowSteps.length > 0
+            ? visibleSteps >= flowSteps.length
+              ? `Done — ${cfg.label} served ${selectedUrl}`
+              : `Step ${visibleSteps}/${flowSteps.length}…`
+            : selectedUrl
+            ? `Ready to fetch ${selectedUrl}`
+            : cfg.insight}
+        </span>
+        <button
+          type="button"
+          onClick={() => requestResource(selectedUrl ?? resources[0]?.url ?? "/")}
+          className="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-opacity"
+        >
+          {flowSteps.length > 0 && visibleSteps < flowSteps.length ? "Fetching…" : "Fetch Resource"}
+        </button>
       </div>
     </div>
   );

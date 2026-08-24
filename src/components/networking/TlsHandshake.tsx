@@ -225,25 +225,24 @@ export function TlsHandshake({
 
   useEffect(() => () => { if (intervalRef.current) clearInterval(intervalRef.current); }, []);
 
+  const statusText =
+    running ? `Step ${activeStep + 1} of ${steps.length} — handshaking…`
+    : done ? "Encrypted tunnel established"
+    : "Click Simulate to watch TLS secure the connection";
+
   return (
     <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 overflow-hidden">
-      {/* Header */}
-      <div className="flex items-center gap-3 px-4 h-12 border-b border-zinc-100 dark:border-zinc-900 bg-zinc-50 dark:bg-zinc-900/50">
-        <Lock className="size-3.5 text-zinc-400 shrink-0" />
-        <span className="text-xs font-semibold text-zinc-800 dark:text-zinc-200 flex-1">{serverName}</span>
-        <span className="text-[10px] font-mono text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 px-2 py-0.5 rounded">
+      <div className="flex items-center gap-3 px-4 h-12 border-b border-zinc-100 dark:border-zinc-900">
+        <Lock className="size-4 text-zinc-400 shrink-0" />
+        <span className="text-sm font-semibold text-zinc-800 dark:text-zinc-200 flex-1">TLS Handshake</span>
+        <code className="text-[10px] font-mono text-zinc-500 dark:text-zinc-400 truncate max-w-[120px]">{serverName}</code>
+        <span className="text-[10px] font-mono text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 px-2 py-0.5 rounded shrink-0">
           {version}
         </span>
-        {interactive && (
-          <button
-            onClick={done ? reset : run}
-            disabled={running}
-            className="flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-semibold transition-all duration-500 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 hover:opacity-90 disabled:opacity-50"
-          >
-            {running ? <RefreshCw className="size-3 animate-spin" /> : done ? <RefreshCw className="size-3" /> : <ShieldCheck className="size-3" />}
-            {running ? "Handshaking…" : done ? "Reset" : "Simulate"}
-          </button>
-        )}
+      </div>
+
+      <div className="text-sm text-zinc-500 dark:text-zinc-400 px-4 py-2 border-b border-zinc-100 dark:border-zinc-900">
+        Before data is sent, browser and server agree on encryption keys so no one can read the traffic.
       </div>
 
       {/* Participants */}
@@ -280,27 +279,22 @@ export function TlsHandshake({
         ))}
       </div>
 
-      {/* Footer */}
-      <div
-        className={cn(
-          "border-t px-4 py-3 flex items-center gap-3 transition-all duration-700",
-          done
-            ? "border-emerald-200 dark:border-emerald-900/40 bg-emerald-50 dark:bg-emerald-950/10"
-            : "border-zinc-100 dark:border-zinc-900 bg-zinc-50 dark:bg-zinc-900/20"
-        )}
-      >
-        {done ? (
-          <>
-            <Lock className="size-4 text-emerald-500 shrink-0" />
-            <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-400 flex-1">
-              Encrypted tunnel established
-            </span>
-            <code className="text-[10px] font-mono text-emerald-600 dark:text-emerald-500 truncate max-w-[160px]">{cipher}</code>
-          </>
-        ) : (
-          <p className="text-[11px] text-zinc-400">
-            {running ? `Step ${activeStep + 1} of ${steps.length} — handshaking…` : "TLS handshake not started"}
-          </p>
+      <div className="border-t border-zinc-100 dark:border-zinc-900 px-4 py-3 flex items-center gap-3">
+        <span className={cn(
+          "text-sm flex-1 transition-all duration-500",
+          done ? "text-emerald-700 dark:text-emerald-400 font-semibold" : "text-zinc-500 dark:text-zinc-400"
+        )}>
+          {statusText}
+        </span>
+        {interactive && (
+          <button
+            onClick={done ? reset : run}
+            disabled={running}
+            className="flex items-center gap-1.5 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-50 shrink-0"
+          >
+            {running ? <RefreshCw className="size-3.5 animate-spin" /> : done ? <RefreshCw className="size-3.5" /> : <ShieldCheck className="size-3.5" />}
+            {running ? "Handshaking…" : done ? "Reset" : "Simulate"}
+          </button>
         )}
       </div>
     </div>

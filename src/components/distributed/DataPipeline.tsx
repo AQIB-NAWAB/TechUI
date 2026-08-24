@@ -155,34 +155,31 @@ export function DataPipeline({
   const selectedStage = stages.find((s) => s.id === selected);
   const throughput = running ? Math.round(processed / Math.max(1, (processed + failed) / 10)) + 2 : 0;
 
+  const statusText = running
+    ? `Processing records… ${processed} done, ${failed} failed`
+    : processed > 0
+    ? `Finished — ${processed} records processed`
+    : "Run the pipeline to watch data flow through each stage";
+
   return (
-    <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 overflow-hidden text-sm">
-      {/* Header */}
-      <div className="flex items-center gap-3 px-4 py-2.5 border-b border-zinc-100 dark:border-zinc-900 bg-zinc-50 dark:bg-zinc-900/40">
-        <Database className="size-3.5 text-zinc-400 shrink-0" />
-        <span className="text-xs font-semibold text-zinc-800 dark:text-zinc-200 flex-1">{title}</span>
+    <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden text-sm">
+      <div className="flex items-center gap-3 px-4 h-12 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50">
+        <Database className="size-4 text-zinc-400 shrink-0" />
+        <span className="text-sm font-semibold text-zinc-800 dark:text-zinc-200 flex-1">{title}</span>
         {interactive && (
-          <div className="flex items-center gap-2">
-            <button
-              onClick={resetAll}
-              className="text-[11px] text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors flex items-center gap-1"
-            >
-              <RotateCcw className="size-3" />
-              Reset
-            </button>
-            <button
-              onClick={running ? stopAnimation : startAnimation}
-              className={cn(
-                "flex items-center gap-1.5 px-2.5 py-1 rounded text-[11px] font-semibold transition-colors",
-                running
-                  ? "bg-zinc-200 dark:bg-zinc-700 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-300 dark:hover:bg-zinc-600"
-                  : "bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 hover:bg-zinc-700 dark:hover:bg-zinc-300"
-              )}
-            >
-              {running ? <><Pause className="size-3" /> Pause</> : <><Play className="size-3" /> Run</>}
-            </button>
-          </div>
+          <button
+            type="button"
+            onClick={resetAll}
+            className="text-[11px] text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-all duration-500 flex items-center gap-1"
+          >
+            <RotateCcw className="size-3" />
+            Reset
+          </button>
         )}
+      </div>
+
+      <div className="text-sm text-zinc-500 dark:text-zinc-400 px-4 py-2 border-b border-zinc-100 dark:border-zinc-800">
+        Data moves through stages — source, transform, sink — as a stream of records.
       </div>
 
       {/* Stats — fixed height */}
@@ -204,7 +201,7 @@ export function DataPipeline({
       </div>
 
       {/* Pipeline flow */}
-      <div className="px-4 py-5 overflow-x-auto min-h-[180px]">
+      <div className="px-4 py-5 overflow-x-auto min-h-[220px]">
         <div className="flex items-start gap-0 min-w-max">
           {stages.map((stage, i) => {
             const status = statuses[stage.id] ?? "idle";
@@ -318,8 +315,8 @@ export function DataPipeline({
         </div>
       </div>
 
-      {/* Selected stage detail / empty hint */}
-      <div className="border-t border-zinc-100 dark:border-zinc-900 min-h-[52px]">
+      {/* Selected stage detail — fixed height */}
+      <div className="border-t border-zinc-100 dark:border-zinc-800 min-h-[52px]">
         {selectedStage ? (
           <div className="px-4 py-3 flex items-start gap-4 bg-zinc-50/30 dark:bg-zinc-900/10">
             <div className="flex-1 min-w-0">
@@ -338,12 +335,21 @@ export function DataPipeline({
               </div>
             )}
           </div>
-        ) : (
-          <div className="px-4 py-3 text-[10px] text-zinc-400">
-            {interactive ? "Click a stage for details · Run to see data flowing through the pipeline" : "Data pipeline stages"}
-          </div>
-        )}
+        ) : null}
       </div>
+
+      {interactive && (
+        <div className="border-t border-zinc-100 dark:border-zinc-800 px-4 py-3 flex items-center gap-3 bg-zinc-50 dark:bg-zinc-900/30">
+          <span className="text-sm text-zinc-500 dark:text-zinc-400 flex-1">{statusText}</span>
+          <button
+            type="button"
+            onClick={running ? stopAnimation : startAnimation}
+            className="flex items-center gap-1.5 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-opacity shrink-0"
+          >
+            {running ? <><Pause className="size-3.5" /> Pause</> : <><Play className="size-3.5" /> Run Pipeline</>}
+          </button>
+        </div>
+      )}
     </div>
   );
 }

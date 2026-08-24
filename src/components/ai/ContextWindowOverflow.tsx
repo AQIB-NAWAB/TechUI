@@ -178,18 +178,27 @@ export function ContextWindowOverflow({
         flash === "overflow" ? "border-red-300 dark:border-red-800" : "border-zinc-200 dark:border-zinc-800"
       )}
     >
-      <div className="flex items-center gap-3 px-4 h-12 border-b border-zinc-100 dark:border-zinc-900 bg-zinc-50 dark:bg-zinc-900/50">
+      <div className="flex items-center gap-3 px-4 h-12 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50">
         <Layers className="size-4 text-zinc-400 shrink-0" />
         <span className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 flex-1">{title}</span>
         <span className="text-[10px] font-mono text-zinc-400 bg-zinc-100 dark:bg-zinc-800 px-2 py-0.5 rounded">
-          {STRATEGY_LABELS[strategy]}
+          {contextWindow.toLocaleString()} tokens
         </span>
         {interactive && (
-          <button onClick={reset} className="p-1 rounded text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-all duration-500">
+          <button
+            type="button"
+            onClick={reset}
+            className="p-1 rounded text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-all duration-500"
+            title="Reset"
+          >
             <RefreshCw className="size-3.5" />
           </button>
         )}
       </div>
+
+      <p className="text-sm text-zinc-500 dark:text-zinc-400 px-4 py-2 border-b border-zinc-100 dark:border-zinc-800">
+        LLMs have a memory limit — when the conversation gets too long, older messages get dropped.
+      </p>
 
       <div className="p-4 min-h-[220px] space-y-4">
         {/* Context bar */}
@@ -275,7 +284,7 @@ export function ContextWindowOverflow({
         </div>
 
         {isOverflow && (
-          <div className="flex items-start gap-2 px-3 py-2 rounded-lg bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/40">
+          <div className="flex items-start gap-2 px-3 py-2 rounded-lg bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/40 min-h-[44px]">
             <AlertTriangle className="size-3.5 text-amber-500 shrink-0 mt-0.5" />
             <p className="text-[11px] text-amber-700 dark:text-amber-400">
               Input exceeds {contextWindow.toLocaleString()}-token limit. Strategy <strong>{STRATEGY_LABELS[strategy]}</strong> removes{" "}
@@ -283,16 +292,22 @@ export function ContextWindowOverflow({
             </p>
           </div>
         )}
+        {!isOverflow && (
+          <div className="min-h-[44px]" aria-hidden />
+        )}
       </div>
 
       {interactive && (
-        <div className="border-t border-zinc-100 dark:border-zinc-900 px-4 py-3 flex items-center gap-3 bg-zinc-50 dark:bg-zinc-900/30">
+        <div className="border-t border-zinc-100 dark:border-zinc-800 px-4 py-3 flex items-center gap-3 bg-zinc-50 dark:bg-zinc-900/30">
           <span className="text-sm text-zinc-500 dark:text-zinc-400 flex-1">
             {flash === "overflow"
-              ? "Context overflow! Older messages are evicted per strategy."
-              : "Add conversation turns until the context window overflows."}
+              ? "Overflow — older messages evicted before the model call."
+              : isOverflow
+              ? `${STRATEGY_LABELS[strategy]} removed ${dropped.length} segment${dropped.length !== 1 ? "s" : ""}.`
+              : "Add turns until the context window fills up."}
           </span>
           <button
+            type="button"
             onClick={addTurn}
             className={cn(
               "px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-500 shrink-0 hover:opacity-90",

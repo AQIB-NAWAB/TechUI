@@ -250,50 +250,51 @@ function applyTheme(dark: boolean) {
       </div>
 
       <div className="min-h-[220px] p-4 flex flex-col gap-3">
-        <div className="transition-all duration-500">
+        <div className="transition-all duration-500 flex-1">
           {tabContent[activeTab]}
         </div>
-      </div>
 
-      <div className="border-t border-zinc-100 dark:border-zinc-800 px-4 py-3 bg-zinc-50 dark:bg-zinc-900/30">
-        <div className="text-[10px] text-zinc-400 font-semibold uppercase tracking-wide mb-2">Approach comparison</div>
-        <div className="overflow-x-auto">
-          <table className="w-full text-[10px]">
-            <thead>
-              <tr className="text-zinc-400">
-                <th className="text-left pb-1 font-semibold">Approach</th>
-                <th className="text-center pb-1 font-semibold">Flexible</th>
-                <th className="text-center pb-1 font-semibold">Zero JS</th>
-                <th className="text-center pb-1 font-semibold">User Override</th>
-                <th className="text-center pb-1 font-semibold">Persistent</th>
-              </tr>
-            </thead>
-            <tbody>
-              {TRADEOFFS.map((row) => (
-                <tr key={row.impl} className={cn(
-                  "transition-all duration-500",
-                  TAB_LABELS[activeTab] === row.impl ? "text-zinc-800 dark:text-zinc-200 font-bold" : "text-zinc-500 dark:text-zinc-400"
-                )}>
-                  <td className="py-0.5 pr-2">{row.impl}</td>
-                  {[row.flexible, row.zeroJs, row.userOverride, row.persistent].map((v, i) => (
-                    <td key={i} className="text-center py-0.5">
-                      <span className={v ? "text-emerald-500" : "text-zinc-300 dark:text-zinc-600"}>{v ? "✓" : "✗"}</span>
-                    </td>
-                  ))}
+        <div className="rounded-lg border border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/30 p-3 shrink-0">
+          <div className="text-[10px] text-zinc-400 font-semibold uppercase tracking-widest mb-2">Approach comparison</div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-[10px]">
+              <thead>
+                <tr className="text-zinc-400">
+                  <th className="text-left pb-1 font-semibold">Approach</th>
+                  <th className="text-center pb-1 font-semibold">Flexible</th>
+                  <th className="text-center pb-1 font-semibold">Zero JS</th>
+                  <th className="text-center pb-1 font-semibold">User Override</th>
+                  <th className="text-center pb-1 font-semibold">Persistent</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-        <div className="mt-2 text-[10px] text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800/60 rounded-md px-2 py-1.5">
-          <span className="font-semibold text-zinc-700 dark:text-zinc-300">Best practice: </span>
-          CSS variables + class toggle + localStorage = flexible, user-controlled, AND persistent.
+              </thead>
+              <tbody>
+                {TRADEOFFS.map((row) => (
+                  <tr
+                    key={row.impl}
+                    className={cn(
+                      "transition-all duration-500",
+                      TAB_LABELS[activeTab] === row.impl
+                        ? "text-zinc-800 dark:text-zinc-200 font-bold"
+                        : "text-zinc-500 dark:text-zinc-400"
+                    )}
+                  >
+                    <td className="py-0.5 pr-2">{row.impl}</td>
+                    {[row.flexible, row.zeroJs, row.userOverride, row.persistent].map((v, i) => (
+                      <td key={i} className="text-center py-0.5">
+                        <span className={v ? "text-emerald-500" : "text-zinc-300 dark:text-zinc-600"}>{v ? "✓" : "✗"}</span>
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
 
-      <div className="border-t border-zinc-100 dark:border-zinc-800 px-4 py-3 flex items-center gap-3">
+      <div className="border-t border-zinc-100 dark:border-zinc-800 px-4 py-3 flex items-center gap-3 bg-zinc-50 dark:bg-zinc-900/30">
         <span className="text-sm text-zinc-500 dark:text-zinc-400 flex-1">
-          {TAB_LABELS[activeTab]} — {activeTab === "media-query" ? "zero JS, follows OS automatically" : "click to preview the approach"}
+          {TAB_LABELS[activeTab]} — {statusCaption(activeTab, tabActions[activeTab])}
         </span>
         {tabActions[activeTab].active && (
           <button
@@ -306,4 +307,10 @@ function applyTheme(dark: boolean) {
       </div>
     </div>
   );
+}
+
+function statusCaption(tab: Tab, action: { label: string; active: boolean }) {
+  if (tab === "media-query") return "zero JS, follows OS automatically";
+  if (!action.active) return "read-only preview";
+  return "click to preview the approach";
 }

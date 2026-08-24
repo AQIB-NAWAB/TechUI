@@ -2,7 +2,7 @@
 
 import { z } from "zod";
 import { useState, useEffect, useRef } from "react";
-import { Activity } from "lucide-react";
+import { Layers } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export const KubernetesHpaSchema = z.object({
@@ -95,23 +95,6 @@ export function KubernetesHpa({
     }
   }
 
-  function handleScaleDown() {
-    if (scaling) return;
-    const newCpu = 25;
-    setCpu(newCpu);
-    const target = desired(replicas, newCpu);
-    if (target !== replicas) {
-      animatePods(replicas, target, newCpu);
-    } else {
-      setHistory(prev => {
-        const next6 = [...prev.slice(-5), { pods: replicas, label: "now" }].map((h, i, arr) =>
-          i === arr.length - 1 ? h : { ...h, label: `t-${arr.length - 1 - i}` }
-        );
-        return next6;
-      });
-    }
-  }
-
   const desiredReplicas = desired(replicas, cpu);
   const formulaResult = desiredReplicas;
   const noChange = desiredReplicas === replicas;
@@ -121,7 +104,7 @@ export function KubernetesHpa({
   return (
     <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden">
       <div className="flex items-center gap-3 px-4 h-12 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50">
-        <Activity className="size-4 text-zinc-400 shrink-0" />
+        <Layers className="size-4 text-zinc-400 shrink-0" />
         <span className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 flex-1">Kubernetes HPA</span>
         <span className="font-mono text-[10px] text-zinc-400">{deploymentName}</span>
       </div>

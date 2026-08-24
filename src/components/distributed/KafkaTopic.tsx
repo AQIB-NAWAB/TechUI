@@ -143,36 +143,35 @@ export function KafkaTopic({
 
   const VISIBLE = 5;
 
+  const totalLag = groups.reduce((sum, g) => {
+    const gOff = groupOffsets[g.id] ?? [];
+    return sum + partPills.reduce((a, pills, p) => a + Math.max(0, pills.length - 1 - (gOff[p] ?? 0)), 0);
+  }, 0);
+
+  const statusText = producing
+    ? "Publishing event to a random partition…"
+    : totalLag > 0
+    ? `${totalLag} unread message${totalLag !== 1 ? "s" : ""} — consumers are behind`
+    : "All consumer groups are up to date";
+
   return (
-    <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 overflow-hidden">
-      {/* Header */}
-      <div className="flex items-center gap-3 px-4 py-3 border-b border-zinc-100 dark:border-zinc-900 bg-zinc-50 dark:bg-zinc-900/50">
+    <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden">
+      <div className="flex items-center gap-3 px-4 h-12 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50">
         <Radio className="size-4 text-violet-500 shrink-0" />
-        <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-semibold font-mono text-zinc-900 dark:text-zinc-100 truncate">{topic}</span>
-            <span className="shrink-0 text-[9px] px-1.5 py-0.5 rounded border font-semibold uppercase tracking-wider bg-violet-100 dark:bg-violet-950/40 border-violet-200 dark:border-violet-800 text-violet-600 dark:text-violet-400">
-              TOPIC
-            </span>
-          </div>
-          <div className="text-[10px] text-zinc-400 mt-0.5">
-            {numPartitions} partitions · replication {replicationFactor}
-          </div>
-        </div>
-        {interactive && (
-          <button
-            onClick={produce}
-            disabled={producing}
-            className="ml-auto flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 hover:opacity-90 transition-opacity disabled:opacity-50 shrink-0"
-          >
-            <Plus className="size-3" />
-            {producing ? "Producing…" : "+ Produce"}
-          </button>
-        )}
+        <span className="text-sm font-semibold font-mono text-zinc-900 dark:text-zinc-100 truncate flex-1">{topic}</span>
+        <span className="shrink-0 text-[9px] px-1.5 py-0.5 rounded border font-semibold uppercase tracking-wider bg-violet-100 dark:bg-violet-950/40 border-violet-200 dark:border-violet-800 text-violet-600 dark:text-violet-400">
+          TOPIC
+        </span>
+        <span className="text-[10px] text-zinc-400 shrink-0 hidden sm:inline">
+          {numPartitions}p · rf{replicationFactor}
+        </span>
       </div>
 
-      {/* Producer + Partition lanes */}
-      <div className="px-4 pt-4 pb-3 min-h-[220px]">
+      <div className="text-sm text-zinc-500 dark:text-zinc-400 px-4 py-2 border-b border-zinc-100 dark:border-zinc-800">
+        Messages land in partition lanes. Each consumer group tracks its own read position independently.
+      </div>
+
+      <div className="px-4 pt-4 pb-3 min-h-[240px]">
         {/* Producer box with broadcast rings */}
         <div className="flex items-center gap-3 mb-4">
           <div className="relative flex items-center justify-center shrink-0">
@@ -304,8 +303,9 @@ export function KafkaTopic({
                 )}
                 {interactive && totalLag > 0 && (
                   <button
+                    type="button"
                     onClick={() => consume(g.id)}
-                    className="flex items-center gap-1 px-2 py-1 rounded text-[10px] font-semibold bg-zinc-800 dark:bg-zinc-200 text-white dark:text-zinc-900 hover:opacity-90 transition-opacity shrink-0"
+                    className="flex items-center gap-1 px-2 py-1 rounded text-[10px] font-medium border border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all duration-500 shrink-0"
                   >
                     <RefreshCw className="size-2.5" />
                     Consume
@@ -317,12 +317,20 @@ export function KafkaTopic({
         </div>
       </div>
 
-      {/* Explanation */}
-      <div className="border-t border-zinc-100 dark:border-zinc-900 px-4 py-2.5 bg-zinc-50 dark:bg-zinc-900/30">
-        <p className="text-[10px] text-zinc-400 leading-relaxed">
-          Produce adds a message to a random partition. Each consumer group tracks its own read position (offset) independently.
-        </p>
-      </div>
+      {interactive && (
+        <div className="border-t border-zinc-100 dark:border-zinc-800 px-4 py-3 flex items-center gap-3 bg-zinc-50 dark:bg-zinc-900/30">
+          <span className="text-sm text-zinc-500 dark:text-zinc-400 flex-1">{statusText}</span>
+          <button
+            type="button"
+            onClick={produce}
+            disabled={producing}
+            className="flex items-center gap-1.5 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-50 shrink-0"
+          >
+            <Plus className="size-3.5" />
+            {producing ? "Producing…" : "Produce Message"}
+          </button>
+        </div>
+      )}
     </div>
   );
 }

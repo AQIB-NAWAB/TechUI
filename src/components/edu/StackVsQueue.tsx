@@ -148,6 +148,15 @@ export function StackVsQueue({
         <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-500">
           Side by side
         </span>
+        {interactive && (
+          <button
+            onClick={reset}
+            className="p-1 rounded text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-all duration-500"
+            title="Reset"
+          >
+            <RefreshCw className="size-3.5" />
+          </button>
+        )}
       </div>
 
       <div className="text-sm text-zinc-500 dark:text-zinc-400 px-4 py-2 border-b border-zinc-100 dark:border-zinc-800">
@@ -160,19 +169,12 @@ export function StackVsQueue({
       </div>
 
       {interactive && (
-        <div className="border-t border-zinc-100 dark:border-zinc-800 px-4 py-3 flex items-center gap-3">
-          <span className="text-[11px] text-zinc-500 flex-1">{statusText}</span>
-          <button
-            onClick={reset}
-            className="p-1.5 rounded-lg text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors"
-            title="Reset"
-          >
-            <RefreshCw className="size-3.5" />
-          </button>
+        <div className="border-t border-zinc-100 dark:border-zinc-800 px-4 py-3 flex items-center gap-3 bg-zinc-50 dark:bg-zinc-900/30">
+          <span className="text-sm text-zinc-500 dark:text-zinc-400 flex-1">{statusText}</span>
           <button
             onClick={addAndRemove}
             disabled={animating}
-            className="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-50"
+            className="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-all duration-500 disabled:opacity-50 shrink-0"
           >
             Add & Remove
           </button>

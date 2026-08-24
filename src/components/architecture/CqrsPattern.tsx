@@ -107,8 +107,8 @@ export function CqrsPattern({
         {/* Two columns: Commands / Queries */}
         <div className="grid grid-cols-2 gap-4 mb-4">
           {/* Commands */}
-          <div>
-            <div className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-2">Commands (Write)</div>
+          <div className="border border-zinc-100 dark:border-zinc-800 rounded-lg p-3 bg-zinc-50 dark:bg-zinc-800/50">
+            <div className="text-[10px] font-semibold uppercase tracking-widest text-zinc-400 mb-2">Commands (Write)</div>
             <div className="space-y-1.5">
               {commands.map((cmd, i) => {
                 const cc = cmdColor(cmd.color);
@@ -134,8 +134,8 @@ export function CqrsPattern({
           </div>
 
           {/* Queries */}
-          <div>
-            <div className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-2">Queries (Read)</div>
+          <div className="border border-zinc-100 dark:border-zinc-800 rounded-lg p-3 bg-zinc-50 dark:bg-zinc-800/50">
+            <div className="text-[10px] font-semibold uppercase tracking-widest text-zinc-400 mb-2">Queries (Read)</div>
             <div className="space-y-1.5">
               {queries.map((q, i) => {
                 const isActive = (phase === "query-read" || phase === "done-query") && i === activeQuery;

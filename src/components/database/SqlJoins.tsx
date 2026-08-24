@@ -221,11 +221,11 @@ export function SqlJoins({
         <span className={cn("text-[10px] font-bold px-2 py-0.5 rounded", clr.badge)}>{cfg.short}</span>
       </div>
 
-      <div className="px-4 py-2 border-b border-zinc-100 dark:border-zinc-800">
-        <p className="text-sm text-zinc-500 dark:text-zinc-400">{cfg.description}</p>
-      </div>
+      <p className="text-sm text-zinc-500 dark:text-zinc-400 px-4 py-2 border-b border-zinc-100 dark:border-zinc-800">
+        Combine rows from two tables — the join type decides which unmatched rows stay in the result.
+      </p>
 
-      {/* Tab buttons */}
+      {/* Tabs */}
       <div className="flex items-center gap-1.5 px-4 py-2.5 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/20">
         {allTypes.map((t) => {
           const c = JOIN_CONFIGS[t];
@@ -280,18 +280,27 @@ export function SqlJoins({
         </div>
 
         {/* Result badge — fixed height */}
-        <div className="flex items-center gap-2 mt-auto min-h-[28px]">
+        <div className="flex items-center gap-2 mt-auto min-h-[56px] border border-zinc-100 dark:border-zinc-800 rounded-lg p-2 bg-zinc-50 dark:bg-zinc-800/40">
           <span className={cn("text-[11px] font-bold px-2 py-0.5 rounded transition-all duration-500", clr.badge)}>
             {resultCount} row{resultCount !== 1 ? "s" : ""} in result
           </span>
+          <pre className="text-[10px] font-mono text-zinc-500 dark:text-zinc-400 leading-relaxed whitespace-pre-wrap flex-1 ml-2">
+            {cfg.sql(leftTable, rightTable)}
+          </pre>
         </div>
       </div>
 
-      {/* SQL footer */}
-      <div className="border-t border-zinc-100 dark:border-zinc-800 px-4 py-2.5 bg-zinc-50 dark:bg-zinc-900/30">
-        <pre className="text-[10px] font-mono text-zinc-500 dark:text-zinc-400 leading-relaxed whitespace-pre-wrap">
-          {cfg.sql(leftTable, rightTable)}
-        </pre>
+      <div className="border-t border-zinc-100 dark:border-zinc-800 px-4 py-3 flex items-center gap-3 bg-zinc-50 dark:bg-zinc-900/30">
+        <span className="text-sm text-zinc-500 dark:text-zinc-400 flex-1">{cfg.description}</span>
+        <button
+          onClick={() => {
+            const idx = allTypes.indexOf(joinType);
+            setJoinType(allTypes[(idx + 1) % allTypes.length]!);
+          }}
+          className="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-all duration-500"
+        >
+          Next Join
+        </button>
       </div>
     </div>
   );

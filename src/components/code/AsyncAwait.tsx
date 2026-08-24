@@ -180,7 +180,7 @@ export function AsyncAwait({
 
   return (
     <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden">
-      <div className="flex items-center gap-3 px-4 h-12 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50">
+      <div className="flex items-center gap-3 px-4 h-12 border-b border-zinc-100 dark:border-zinc-800">
         <Code2 className="size-4 text-zinc-400 shrink-0" />
         <span className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 flex-1">Async/Await Patterns</span>
       </div>
@@ -252,7 +252,7 @@ export function AsyncAwait({
         </div>
       </div>
 
-      <div className="border-t border-zinc-100 dark:border-zinc-800 px-4 py-3 flex items-center gap-3 bg-zinc-50 dark:bg-zinc-900/30">
+      <div className="border-t border-zinc-100 dark:border-zinc-800 px-4 py-3 flex items-center gap-3">
         <span className="text-sm text-zinc-500 dark:text-zinc-400 flex-1">
           {running ? "Stepping through async calls…" : "Run to watch each async step execute in order"}
         </span>

@@ -101,21 +101,20 @@ export function DockerContainer({
 
   return (
     <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden">
-      <div className="flex items-center gap-3 h-12 px-4 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/50">
+      <div className="flex items-center gap-3 h-12 px-4 border-b border-zinc-100 dark:border-zinc-800">
         <Box className="size-4 text-blue-500 shrink-0" />
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2">
-            <span className="text-sm font-bold text-zinc-800 dark:text-zinc-100">{name}</span>
-            <div className="flex items-center gap-1.5">
-              <span className={cn("size-1.5 rounded-full shrink-0", sc.dot)} />
-              <span className={cn("text-[10px] font-semibold", sc.text)}>{sc.label}</span>
-            </div>
-          </div>
-          <code className="text-[11px] font-mono text-zinc-400 block truncate mt-0.5">{shortId}</code>
+        <span className="text-sm font-semibold text-zinc-800 dark:text-zinc-100 flex-1">{name}</span>
+        <div className="flex items-center gap-1.5">
+          <span className={cn("size-1.5 rounded-full shrink-0", sc.dot)} />
+          <span className={cn("text-[10px] font-semibold", sc.text)}>{sc.label}</span>
         </div>
       </div>
 
-      <div className="px-4 py-4 border-b border-zinc-100 dark:border-zinc-800 min-h-[180px]">
+      <div className="text-sm text-zinc-500 dark:text-zinc-400 px-4 py-2 border-b border-zinc-100 dark:border-zinc-800">
+        A lightweight, isolated runtime that packages your app and its dependencies into one portable unit.
+      </div>
+
+      <div className="px-4 py-4 border-b border-zinc-100 dark:border-zinc-800 min-h-[200px]">
         <div className="border border-dashed border-zinc-300 dark:border-zinc-600 rounded-lg p-3 bg-zinc-50/50 dark:bg-zinc-800/30">
           <div className="text-[10px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500 mb-2">Host machine</div>
           <div className="border-2 border-zinc-300 dark:border-zinc-600 rounded-md p-3 bg-white dark:bg-zinc-900/80">
@@ -227,8 +226,24 @@ export function DockerContainer({
         </>
       )}
 
-      <div className="border-t border-zinc-100 dark:border-zinc-800 px-4 py-3 flex items-center gap-3 text-[10px] text-zinc-400">
-        <span>network: <span className="font-mono text-zinc-500">{network}</span></span>
+      <div className="border-t border-zinc-100 dark:border-zinc-800 px-4 py-3 flex items-center gap-3">
+        <span className="text-sm text-zinc-500 dark:text-zinc-400 flex-1 truncate">
+          <code className="font-mono text-xs">{shortId}</code>
+          <span className="ml-2">· network: {network}</span>
+          {hasTabs && <span className="ml-2">· {tabs.find((t) => t.id === activeTab)?.label}</span>}
+        </span>
+        <button
+          onClick={() => {
+            if (hasTabs) {
+              const idx = tabs.findIndex((t) => t.id === activeTab);
+              setActiveTab(tabs[(idx + 1) % tabs.length]!.id);
+            }
+          }}
+          disabled={!hasTabs}
+          className="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-opacity shrink-0 disabled:opacity-40"
+        >
+          {hasTabs ? "Next Section" : sc.label}
+        </button>
       </div>
     </div>
   );

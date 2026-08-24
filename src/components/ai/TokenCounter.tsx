@@ -5,9 +5,12 @@ import { z } from "zod";
 import { cn } from "@/lib/utils";
 import { Hash } from "lucide-react";
 
+const SAMPLE_TEXT =
+  "The attention mechanism in transformers computes a weighted sum of values, where weights are determined by the compatibility of queries and keys. This allows the model to focus on relevant parts of the input sequence regardless of distance.";
+
 export const TokenCounterSchema = z.object({
   title: z.string().optional().default("Token Counter"),
-  text: z.string(),
+  text: z.string().optional().default(SAMPLE_TEXT),
   model: z.string().optional().default("gpt-4o"),
   contextWindow: z.number().optional().default(128000),
   costPer1kInput: z.number().optional(),
@@ -27,7 +30,7 @@ function approximateTokenize(text: string): string[] {
     } else {
       let i = 0;
       while (i < chunk.length) {
-        const len = chunk.length - i > 6 ? (Math.random() > 0.5 ? 3 : 4) : chunk.length - i;
+        const len = chunk.length - i > 6 ? (i % 2 === 0 ? 3 : 4) : chunk.length - i;
         tokens.push(chunk.slice(i, i + len));
         i += len;
       }
@@ -67,7 +70,7 @@ function matchesModel(selected: string, entry: typeof MODEL_PRICES[0]): boolean 
 
 export function TokenCounter({
   title = "Token Counter",
-  text: initialText,
+  text: initialText = SAMPLE_TEXT,
   model = "gpt-4o",
   contextWindow = 128000,
   interactive = true,
@@ -87,6 +90,10 @@ export function TokenCounter({
     pct >= 80 ? "High usage" :
     pct >= 50 ? "Moderate" : "Low usage";
 
+  const footerStatus = count === 0
+    ? "Load sample text to see how LLMs split input into tokens"
+    : `${count.toLocaleString()} tokens · ${usageLabel.toLowerCase()} for ${model}`;
+
   return (
     <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden text-sm">
       <div className="flex items-center gap-3 h-12 px-4 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/50">
@@ -97,117 +104,120 @@ export function TokenCounter({
         </span>
       </div>
 
-      {interactive ? (
-        <div className="px-4 pt-3 pb-0">
+      <p className="text-sm text-zinc-500 dark:text-zinc-400 px-4 py-2 border-b border-zinc-100 dark:border-zinc-800">
+        LLMs charge and truncate by tokens — not characters or words.
+      </p>
+
+      <div className="min-h-[220px] px-4 py-3 flex flex-col gap-3">
+        {interactive ? (
           <textarea
             value={text}
             onChange={(e) => setText(e.target.value)}
-            className="w-full resize-none rounded-lg border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 text-[12px] text-zinc-700 dark:text-zinc-300 px-3 py-2.5 leading-relaxed focus:outline-none focus:border-zinc-400 dark:focus:border-zinc-600 placeholder:text-zinc-300 dark:placeholder:text-zinc-600 font-mono transition-all duration-500"
-            rows={4}
+            className="w-full resize-none rounded-lg border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 text-[12px] text-zinc-700 dark:text-zinc-300 px-3 py-2 leading-relaxed focus:outline-none focus:border-zinc-400 dark:focus:border-zinc-600 placeholder:text-zinc-300 dark:placeholder:text-zinc-600 font-mono transition-all duration-500"
+            rows={2}
             placeholder="Type or paste text to tokenize…"
           />
-        </div>
-      ) : (
-        <div className="px-4 pt-3">
-          <div className="text-[12px] text-zinc-600 dark:text-zinc-400 leading-relaxed font-mono whitespace-pre-wrap bg-zinc-50 dark:bg-zinc-800 rounded-lg border border-zinc-100 dark:border-zinc-800 px-3 py-2.5">
+        ) : (
+          <div className="text-[12px] text-zinc-600 dark:text-zinc-400 leading-relaxed font-mono whitespace-pre-wrap bg-zinc-50 dark:bg-zinc-800 rounded-lg border border-zinc-100 dark:border-zinc-800 px-3 py-2 line-clamp-2">
             {text || <span className="text-zinc-300 dark:text-zinc-600">No text provided</span>}
           </div>
-        </div>
-      )}
-
-      <div className="px-4 py-3 min-h-[120px]">
-        <div className="text-[10px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500 mb-2">
-          Tokens ({count.toLocaleString()})
-        </div>
-        {tokens.length > 0 ? (
-          <div className="flex flex-wrap gap-1 max-h-28 overflow-y-auto border border-zinc-100 dark:border-zinc-800 rounded-lg p-2 bg-zinc-50 dark:bg-zinc-800/50">
-            {tokens.slice(0, 200).map((tok, i) => (
-              <span
-                key={i}
-                className={cn(
-                  "inline-block text-[11px] font-mono rounded px-1 py-0.5 border leading-5 transition-all duration-500",
-                  TOKEN_COLORS[i % TOKEN_COLORS.length]
-                )}
-              >
-                {tok === " " ? "\u00a0" : tok}
-              </span>
-            ))}
-            {tokens.length > 200 && (
-              <span className="text-[11px] text-zinc-400 italic self-center">+{tokens.length - 200} more</span>
-            )}
-          </div>
-        ) : (
-          <div className="text-[11px] text-zinc-400 italic h-16 flex items-center justify-center border border-dashed border-zinc-200 dark:border-zinc-700 rounded-lg">
-            Enter text above to see color-coded tokens
-          </div>
         )}
-      </div>
 
-      <div className="px-4 pb-3">
-        <div className="flex items-center justify-between mb-1.5">
-          <span className="text-[10px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500">Context window usage</span>
-          <span className={cn(
-            "text-[10px] font-semibold transition-all duration-500",
-            pct >= 95 ? "text-red-500" : pct >= 80 ? "text-amber-500 dark:text-amber-400" : "text-emerald-600 dark:text-emerald-400"
-          )}>
-            {usageLabel} · {pct.toFixed(1)}%
-          </span>
-        </div>
-        <div className="h-3 rounded-full bg-zinc-100 dark:bg-zinc-800 overflow-hidden relative border border-zinc-200 dark:border-zinc-700">
-          <div className="absolute inset-y-0 left-0 w-4/5 bg-emerald-100/80 dark:bg-emerald-950/30" />
-          <div className="absolute inset-y-0 bg-amber-100/80 dark:bg-amber-950/30" style={{ left: "80%", width: "15%" }} />
-          <div className="absolute inset-y-0 right-0 w-[5%] bg-red-100/80 dark:bg-red-950/30" />
-          <div
-            className={cn("absolute inset-y-0 left-0 rounded-full transition-all duration-500", barColor)}
-            style={{ width: `${pct}%` }}
-          />
-        </div>
-        <div className="flex items-center justify-between mt-1">
-          <span className="text-[10px] font-mono text-zinc-400">{count.toLocaleString()} / {contextWindow.toLocaleString()} tokens</span>
-          <div className="flex items-center gap-2">
-            <span className="text-[9px] text-emerald-500">●</span><span className="text-[9px] text-zinc-400">Safe</span>
-            <span className="text-[9px] text-amber-500">●</span><span className="text-[9px] text-zinc-400">&gt;80%</span>
-            <span className="text-[9px] text-red-500">●</span><span className="text-[9px] text-zinc-400">&gt;95%</span>
+        <div className="flex-1 min-h-0 flex flex-col gap-2">
+          <div className="text-[10px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500">
+            Tokens ({count.toLocaleString()})
           </div>
-        </div>
-      </div>
-
-      <div className="border-t border-zinc-100 dark:border-zinc-800 px-4 py-2.5 flex items-center gap-4 flex-wrap">
-        <Stat label="Characters" value={text.length.toLocaleString()} />
-        <Stat label="Words" value={text.split(/\s+/).filter(Boolean).length.toLocaleString()} />
-        <Stat label="Tokens" value={count.toLocaleString()} mono />
-        <Stat label="Chars/token" value={count > 0 ? (text.length / count).toFixed(1) : "—"} />
-      </div>
-
-      {count > 0 && (
-        <div className="border-t border-zinc-100 dark:border-zinc-800 px-4 py-3">
-          <div className="text-[10px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500 mb-2">Cost Estimate (per request)</div>
-          <div className="space-y-1.5">
-            {MODEL_PRICES.map((m) => {
-              const inputCost = ((count / 1_000_000) * m.input).toFixed(6);
-              const isSelected = matchesModel(model, m);
-              return (
-                <div
-                  key={m.model}
+          {tokens.length > 0 ? (
+            <div className="flex flex-wrap gap-1 max-h-16 overflow-y-auto border border-zinc-100 dark:border-zinc-800 rounded-lg p-2 bg-zinc-50 dark:bg-zinc-800/50">
+              {tokens.slice(0, 80).map((tok, i) => (
+                <span
+                  key={i}
                   className={cn(
-                    "flex items-center gap-3 rounded-lg px-2 py-1.5 transition-all duration-500",
-                    isSelected
-                      ? "bg-violet-50 dark:bg-violet-950/30 border border-violet-200 dark:border-violet-800 ring-1 ring-violet-200 dark:ring-violet-800"
-                      : "border border-transparent"
+                    "inline-block text-[11px] font-mono rounded px-1 py-0.5 border leading-5 transition-all duration-500",
+                    TOKEN_COLORS[i % TOKEN_COLORS.length]
                   )}
                 >
-                  <span className={cn(
-                    "text-[11px] w-28 shrink-0",
-                    isSelected ? "text-violet-700 dark:text-violet-400 font-semibold" : "text-zinc-600 dark:text-zinc-400"
-                  )}>
-                    {m.model}{isSelected ? " ← current" : ""}
-                  </span>
-                  <span className="text-[10px] font-mono text-zinc-500 dark:text-zinc-400">${inputCost} input</span>
-                  <span className="text-[10px] text-zinc-400 ml-auto">${m.input.toFixed(2)}/1M in · ${m.output.toFixed(2)}/1M out</span>
-                </div>
-              );
-            })}
+                  {tok === " " ? "\u00a0" : tok}
+                </span>
+              ))}
+              {tokens.length > 80 && (
+                <span className="text-[11px] text-zinc-400 italic self-center">+{tokens.length - 80} more</span>
+              )}
+            </div>
+          ) : (
+            <div className="text-[11px] text-zinc-400 italic h-12 flex items-center justify-center border border-dashed border-zinc-200 dark:border-zinc-700 rounded-lg">
+              Tokens appear here
+            </div>
+          )}
+
+          <div>
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-[10px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500">Context window</span>
+              <span className={cn(
+                "text-[10px] font-semibold transition-all duration-500",
+                pct >= 95 ? "text-red-500" : pct >= 80 ? "text-amber-500 dark:text-amber-400" : "text-emerald-600 dark:text-emerald-400"
+              )}>
+                {usageLabel} · {pct.toFixed(1)}%
+              </span>
+            </div>
+            <div className="h-2.5 rounded-full bg-zinc-100 dark:bg-zinc-800 overflow-hidden relative border border-zinc-200 dark:border-zinc-700">
+              <div className="absolute inset-y-0 left-0 w-4/5 bg-emerald-100/80 dark:bg-emerald-950/30" />
+              <div className="absolute inset-y-0 bg-amber-100/80 dark:bg-amber-950/30" style={{ left: "80%", width: "15%" }} />
+              <div className="absolute inset-y-0 right-0 w-[5%] bg-red-100/80 dark:bg-red-950/30" />
+              <div
+                className={cn("absolute inset-y-0 left-0 rounded-full transition-all duration-500", barColor)}
+                style={{ width: `${pct}%` }}
+              />
+            </div>
+            <div className="text-[10px] font-mono text-zinc-400 mt-1">
+              {count.toLocaleString()} / {contextWindow.toLocaleString()} tokens
+            </div>
           </div>
+
+          <div className="flex items-center gap-4 flex-wrap border-t border-zinc-100 dark:border-zinc-800 pt-2">
+            <Stat label="Chars" value={text.length.toLocaleString()} />
+            <Stat label="Words" value={text.split(/\s+/).filter(Boolean).length.toLocaleString()} />
+            <Stat label="Tokens" value={count.toLocaleString()} mono />
+            <Stat label="Chars/token" value={count > 0 ? (text.length / count).toFixed(1) : "—"} />
+          </div>
+
+          {count > 0 && (
+            <div className="border-t border-zinc-100 dark:border-zinc-800 pt-2 space-y-1 max-h-[72px] overflow-y-auto">
+              {MODEL_PRICES.filter((m) => matchesModel(model, m) || count > 0).slice(0, 2).map((m) => {
+                const inputCost = ((count / 1_000_000) * m.input).toFixed(6);
+                const isSelected = matchesModel(model, m);
+                return (
+                  <div
+                    key={m.model}
+                    className={cn(
+                      "flex items-center gap-2 rounded-lg px-2 py-1 transition-all duration-500 text-[10px]",
+                      isSelected
+                        ? "bg-violet-50 dark:bg-violet-950/30 border border-violet-200 dark:border-violet-800"
+                        : "text-zinc-400"
+                    )}
+                  >
+                    <span className={cn("w-24 shrink-0 truncate", isSelected && "font-semibold text-violet-700 dark:text-violet-400")}>
+                      {m.model}
+                    </span>
+                    <span className="font-mono">${inputCost} input</span>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {interactive && (
+        <div className="border-t border-zinc-100 dark:border-zinc-800 px-4 py-3 flex items-center gap-3 bg-zinc-50 dark:bg-zinc-900/30">
+          <span className="text-sm text-zinc-500 dark:text-zinc-400 flex-1 truncate">{footerStatus}</span>
+          <button
+            type="button"
+            onClick={() => setText(SAMPLE_TEXT)}
+            className="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-opacity shrink-0"
+          >
+            Load Sample
+          </button>
         </div>
       )}
     </div>

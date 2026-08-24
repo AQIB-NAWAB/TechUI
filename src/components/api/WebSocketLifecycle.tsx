@@ -67,13 +67,6 @@ export function WebSocketLifecycle({
     }, 2600);
   }
 
-  function reset() {
-    clearAll();
-    setPhase("idle");
-    setVisibleMessages(0);
-    setRunning(false);
-  }
-
   const phaseLabels: { id: Phase; label: string; desc: string }[] = [
     { id: "handshake", label: "HTTP Upgrade", desc: "Switch from HTTP to WebSocket" },
     { id: "open",      label: "Connected",    desc: "Persistent two-way channel open" },
@@ -96,6 +89,16 @@ export function WebSocketLifecycle({
     : phase === "messages" ? `Live — ${visibleMessages}/${messages.length} messages`
     : "Connection closed";
 
+  function handlePrimaryAction() {
+    if (running) return;
+    if (phase === "idle" || phase === "closed") {
+      connect();
+    } else if (phase === "messages") {
+      setPhase("closed");
+      setRunning(false);
+    }
+  }
+
   return (
     <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden">
       <div className="flex items-center gap-2.5 px-4 h-12 border-b border-zinc-100 dark:border-zinc-800">
@@ -103,21 +106,16 @@ export function WebSocketLifecycle({
         <span className="text-sm font-semibold text-zinc-800 dark:text-zinc-200 flex-1">WebSocket Lifecycle</span>
         <span className="font-mono text-[10px] text-zinc-400 truncate max-w-[180px]">{url}</span>
         <div className={cn(
-          "size-2 rounded-full transition-all duration-500",
+          "size-2 rounded-full shrink-0 transition-all duration-500",
           phase === "open" || phase === "messages" ? "bg-emerald-500 animate-pulse" : "bg-zinc-300 dark:bg-zinc-600"
         )} />
-        {(phase !== "idle" || running) && !running && (
-          <button onClick={reset} className="p-1 text-zinc-400 hover:text-zinc-600 transition-all duration-500">
-            <RefreshCw className="size-3.5" />
-          </button>
-        )}
       </div>
 
       <div className="text-sm text-zinc-500 dark:text-zinc-400 px-4 py-2 border-b border-zinc-100 dark:border-zinc-800">
         WebSockets upgrade HTTP into a persistent, two-way channel for real-time communication.
       </div>
 
-      <div className="min-h-[300px] px-4 py-3 flex flex-col gap-2">
+      <div className="min-h-[280px] px-4 py-3 flex flex-col gap-2">
         <div className="flex items-center justify-center gap-6 mb-2">
           <div className="flex flex-col items-center gap-1">
             <Monitor className={cn("size-5 transition-colors duration-500", phaseReached("open") ? "text-blue-500" : "text-zinc-400")} />
@@ -161,7 +159,7 @@ export function WebSocketLifecycle({
               )}
 
               {id === "messages" && reached && (
-                <div className="mt-1.5 space-y-1 max-h-[80px] overflow-y-auto pl-1">
+                <div className="mt-1.5 space-y-1 h-[80px] overflow-y-auto pl-1">
                   {messages.slice(0, visibleMessages).map((msg, i) => (
                     <div key={i} className={cn("flex items-center gap-2 text-[10px] transition-all duration-500", msg.direction === "client" ? "justify-end" : "justify-start")}>
                       {msg.direction === "server" && <ArrowLeft className="size-3 text-emerald-500 shrink-0" />}
@@ -196,12 +194,12 @@ export function WebSocketLifecycle({
           {statusText}
         </span>
         <button
-          onClick={phase === "messages" && !running ? () => { setPhase("closed"); setRunning(false); } : connect}
+          onClick={handlePrimaryAction}
           disabled={running || (phase !== "idle" && phase !== "closed" && phase !== "messages")}
-          className="flex items-center gap-1.5 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-50"
+          className="flex items-center gap-1.5 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-all duration-500 disabled:opacity-50"
         >
           {running ? <RefreshCw className="size-3.5 animate-spin" /> : <Wifi className="size-3.5" />}
-          {running ? "Connecting…" : phase === "messages" && !running ? "Disconnect" : phase === "closed" ? "Reconnect" : "Connect"}
+          {running ? "Connecting…" : phase === "messages" ? "Disconnect" : phase === "closed" ? "Reconnect" : "Connect"}
         </button>
       </div>
     </div>

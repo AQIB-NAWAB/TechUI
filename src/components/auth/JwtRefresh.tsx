@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState } from "react";
 import { z } from "zod";
 import { cn } from "@/lib/utils";
 import { RefreshCw } from "lucide-react";
@@ -169,21 +169,8 @@ export function JwtRefresh({
 }: JwtRefreshProps) {
   const [scenario, setScenario] = useState<"normal" | "expired" | "refresh" | "revoked">(initialScenario);
   const [step, setStep] = useState(0);
-  const [running, setRunning] = useState(false);
-  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
-
-  const stopAuto = useCallback(() => {
-    if (timerRef.current) {
-      clearInterval(timerRef.current);
-      timerRef.current = null;
-    }
-    setRunning(false);
-  }, []);
-
-  useEffect(() => () => { stopAuto(); }, [stopAuto]);
 
   function changeScenario(s: typeof scenario) {
-    stopAuto();
     setScenario(s);
     setStep(0);
   }
@@ -191,23 +178,6 @@ export function JwtRefresh({
   function next() {
     const maxSteps = SCENARIOS[scenario].steps.length;
     setStep((prev) => Math.min(prev + 1, maxSteps - 1));
-  }
-
-  function prev() {
-    setStep((prev) => Math.max(prev - 1, 0));
-  }
-
-  function startAuto() {
-    if (running) { stopAuto(); return; }
-    setStep(0);
-    setRunning(true);
-    let s = 0;
-    const maxSteps = SCENARIOS[scenario].steps.length;
-    timerRef.current = setInterval(() => {
-      s++;
-      if (s >= maxSteps) { stopAuto(); return; }
-      setStep(s);
-    }, 1200);
   }
 
   const scenarioData = SCENARIOS[scenario];
@@ -255,6 +225,10 @@ export function JwtRefresh({
             {s === "normal" ? "Normal" : s === "expired" ? "Expired" : s === "refresh" ? "Refresh" : "Revoked"}
           </button>
         ))}
+      </div>
+
+      <div className="text-sm text-zinc-500 dark:text-zinc-400 px-4 py-2 border-b border-zinc-100 dark:border-zinc-800">
+        Short-lived access tokens limit damage; refresh tokens keep users signed in.
       </div>
 
       <div className="min-h-[300px] p-4 space-y-4">
@@ -307,10 +281,10 @@ export function JwtRefresh({
           ))}
         </div>
 
-        {/* Current step */}
+        {/* Current step — fixed height */}
         <div
           className={cn(
-            "rounded-lg border px-3 py-3 space-y-2 transition-all duration-500",
+            "rounded-lg border px-3 py-3 space-y-2 transition-all duration-500 min-h-[160px]",
             currentStep.status ? STATUS_STYLE[currentStep.status] : STATUS_STYLE.info
           )}
         >
@@ -318,50 +292,24 @@ export function JwtRefresh({
             <div className={cn("size-2 rounded-full shrink-0", currentStep.status ? STATUS_DOT[currentStep.status] : "bg-blue-500")} />
             <span className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">{currentStep.label}</span>
           </div>
-          <p className="text-[10px] text-zinc-500 dark:text-zinc-400 pl-4">{currentStep.detail}</p>
-          {currentStep.code && (
-            <pre className="text-[10px] font-mono bg-zinc-900 dark:bg-zinc-950 text-zinc-200 rounded p-2 overflow-x-auto leading-relaxed ml-4">
-              {currentStep.code}
-            </pre>
-          )}
+          <p className="text-[11px] text-zinc-500 dark:text-zinc-400 pl-4">{currentStep.detail}</p>
+          <pre className="text-[10px] font-mono bg-zinc-900 dark:bg-zinc-950 text-zinc-200 rounded p-2 overflow-y-auto leading-relaxed ml-4 h-20">
+            {currentStep.code ?? "// waiting…"}
+          </pre>
         </div>
+      </div>
 
-        {/* Controls */}
-        <div className="flex items-center gap-2">
-          <button
-            onClick={prev}
-            disabled={step === 0}
-            className="bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 rounded-lg px-3 py-2 text-xs font-semibold hover:opacity-90 transition-opacity disabled:opacity-30"
-          >
-            ← Prev
-          </button>
-          <button
-            onClick={next}
-            disabled={step >= steps.length - 1}
-            className="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-3 py-2 text-xs font-semibold hover:opacity-90 transition-opacity disabled:opacity-30"
-          >
-            Next →
-          </button>
-          <button
-            onClick={startAuto}
-            className={cn(
-              "rounded-lg px-3 py-2 text-xs font-semibold hover:opacity-90 transition-opacity",
-              running
-                ? "bg-amber-500 text-white"
-                : "bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300"
-            )}
-          >
-            {running ? "Stop" : "Auto-Play"}
-          </button>
-          <span className="text-[10px] text-zinc-400 ml-auto">
-            {step + 1}/{steps.length}
-          </span>
-        </div>
-
-        {/* Key insight */}
-        <p className="text-[10px] text-zinc-400 border-t border-zinc-100 dark:border-zinc-800 pt-2">
-          <span className="font-semibold text-zinc-500 dark:text-zinc-400">Key insight:</span> Short access token TTL limits damage from theft. Refresh tokens enable seamless UX.
-        </p>
+      <div className="px-4 py-3 border-t border-zinc-100 dark:border-zinc-800 flex items-center gap-3">
+        <span className="text-sm text-zinc-500 dark:text-zinc-400 flex-1">
+          Step {step + 1} of {steps.length} · {scenarioData.title}
+        </span>
+        <button
+          onClick={next}
+          disabled={step >= steps.length - 1}
+          className="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-40"
+        >
+          Next Step →
+        </button>
       </div>
     </div>
   );

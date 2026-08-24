@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { z } from "zod";
 import { cn } from "@/lib/utils";
-import { Play, RotateCcw, Monitor, Server, Database, Zap, Globe } from "lucide-react";
+import { Play, RotateCcw, Monitor, Server, Database, Zap, Globe, ArrowRightLeft } from "lucide-react";
 
 export const SequenceDiagramSchema = z.object({
   title: z.string().optional(),
@@ -93,32 +93,42 @@ export function SequenceDiagram({
 
   const visible = messages.slice(0, step);
 
+  const statusText =
+    playing
+      ? `Playing step ${step}/${messages.length}…`
+      : step >= messages.length
+      ? "Sequence complete — replay to watch again."
+      : step > 0
+      ? `Step ${step}/${messages.length} — ${messages[step - 1]?.label ?? ""}`
+      : "Press Play to watch messages travel between participants.";
+
   return (
-    <div className="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 overflow-hidden">
-      <div className="flex items-center gap-3 px-4 py-3 border-b border-zinc-100 dark:border-zinc-900">
+    <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden">
+      <div className="flex items-center gap-3 px-4 h-12 border-b border-zinc-100 dark:border-zinc-800">
+        <ArrowRightLeft className="size-4 text-zinc-400 shrink-0" />
         <h3 className="text-sm font-semibold text-zinc-800 dark:text-zinc-200 flex-1">
           {title ?? "Sequence Diagram"}
         </h3>
-        <div className="flex items-center gap-2">
-          <button
-            onClick={reset}
-            disabled={playing}
-            className="p-1.5 rounded text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors disabled:opacity-40"
-          >
-            <RotateCcw className="size-3.5" />
-          </button>
-          <button
-            onClick={play}
-            disabled={playing}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 text-xs font-medium hover:bg-zinc-700 dark:hover:bg-zinc-100 transition-colors disabled:opacity-40"
-          >
-            <Play className="size-3" fill="currentColor" />
-            {playing ? "Playing…" : step === messages.length ? "Replay" : "Play"}
-          </button>
-        </div>
+        {animate && (
+          <span className="text-[10px] font-mono text-zinc-400 bg-zinc-100 dark:bg-zinc-800 px-2 py-0.5 rounded">
+            {step}/{messages.length}
+          </span>
+        )}
+        <button
+          onClick={reset}
+          disabled={playing}
+          className="p-1 rounded text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-all duration-500 disabled:opacity-40"
+          title="Reset"
+        >
+          <RotateCcw className="size-3.5" />
+        </button>
       </div>
 
-      <div className="overflow-x-auto min-h-[300px]">
+      <div className="text-sm text-zinc-500 dark:text-zinc-400 px-4 py-2 border-b border-zinc-100 dark:border-zinc-800">
+        Shows who talks to whom and in what order — press Play to watch the messages step by step.
+      </div>
+
+      <div className="overflow-x-auto min-h-[280px] max-h-[280px]">
         <svg
           width={svgW}
           height={svgH}
@@ -321,6 +331,18 @@ export function SequenceDiagram({
             </text>
           )}
         </svg>
+      </div>
+
+      <div className="border-t border-zinc-100 dark:border-zinc-800 px-4 py-3 flex items-center gap-3 bg-zinc-50 dark:bg-zinc-900/30">
+        <span className="text-sm text-zinc-500 dark:text-zinc-400 flex-1">{statusText}</span>
+        <button
+          onClick={play}
+          disabled={playing}
+          className="flex items-center gap-1.5 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-all duration-500 disabled:opacity-50 shrink-0"
+        >
+          <Play className="size-3.5" fill="currentColor" />
+          {playing ? "Playing…" : step >= messages.length ? "Replay" : "Play"}
+        </button>
       </div>
     </div>
   );

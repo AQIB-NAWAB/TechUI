@@ -222,9 +222,9 @@ export function BlobStorage({
                         ))}
                         <button
                           onClick={() => setPresignedVisible(true)}
-                          className="ml-auto bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-3 py-1 text-[11px] font-semibold hover:opacity-90 transition-opacity cursor-pointer"
+                          className="ml-auto border border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 rounded-lg px-3 py-1 text-[11px] font-semibold hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all duration-500 cursor-pointer"
                         >
-                          Generate
+                          Preview
                         </button>
                       </div>
                       {presignedVisible && (
@@ -253,9 +253,38 @@ export function BlobStorage({
         })}
 
         {/* Key insight */}
-        <div className="text-[10px] text-zinc-400 dark:text-zinc-500 bg-zinc-50 dark:bg-zinc-800/40 rounded-lg px-3 py-2 mt-3">
+        <div className="text-[10px] text-zinc-400 dark:text-zinc-500 bg-zinc-50 dark:bg-zinc-800/40 rounded-lg border border-zinc-100 dark:border-zinc-800 px-3 py-2 mt-3">
           Presigned URLs let you share private objects for a limited time without making them public — the signature expires automatically.
         </div>
+      </div>
+
+      <div className="px-4 py-3 border-t border-zinc-100 dark:border-zinc-800 flex items-center gap-3 bg-zinc-50 dark:bg-zinc-900/30">
+        <span className="text-sm text-zinc-500 dark:text-zinc-400 flex-1 truncate">
+          {!selectedObj
+            ? "Select a file to get its URL"
+            : selectedObj.public
+            ? "Public URL ready to copy"
+            : presignedVisible
+            ? `Presigned link expires in ${expiry}`
+            : "Generate a time-limited link for this private file"}
+        </span>
+        <button
+          type="button"
+          disabled={!selectedObj}
+          onClick={() => {
+            if (!selectedObj) return;
+            if (selectedObj.public) {
+              handleCopy(getPublicUrl(provider, bucketName, selectedObj.key));
+            } else {
+              setPresignedVisible(true);
+              handleCopy(getPresignedUrl(provider, bucketName, selectedObj.key, expiry));
+            }
+          }}
+          className="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-all duration-500 disabled:opacity-40 shrink-0 flex items-center gap-1.5"
+        >
+          {copied ? <Check className="size-3.5" /> : <Copy className="size-3.5" />}
+          {!selectedObj ? "Select File" : selectedObj.public ? "Copy URL" : "Generate Link"}
+        </button>
       </div>
     </div>
   );

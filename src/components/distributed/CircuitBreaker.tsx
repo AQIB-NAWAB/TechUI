@@ -152,19 +152,6 @@ export function CircuitBreaker({
     setOpenAt(null);
   }
 
-  function tripOpen() {
-    setState("open");
-    setOpenAt(Date.now());
-    setFailures(0);
-    setSuccesses(0);
-  }
-
-  function forceHalfOpen() {
-    setState("half-open");
-    setSuccesses(0);
-    setFailures(0);
-  }
-
   const cfg = STATE_CFG[state];
   const progress = state === "closed"
     ? (failures / failureThreshold) * 100
@@ -179,23 +166,28 @@ export function CircuitBreaker({
     : "bg-red-500";
 
   return (
-    <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 overflow-hidden">
-      {/* Header */}
-      <div className="flex items-center gap-3 px-4 py-2.5 border-b border-zinc-100 dark:border-zinc-900 bg-zinc-50 dark:bg-zinc-900/50">
-        <Zap className="size-3.5 text-zinc-400 shrink-0" />
-        <span className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 flex-1">{name}</span>
-        <span className="text-[10px] text-zinc-400">
-          failure_threshold={failureThreshold} · success_threshold={successThreshold}
+    <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden">
+      <div className="flex items-center gap-3 px-4 h-12 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50">
+        <Zap className="size-4 text-zinc-400 shrink-0" />
+        <span className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 flex-1">{name}</span>
+        <span className={cn(
+          "text-[10px] font-bold px-2 py-0.5 rounded border transition-all duration-700",
+          cfg.bg, cfg.color
+        )}>
+          {cfg.label}
         </span>
         {interactive && (
-          <button onClick={reset} className="p-1 rounded text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors">
+          <button type="button" onClick={reset} className="p-1 rounded text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-all duration-500">
             <RefreshCw className="size-3.5" />
           </button>
         )}
       </div>
 
-      {/* Circuit visual + state card */}
-      <div className="px-4 pt-4 pb-2 min-h-[220px]">
+      <div className="text-sm text-zinc-500 dark:text-zinc-400 px-4 py-2 border-b border-zinc-100 dark:border-zinc-800">
+        Closed = requests pass through · Open = all requests blocked · Half-Open = testing if service recovered.
+      </div>
+
+      <div className="px-4 pt-4 pb-2 min-h-[240px]">
         <div className="flex items-center justify-center gap-4 mb-4">
           <div className="flex flex-col items-center gap-1">
             <div className="size-10 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900 flex items-center justify-center">
@@ -251,7 +243,7 @@ export function CircuitBreaker({
         </div>
 
         <p className="text-[11px] text-zinc-500 dark:text-zinc-400 text-center mb-3 leading-relaxed">
-          Closed = requests pass through · Open = all requests blocked · Half-Open = testing if service recovered
+          {cfg.description}
         </p>
 
         <div className={cn("rounded-lg border px-4 py-3 flex items-start gap-3 transition-all duration-700", cfg.bg)}>
@@ -285,94 +277,58 @@ export function CircuitBreaker({
         </div>
       </div>
 
-      {/* Controls */}
-      {interactive && (
-        <div className="px-4 pb-3 flex items-center gap-2 flex-wrap">
-          <button
-            onClick={sendSuccess}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold transition-colors"
-          >
-            <CheckCircle2 className="size-3.5" />
-            Send Success
-          </button>
-          <button
-            onClick={sendFailure}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-red-600 hover:bg-red-700 text-white text-xs font-semibold transition-colors"
-          >
-            <XCircle className="size-3.5" />
-            Send Failure
-          </button>
-          {state === "closed" && (
-            <button
-              onClick={tripOpen}
-              className="px-3 py-1.5 rounded-md bg-zinc-200 dark:bg-zinc-800 hover:bg-zinc-300 dark:hover:bg-zinc-700 text-zinc-600 dark:text-zinc-400 text-xs font-medium transition-colors ml-auto"
-            >
-              Force Open
-            </button>
-          )}
-          {state === "open" && (
-            <button
-              onClick={forceHalfOpen}
-              className="px-3 py-1.5 rounded-md bg-zinc-200 dark:bg-zinc-800 hover:bg-zinc-300 dark:hover:bg-zinc-700 text-zinc-600 dark:text-zinc-400 text-xs font-medium transition-colors ml-auto"
-            >
-              Skip Timeout
-            </button>
-          )}
-        </div>
-      )}
+      {/* Request log — fixed height */}
+      <div className="border-t border-zinc-100 dark:border-zinc-800 px-4 py-2 min-h-[52px]">
+        {requests.length > 0 ? (
+          <>
+            <div className="text-[10px] font-semibold text-zinc-400 mb-2 uppercase tracking-widest">Recent Requests</div>
+            <div className="flex flex-wrap gap-1.5">
+              {requests.map((r) => {
+                const rc = RESULT_CFG[r.result];
+                return (
+                  <span
+                    key={r.id}
+                    title={r.result}
+                    className={cn("size-5 rounded flex items-center justify-center text-[11px] font-bold transition-all duration-500", rc.dot, "text-white")}
+                  >
+                    {rc.label}
+                  </span>
+                );
+              })}
+            </div>
+          </>
+        ) : (
+          <span className="text-[10px] text-zinc-400">Send requests to see the circuit react to failures</span>
+        )}
+      </div>
 
-      {/* Request log */}
-      {requests.length > 0 && (
-        <div className="border-t border-zinc-50 dark:border-zinc-900 px-4 py-2">
-          <div className="text-[10px] font-semibold text-zinc-400 mb-2 uppercase tracking-wide">Recent Requests</div>
-          <div className="flex flex-wrap gap-1.5">
-            {requests.map((r) => {
-              const rc = RESULT_CFG[r.result];
-              return (
-                <span
-                  key={r.id}
-                  title={r.result}
-                  className={cn("size-5 rounded flex items-center justify-center text-[11px] font-bold", rc.dot, "text-white")}
-                >
-                  {rc.label}
-                </span>
-              );
-            })}
+      {interactive && (
+        <div className="border-t border-zinc-100 dark:border-zinc-800 px-4 py-3 flex items-center gap-3 bg-zinc-50 dark:bg-zinc-900/30">
+          <span className="text-sm text-zinc-500 dark:text-zinc-400 flex-1">
+            {state === "closed"
+              ? `Failures: ${failures}/${failureThreshold} before circuit opens`
+              : state === "open"
+              ? "Circuit OPEN — all requests rejected"
+              : `Probing recovery: ${successes}/${successThreshold} successes needed`}
+          </span>
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              type="button"
+              onClick={sendSuccess}
+              className="px-3 py-2 rounded-lg border border-zinc-200 dark:border-zinc-700 text-xs font-medium text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all duration-500"
+            >
+              Success
+            </button>
+            <button
+              type="button"
+              onClick={sendFailure}
+              className="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-opacity"
+            >
+              Send Failure
+            </button>
           </div>
         </div>
       )}
-
-      {/* How to use hint */}
-      {interactive && (
-        <div className="border-t border-zinc-50 dark:border-zinc-900 px-4 py-2 bg-zinc-50/50 dark:bg-zinc-900/20">
-          <p className="text-[10px] text-zinc-400">
-            <span className="font-semibold">How it works:</span> Send Failures until the threshold is reached — the circuit trips OPEN and blocks all requests. After the timeout, it enters HALF-OPEN to test recovery.
-          </p>
-        </div>
-      )}
-
-      {/* State machine diagram */}
-      <div className="border-t border-zinc-50 dark:border-zinc-900 px-4 py-3">
-        <div className="flex items-center justify-between text-[10px] font-mono">
-          {(["closed", "open", "half-open"] as CBState[]).map((s, i) => {
-            const c = STATE_CFG[s];
-            const active = state === s;
-            return (
-              <div key={s} className="flex items-center gap-1.5">
-                <span className={cn(
-                  "px-2 py-0.5 rounded-full border font-semibold transition-all",
-                  active
-                    ? cn(c.color, "border-current bg-current/10 transition-all duration-700")
-                    : "text-zinc-400 dark:text-zinc-600 border-zinc-200 dark:border-zinc-800 transition-all duration-500"
-                )}>
-                  {c.label}
-                </span>
-                {i < 2 && <span className="text-zinc-300 dark:text-zinc-700">→</span>}
-              </div>
-            );
-          })}
-        </div>
-      </div>
     </div>
   );
 }

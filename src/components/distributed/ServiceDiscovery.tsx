@@ -119,20 +119,22 @@ export function ServiceDiscovery({
 
   return (
     <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden">
-      {/* Header */}
-      <div className="flex items-center gap-2.5 px-4 py-2.5 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50">
-        <Radar className="size-3.5 text-zinc-400 shrink-0" />
-        <span className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 flex-1">Service Discovery</span>
+      <div className="flex items-center gap-3 px-4 h-12 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50">
+        <Radar className="size-4 text-zinc-400 shrink-0" />
+        <span className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 flex-1">Service Discovery</span>
         <span className="text-[10px] px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 font-semibold">
           {REGISTRY_LABELS[registryType]}
         </span>
-        <button onClick={resetAll} className="p-1 rounded text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors">
+        <button onClick={resetAll} className="p-1 rounded text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-all duration-500">
           <RefreshCw className="size-3.5" />
         </button>
       </div>
 
-      {/* Main layout */}
-      <div className="p-4 min-h-[280px]">
+      <p className="text-sm text-zinc-500 dark:text-zinc-400 px-4 py-2 border-b border-zinc-100 dark:border-zinc-800">
+        Services register with a central registry so clients can find healthy instances without hard-coded URLs.
+      </p>
+
+      <div className="p-4 min-h-[260px]">
         {/* Registry box */}
         <div className="flex justify-center mb-2">
           <div className={cn(
@@ -226,7 +228,7 @@ export function ServiceDiscovery({
 
         {/* Selected service detail */}
         {selected && selectedSvc && (
-          <div className="mt-3 rounded-lg border border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-950/10 p-3 space-y-2 transition-all duration-500">
+          <div className="mt-3 rounded-lg border border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-950/10 p-3 space-y-2 transition-all duration-500 min-h-[88px]">
             <div className="flex items-center gap-2">
               <div className="text-xs font-bold text-blue-700 dark:text-blue-300">{selectedSvc.name}</div>
               <span className={cn(
@@ -242,44 +244,51 @@ export function ServiceDiscovery({
               <div>Endpoint: <span className="font-mono text-zinc-700 dark:text-zinc-300">{getIP(services.indexOf(selectedSvc))}:{selectedSvc.port}</span></div>
               <div>TTL: <span className="font-mono text-zinc-700 dark:text-zinc-300">10s</span> (heartbeat required)</div>
             </div>
-            <div className="flex gap-1.5 flex-wrap">
-              <button
-                onClick={() => triggerRegister(selectedSvc.name)}
-                disabled={animState !== "idle"}
-                className="px-2.5 py-1 rounded-md bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white text-[10px] font-semibold transition-colors"
-              >
-                Register
-              </button>
-              <button
-                onClick={() => triggerDiscover(selectedSvc, services.indexOf(selectedSvc))}
-                disabled={animState !== "idle"}
-                className="px-2.5 py-1 rounded-md bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white text-[10px] font-semibold transition-colors"
-              >
-                Discover
-              </button>
-              {selectedSvc.healthy > 0 && (
+            {selectedSvc.healthy > 0 ? (
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => triggerRegister(selectedSvc.name)}
+                  disabled={animState !== "idle"}
+                  className="text-[10px] font-semibold text-emerald-600 dark:text-emerald-400 hover:underline disabled:opacity-40"
+                >
+                  Register heartbeat
+                </button>
                 <button
                   onClick={() => killInstance(selectedSvc.name)}
-                  className="px-2.5 py-1 rounded-md bg-red-100 dark:bg-red-900/30 hover:bg-red-200 dark:hover:bg-red-900/50 text-red-700 dark:text-red-400 text-[10px] font-semibold transition-colors"
+                  className="text-[10px] font-semibold text-red-600 dark:text-red-400 hover:underline"
                 >
-                  Kill instance
+                  Kill one instance
                 </button>
-              )}
-              {selectedSvc.healthy === 0 && (
-                <span className="flex items-center gap-1 text-[10px] text-red-500 dark:text-red-400 px-2">
-                  <XCircle className="size-3" /> All instances down — removed from registry
-                </span>
-              )}
-            </div>
+              </div>
+            ) : (
+              <span className="flex items-center gap-1 text-[10px] text-red-500 dark:text-red-400">
+                <XCircle className="size-3" /> All instances down — removed from registry
+              </span>
+            )}
           </div>
         )}
       </div>
 
-      {/* Footer */}
-      <div className="border-t border-zinc-100 dark:border-zinc-800 px-4 py-2 bg-zinc-50 dark:bg-zinc-900/30">
-        <p className="text-[10px] text-zinc-400">
-          Services heartbeat every 10s · unhealthy instances removed automatically · click a service to inspect
-        </p>
+      <div className="border-t border-zinc-100 dark:border-zinc-800 px-4 py-3 flex items-center gap-3 bg-zinc-50 dark:bg-zinc-900/30">
+        <span className="text-sm text-zinc-500 dark:text-zinc-400 flex-1">
+          {animState === "discovering" && animTarget
+            ? `Resolving ${animTarget}…`
+            : animState === "done" && resolvedIP
+              ? `Discovered → ${resolvedIP}`
+              : selected
+                ? `Selected ${selected} — click Discover to resolve its address`
+                : "Click a service, then discover where it lives"}
+        </span>
+        <button
+          onClick={() => {
+            const svc = selectedSvc ?? services[0];
+            if (svc) triggerDiscover(svc, services.indexOf(svc));
+          }}
+          disabled={animState !== "idle"}
+          className="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-all duration-500 disabled:opacity-50"
+        >
+          Discover
+        </button>
       </div>
     </div>
   );

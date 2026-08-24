@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { z } from "zod";
 import { cn } from "@/lib/utils";
 import {
@@ -12,6 +12,7 @@ import {
   Key,
   ArrowRight,
   CheckCircle2,
+  RefreshCw,
 } from "lucide-react";
 
 export const SessionVsJwtSchema = z.object({
@@ -59,6 +60,12 @@ export function SessionVsJwt({
   const [phase, setPhase] = useState<Phase>("idle");
   const [animating, setAnimating] = useState(false);
 
+  useEffect(() => {
+    setMode(initialMode);
+    setPhase("idle");
+    setAnimating(false);
+  }, [initialMode, serverName]);
+
   function runFlow() {
     if (animating || !interactive) return;
     setAnimating(true);
@@ -91,7 +98,7 @@ export function SessionVsJwt({
         }
       `}</style>
       <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden">
-        <div className="flex items-center gap-3 px-4 h-12 border-b border-zinc-200 dark:border-zinc-800">
+        <div className="flex items-center gap-3 px-4 h-12 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50">
           <Shield className="size-4 text-zinc-400 shrink-0" />
           <span className="text-sm font-semibold text-zinc-800 dark:text-zinc-200 flex-1">
             Session vs JWT
@@ -118,6 +125,16 @@ export function SessionVsJwt({
               </button>
             ))}
           </div>
+          {interactive && (
+            <button
+              type="button"
+              onClick={reset}
+              className="p-1 rounded text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-all duration-500"
+              title="Reset"
+            >
+              <RefreshCw className="size-3.5" />
+            </button>
+          )}
         </div>
 
         <div className="text-sm text-zinc-500 dark:text-zinc-400 px-4 py-2 border-b border-zinc-100 dark:border-zinc-800">
@@ -269,7 +286,7 @@ export function SessionVsJwt({
         </div>
 
         {interactive && (
-          <div className="border-t border-zinc-100 dark:border-zinc-800 px-4 py-3 flex items-center gap-3 bg-zinc-50 dark:bg-zinc-900/30">
+          <div className="border-t border-zinc-100 dark:border-zinc-800 px-4 py-3 flex items-center gap-3 bg-zinc-50 dark:bg-zinc-900/30 min-h-[52px]">
             <span className="text-sm text-zinc-500 dark:text-zinc-400 flex-1">{statusText}</span>
             <button
               type="button"

@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { z } from "zod";
 import { cn } from "@/lib/utils";
-import { Globe, Cable, Lock, ArrowUpRight, Server, CheckCircle, ChevronLeft, ChevronRight, RefreshCw } from "lucide-react";
+import { Globe, Cable, Lock, ArrowUpRight, Server, CheckCircle, ChevronRight, RefreshCw } from "lucide-react";
 
 export const RequestLifecycleSchema = z.object({
   url: z.string().default("https://api.example.com/users/42"),
@@ -82,6 +82,7 @@ export function RequestLifecycle({
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const active = PHASES[activeIdx] ?? PHASES[0]!;
+  const isComplete = activeIdx === PHASES.length - 1 && !running;
 
   function autoPlay() {
     if (running) {
@@ -103,6 +104,22 @@ export function RequestLifecycle({
     }, 1200);
   }
 
+  function handlePrimary() {
+    if (running) {
+      autoPlay();
+      return;
+    }
+    if (isComplete) {
+      setActiveIdx(0);
+      return;
+    }
+    if (activeIdx < PHASES.length - 1) {
+      setActiveIdx((i) => i + 1);
+    } else {
+      autoPlay();
+    }
+  }
+
   useEffect(() => () => { if (intervalRef.current) clearInterval(intervalRef.current); }, []);
 
   const METHOD_COLORS: Record<string, string> = {
@@ -113,25 +130,27 @@ export function RequestLifecycle({
     PATCH: "text-violet-600 dark:text-violet-400 bg-violet-50 dark:bg-violet-950/30",
   };
 
+  const primaryLabel = running ? "Stop" : isComplete ? "Restart" : activeIdx === 0 ? "Auto-play" : "Next Step";
+
   return (
     <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 overflow-hidden">
-      {/* URL Bar — always fixed */}
-      <div className="flex items-center gap-3 px-4 h-12 border-b border-zinc-100 dark:border-zinc-900 bg-zinc-50 dark:bg-zinc-900/50">
+      <div className="flex items-center gap-3 px-4 h-12 border-b border-zinc-100 dark:border-zinc-900">
+        <ArrowUpRight className="size-4 text-zinc-400 shrink-0" />
+        <span className="text-sm font-semibold text-zinc-800 dark:text-zinc-200 flex-1">Request Lifecycle</span>
         <span className={cn("text-[11px] font-bold px-1.5 py-0.5 rounded font-mono shrink-0", METHOD_COLORS[method] ?? "text-zinc-500")}>
           {method}
         </span>
-        <code className="text-xs font-mono text-zinc-600 dark:text-zinc-400 flex-1 truncate">{url}</code>
-        <button
-          onClick={autoPlay}
-          className="flex items-center gap-1 text-[11px] px-2.5 py-1 rounded-md bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 font-semibold hover:opacity-90 transition-opacity shrink-0"
-        >
-          {running ? <RefreshCw className="size-3 animate-spin" /> : <RefreshCw className="size-3" />}
-          {running ? "Stop" : "Auto-play"}
-        </button>
       </div>
 
-      {/* Pipeline — always visible, fixed height */}
-      <div className="px-4 py-4 flex items-center justify-center gap-1 overflow-x-auto bg-zinc-50/50 dark:bg-zinc-900/20 border-b border-zinc-100 dark:border-zinc-800">
+      <div className="text-sm text-zinc-500 dark:text-zinc-400 px-4 py-2 border-b border-zinc-100 dark:border-zinc-900">
+        Every web request travels through DNS, TCP, TLS, and HTTP before the server sends a response.
+      </div>
+
+      <div className="px-4 py-2 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/20">
+        <code className="text-xs font-mono text-zinc-600 dark:text-zinc-400 truncate block">{url}</code>
+      </div>
+
+      <div className="px-4 py-4 flex items-center justify-center gap-1 overflow-x-auto min-h-[100px] border-b border-zinc-100 dark:border-zinc-800">
         {PHASES.map((phase, i) => (
           <div key={phase.id} className="flex items-center gap-1 shrink-0">
             <button
@@ -190,7 +209,6 @@ export function RequestLifecycle({
         ))}
       </div>
 
-      {/* Detail panel — FIXED height, never changes */}
       <div className="px-4 py-4 min-h-[160px] flex flex-col gap-3">
         <div className="flex items-center gap-3">
           <div className="shrink-0 size-9 rounded-lg bg-blue-50 dark:bg-blue-950/30 text-blue-600 dark:text-blue-400 flex items-center justify-center">
@@ -207,24 +225,16 @@ export function RequestLifecycle({
         </pre>
       </div>
 
-      {/* Navigation footer */}
-      <div className="px-4 py-3 border-t border-zinc-100 dark:border-zinc-900 flex items-center justify-between">
+      <div className="border-t border-zinc-100 dark:border-zinc-900 px-4 py-3 flex items-center gap-3">
+        <span className="text-sm text-zinc-500 dark:text-zinc-400 flex-1">
+          {running ? `Auto-playing step ${activeIdx + 1} of ${PHASES.length}…` : `Step ${activeIdx + 1} of ${PHASES.length} — ${active.label}`}
+        </span>
         <button
-          disabled={activeIdx === 0}
-          onClick={() => setActiveIdx((i) => Math.max(0, i - 1))}
-          className="flex items-center gap-1 text-[11px] px-2.5 py-1 rounded border border-zinc-200 dark:border-zinc-800 text-zinc-500 disabled:opacity-30 hover:border-zinc-300 dark:hover:border-zinc-700 transition-colors duration-500"
+          onClick={handlePrimary}
+          className="flex items-center gap-1.5 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-opacity shrink-0"
         >
-          <ChevronLeft className="size-3" />
-          Back
-        </button>
-        <span className="text-[11px] text-zinc-400 tabular-nums">{activeIdx + 1} / {PHASES.length}</span>
-        <button
-          disabled={activeIdx === PHASES.length - 1}
-          onClick={() => setActiveIdx((i) => Math.min(PHASES.length - 1, i + 1))}
-          className="flex items-center gap-1 text-[11px] px-2.5 py-1 rounded border border-zinc-200 dark:border-zinc-800 text-zinc-500 disabled:opacity-30 hover:border-zinc-300 dark:hover:border-zinc-700 transition-colors duration-500"
-        >
-          Next
-          <ChevronRight className="size-3" />
+          {running ? <RefreshCw className="size-3.5 animate-spin" /> : <RefreshCw className="size-3.5" />}
+          {primaryLabel}
         </button>
       </div>
     </div>

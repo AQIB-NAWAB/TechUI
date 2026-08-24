@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { z } from "zod";
 import { cn } from "@/lib/utils";
-import { Shield, Zap, Globe, Monitor, Server, Database, RotateCcw, ChevronDown } from "lucide-react";
+import { Shield, Zap, Globe, Monitor, Server, Database, RotateCcw } from "lucide-react";
 
 const RouteSchema = z.object({
   path: z.string(),
@@ -125,6 +125,10 @@ export function ApiGateway({
         )}
       </div>
 
+      <p className="text-sm text-zinc-500 dark:text-zinc-400 px-4 py-2 border-b border-zinc-100 dark:border-zinc-800">
+        A single front door for your APIs — routes traffic, checks auth, and applies rate limits before requests reach backend services.
+      </p>
+
       {/* Traffic flow visual */}
       <div className="px-4 py-4 min-h-[220px] flex items-center gap-3">
         {/* Client */}
@@ -203,7 +207,21 @@ export function ApiGateway({
 
       {/* Route selector + details */}
       <div className="border-t border-zinc-100 dark:border-zinc-800 px-4 py-3 bg-zinc-50/50 dark:bg-zinc-800/20">
-        <div className="text-[10px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500 mb-2">Selected Route</div>
+        <div className="flex items-center gap-2 flex-wrap mb-2">
+          <div className="text-[10px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500">Selected Route</div>
+          {interactive && (
+            <select
+              value={selectedIdx}
+              onChange={(e) => { setSelectedIdx(Number(e.target.value)); setOutcome(null); setSimState("idle"); }}
+              disabled={simState !== "idle"}
+              className="ml-auto text-xs font-mono rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-2 py-1 text-zinc-700 dark:text-zinc-300 disabled:opacity-50"
+            >
+              {routes.map((route, i) => (
+                <option key={i} value={i}>{route.method} {route.path}</option>
+              ))}
+            </select>
+          )}
+        </div>
         <div className="flex items-center gap-2 flex-wrap">
           <span className={cn("px-1.5 py-0.5 rounded text-[10px] font-bold", METHOD_COLORS[selectedRoute.method ?? "ANY"])}>
             {selectedRoute.method}
@@ -224,41 +242,26 @@ export function ApiGateway({
       </div>
 
       {/* Footer */}
-      <div className="border-t border-zinc-100 dark:border-zinc-800 px-4 py-3 flex items-center gap-3">
-        <div className="relative shrink-0">
-          <select
-            value={selectedIdx}
-            onChange={(e) => { setSelectedIdx(Number(e.target.value)); setOutcome(null); setSimState("idle"); }}
-            disabled={!interactive || simState !== "idle"}
-            className="appearance-none pl-3 pr-8 py-2 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-xs font-mono text-zinc-700 dark:text-zinc-300 disabled:opacity-50 transition-all duration-500"
-          >
-            {routes.map((route, i) => (
-              <option key={i} value={i}>{route.method} {route.path}</option>
-            ))}
-          </select>
-          <ChevronDown className="size-3.5 text-zinc-400 absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" />
-        </div>
-        {outcomeCfg ? (
-          <span className={cn("text-xs font-bold font-mono px-2 py-0.5 rounded border transition-all duration-500", outcomeCfg.color)}>
-            {outcomeCfg.label}
-          </span>
-        ) : (
-          <span className="text-xs text-zinc-400 flex-1">
-            {simState === "idle" ? "Select a route, then send a request through the gateway" : "Simulating…"}
-          </span>
-        )}
+      <div className="border-t border-zinc-100 dark:border-zinc-800 px-4 py-3 flex items-center gap-3 bg-zinc-50 dark:bg-zinc-900/30 min-h-[52px]">
+        <span className="text-sm text-zinc-500 dark:text-zinc-400 flex-1">
+          {outcomeCfg
+            ? outcomeCfg.label
+            : simState === "idle"
+            ? "Pick a route above, then send a request through the gateway"
+            : "Simulating…"}
+        </span>
         {interactive && (
           <button
             onClick={sendRequest}
             disabled={simState !== "idle"}
             className={cn(
-              "ml-auto px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-500",
+              "px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-500 shrink-0",
               simState !== "idle"
                 ? "bg-zinc-200 dark:bg-zinc-700 text-zinc-400 cursor-not-allowed"
                 : "bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 hover:opacity-90"
             )}
           >
-            {simState !== "idle" ? "Sending…" : "Send Request →"}
+            {simState !== "idle" ? "Sending…" : "Send Request"}
           </button>
         )}
       </div>

@@ -134,32 +134,21 @@ export function ConsistentHashing({
         <span className="text-xs font-mono text-zinc-400 border border-zinc-200 dark:border-zinc-700 px-2 py-0.5 rounded">
           {servers.length} servers
         </span>
-        <button
-          onClick={removeServer}
-          disabled={extraCount === 0}
-          className={cn(
-            "rounded-lg px-2 py-1 text-[10px] font-semibold border border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all duration-500",
-            extraCount === 0 && "opacity-40 cursor-not-allowed"
-          )}
-        >
-          − Remove
-        </button>
+        {extraCount > 0 && (
+          <button
+            onClick={removeServer}
+            className="text-[10px] font-semibold text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 transition-all duration-500"
+          >
+            Undo
+          </button>
+        )}
       </div>
 
       <p className="text-sm text-zinc-500 dark:text-zinc-400 px-4 py-2 border-b border-zinc-100 dark:border-zinc-800">
         Keys map to the next server clockwise — adding a server only remaps ~1/N of keys.
       </p>
 
-      <div className={cn(
-        "overflow-hidden transition-all duration-500 border-b border-zinc-100 dark:border-zinc-800",
-        remapMsg ? "max-h-10 opacity-100" : "max-h-0 opacity-0"
-      )}>
-        <div className="px-4 py-2 bg-amber-50 dark:bg-amber-950/20 text-xs text-amber-700 dark:text-amber-300 font-medium">
-          Keys remapped: <strong>{remapMsg}</strong>
-        </div>
-      </div>
-
-      <div className="flex flex-col sm:flex-row items-start gap-4 p-4 min-h-[220px]">
+      <div className="flex flex-col sm:flex-row items-start gap-4 p-4 min-h-[240px]">
         {/* Ring SVG */}
         <div className="flex-shrink-0 w-full sm:w-auto flex justify-center">
           <svg viewBox="0 0 220 220" className="w-full max-w-[220px]">
@@ -337,10 +326,12 @@ export function ConsistentHashing({
       </div>
 
       <div className="px-4 py-3 border-t border-zinc-100 dark:border-zinc-800 flex items-center gap-3">
-        <span className="text-sm text-zinc-500 dark:text-zinc-400 flex-1">
-          {selectedKeyObj && servingServer
-            ? `${selectedKeyObj.name} → ${servingServer.name}`
-            : "Click a dot on the ring to see key placement"}
+        <span className="text-sm text-zinc-500 dark:text-zinc-400 flex-1 min-h-[20px]">
+          {remapMsg
+            ? remapMsg
+            : selectedKeyObj && servingServer
+              ? `${selectedKeyObj.name} → ${servingServer.name}`
+              : "Click a dot on the ring, then add a server to see minimal remapping"}
         </span>
         <button
           onClick={addServer}

@@ -3,7 +3,7 @@
 import { useState, useCallback, useRef } from "react";
 import { z } from "zod";
 import { cn } from "@/lib/utils";
-import { Layers, Lock, Globe, ChevronRight, X, Network } from "lucide-react";
+import { Layers, Lock, Globe, ChevronRight, Network } from "lucide-react";
 
 export const KubernetesIngressSchema = z.object({
   ingressName: z.string().default("freshmarket-ingress"),
@@ -206,9 +206,6 @@ export function KubernetesIngress({
                 ✓ routed to {matchedRule.serviceName}:{matchedRule.servicePort}
               </span>
             )}
-            <button onClick={reset} className="ml-auto p-0.5 text-zinc-400 hover:text-zinc-600 transition-colors">
-              <X className="size-3" />
-            </button>
           </div>
         )}
 
@@ -293,10 +290,13 @@ export function KubernetesIngress({
             : "Select a rule and route a test request through the ingress"}
         </span>
         <button
-          onClick={() => animateRequest(selectedRule ?? 0)}
+          onClick={() => {
+            if (anim.phase !== "idle") reset();
+            else animateRequest(selectedRule ?? 0);
+          }}
           className="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-opacity"
         >
-          Route Request
+          {anim.phase !== "idle" ? "Reset" : "Route Request"}
         </button>
       </div>
     </div>

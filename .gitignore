@@ -36,6 +36,10 @@ yarn-error.log*
 # vercel
 .vercel
 
+# generated registry (run npm run generate:registry)
+/registry/r/
+/public/r/
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts

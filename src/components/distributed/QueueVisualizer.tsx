@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Play, Pause, Plus, Trash2, Server, Cpu, Mail } from "lucide-react";
+import { Play, Pause, Plus, Mail, Server, Cpu } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { z } from "zod";
 
@@ -105,65 +105,47 @@ export function QueueVisualizer({
     }, 500);
   }
 
-  function clear() {
-    setMessages([]);
-    setRunning(false);
-  }
-
   const visible = messages.slice(0, maxVisible);
   const overflow = messages.length - maxVisible;
   const waiting = messages.filter(m => m.status === "waiting").length;
-  const processing = messages.filter(m => m.status === "processing").length;
   const capacityPct = Math.min(100, (messages.length / maxVisible) * 100);
 
+  const statusText = running
+    ? "Consumer processing messages from the front of the queue…"
+    : waiting > 0
+    ? `${waiting} message${waiting !== 1 ? "s" : ""} waiting · ${processed} consumed`
+    : "Queue empty — produce a message to get started";
+
   return (
-    <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 overflow-hidden">
-      {/* Header */}
-      <div className="flex items-center gap-3 px-4 py-3 border-b border-zinc-100 dark:border-zinc-900 bg-zinc-50 dark:bg-zinc-900/50">
-        <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-semibold text-zinc-900 dark:text-zinc-100">{name}</span>
-            <span className="px-1.5 py-0.5 rounded text-[9px] font-mono font-semibold uppercase tracking-wider bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-700">
-              {type}
-            </span>
-          </div>
-          <div className="text-[10px] text-zinc-400 mt-0.5">
-            {waiting} waiting · {processing} processing · {processed} consumed
-          </div>
-        </div>
-        {interactive && (
-          <div className="flex items-center gap-2">
-            <button
-              onClick={produce}
-              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 transition-colors"
-            >
-              <Plus className="size-3" /> Produce
-            </button>
-            <button
-              onClick={() => setRunning(v => !v)}
-              className={cn(
-                "flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors",
-                running
-                  ? "bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700"
-                  : "bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 hover:opacity-90"
-              )}
-            >
-              {running ? <><Pause className="size-3" /> Pause</> : <><Play className="size-3" /> Consume</>}
-            </button>
-            <button
-              onClick={clear}
-              className="p-1.5 rounded-lg text-zinc-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 transition-colors"
-            >
-              <Trash2 className="size-3.5" />
-            </button>
-          </div>
+    <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden">
+      <div className="flex items-center gap-3 px-4 h-12 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50">
+        <Mail className="size-4 text-zinc-400 shrink-0" />
+        <span className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 flex-1">{name}</span>
+        <span className="px-1.5 py-0.5 rounded text-[9px] font-mono font-semibold uppercase tracking-wider bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-700">
+          {type}
+        </span>
+        {interactive && waiting > 0 && (
+          <button
+            type="button"
+            onClick={() => setRunning(v => !v)}
+            className={cn(
+              "flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-medium border transition-all duration-500",
+              running
+                ? "border-amber-200 dark:border-amber-800 text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/30"
+                : "border-zinc-200 dark:border-zinc-700 text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+            )}
+          >
+            {running ? <><Pause className="size-2.5" /> Pause</> : <><Play className="size-2.5" /> Auto-consume</>}
+          </button>
         )}
       </div>
 
-      {/* Flow diagram */}
-      <div className="flex items-stretch gap-3 px-4 py-4 min-h-[120px]">
-        {/* Producer */}
-        <div className="flex flex-col items-center gap-1.5 shrink-0">
+      <div className="text-sm text-zinc-500 dark:text-zinc-400 px-4 py-2 border-b border-zinc-100 dark:border-zinc-800">
+        Producers add messages to the back; consumers take from the front — decoupling senders from workers.
+      </div>
+
+      <div className="flex items-stretch gap-3 px-4 py-4 min-h-[200px]">
+        <div className="flex flex-col items-center gap-1.5 shrink-0 justify-center">
           <div className="size-12 flex items-center justify-center rounded-xl bg-blue-50 dark:bg-blue-950/30 border-2 border-blue-200 dark:border-blue-900">
             <Server className="size-5 text-blue-600 dark:text-blue-400" />
           </div>
@@ -177,9 +159,7 @@ export function QueueVisualizer({
           </div>
         </div>
 
-        {/* Queue */}
-        <div className="flex-1 min-w-0 flex flex-col gap-1.5">
-          {/* Capacity bar */}
+        <div className="flex-1 min-w-0 flex flex-col gap-1.5 justify-center">
           <div className="h-1 rounded-full bg-zinc-200 dark:bg-zinc-800 overflow-hidden">
             <div
               className={cn(
@@ -192,7 +172,6 @@ export function QueueVisualizer({
             />
           </div>
 
-          {/* Message cards */}
           <div className="flex gap-1.5 min-h-[72px] items-center overflow-hidden">
             {messages.length === 0 ? (
               <div className="flex-1 flex items-center justify-center h-[72px] rounded-xl border-2 border-dashed border-zinc-200 dark:border-zinc-800 text-xs text-zinc-400 dark:text-zinc-600">
@@ -242,8 +221,7 @@ export function QueueVisualizer({
           </div>
         </div>
 
-        {/* Consumer */}
-        <div className="flex flex-col items-center gap-1.5 shrink-0">
+        <div className="flex flex-col items-center gap-1.5 shrink-0 justify-center">
           <div className={cn(
             "size-12 flex items-center justify-center rounded-xl border-2 transition-all duration-500",
             consumerActive
@@ -251,13 +229,27 @@ export function QueueVisualizer({
               : "bg-zinc-50 dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800"
           )}>
             <Cpu className={cn(
-              "size-5 transition-colors duration-500",
+              "size-5 transition-all duration-500",
               consumerActive ? "text-emerald-600 dark:text-emerald-400" : "text-zinc-400"
             )} />
           </div>
           <span className="text-[10px] font-medium text-zinc-500 dark:text-zinc-400 text-center max-w-[60px] truncate">{consumerLabel}</span>
         </div>
       </div>
+
+      {interactive && (
+        <div className="border-t border-zinc-100 dark:border-zinc-800 px-4 py-3 flex items-center gap-3 bg-zinc-50 dark:bg-zinc-900/30">
+          <span className="text-sm text-zinc-500 dark:text-zinc-400 flex-1">{statusText}</span>
+          <button
+            type="button"
+            onClick={produce}
+            className="flex items-center gap-1.5 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-opacity shrink-0"
+          >
+            <Plus className="size-3.5" />
+            Produce Message
+          </button>
+        </div>
+      )}
     </div>
   );
 }

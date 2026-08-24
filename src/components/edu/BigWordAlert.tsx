@@ -46,7 +46,7 @@ export function BigWordAlert({ term, plainEnglish, whyItMatters, icon }: BigWord
         <div className="text-center">
           <div className="text-2xl font-bold text-zinc-900 dark:text-zinc-100 mb-2">{term}</div>
           <div className={cn(
-            "rounded-lg border p-4 transition-all duration-500",
+            "rounded-lg border p-4 min-h-[72px] transition-all duration-500",
             revealed
               ? "border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/30 opacity-100"
               : "border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800/50 opacity-60 blur-[2px] select-none"
@@ -56,12 +56,15 @@ export function BigWordAlert({ term, plainEnglish, whyItMatters, icon }: BigWord
           </div>
         </div>
 
-        {revealed && (
-          <div className="border border-zinc-100 dark:border-zinc-800 rounded-lg p-3 bg-zinc-50 dark:bg-zinc-800/50 transition-all duration-500">
-            <p className="text-[10px] font-semibold uppercase tracking-widest text-zinc-400 mb-1.5">Why it matters</p>
-            <p className="text-sm text-zinc-600 dark:text-zinc-400 italic">{whyItMatters}</p>
-          </div>
-        )}
+        <div className={cn(
+          "border border-zinc-100 dark:border-zinc-800 rounded-lg p-3 bg-zinc-50 dark:bg-zinc-800/50 min-h-[72px] transition-all duration-500",
+          !revealed && "opacity-40"
+        )}>
+          <p className="text-[10px] font-semibold uppercase tracking-widest text-zinc-400 mb-1.5">Why it matters</p>
+          <p className={cn("text-sm text-zinc-600 dark:text-zinc-400 italic transition-all duration-500", !revealed && "blur-[3px] select-none")}>
+            {whyItMatters}
+          </p>
+        </div>
       </div>
 
       <div className="px-4 py-3 border-t border-zinc-100 dark:border-zinc-800 flex items-center gap-3">

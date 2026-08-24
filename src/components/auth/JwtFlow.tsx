@@ -71,6 +71,7 @@ export function JwtFlow({
   subject = "user:1234",
   expiresIn = "1h",
   algorithm = "HS256",
+  interactive = true,
 }: JwtFlowProps) {
   const [stepIdx, setStepIdx] = useState(0);
   const step = STEPS[stepIdx]!;
@@ -136,81 +137,77 @@ export function JwtFlow({
           <div className="text-[11px] text-zinc-500 dark:text-zinc-400 leading-relaxed">{step.description}</div>
         </div>
 
-        {stepIdx === 1 && (
-          <div className="rounded-lg border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800/40 px-3 py-2 font-mono text-[10px] leading-relaxed transition-all duration-500">
-            <div className="mb-1 text-[9px] text-zinc-400 uppercase tracking-wider">JWT Token (3 parts)</div>
-            <div className="break-all">
-              <span className="text-violet-600 dark:text-violet-400">{FAKE_HEADER}</span>
-              <span className="text-zinc-400">.</span>
-              <span className="text-blue-600 dark:text-blue-400">{FAKE_PAYLOAD}</span>
-              <span className="text-zinc-400">.</span>
-              <span className="text-emerald-600 dark:text-emerald-400">{FAKE_SIG}</span>
+        <div className="h-[88px] rounded-lg border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800/40 px-3 py-2 font-mono text-[10px] transition-all duration-500 overflow-hidden">
+          {stepIdx === 1 && (
+            <>
+              <div className="mb-1 text-[9px] text-zinc-400 uppercase tracking-wider">JWT Token (3 parts)</div>
+              <div className="break-all leading-relaxed">
+                <span className="text-violet-600 dark:text-violet-400">{FAKE_HEADER.slice(0, 20)}…</span>
+                <span className="text-zinc-400">.</span>
+                <span className="text-blue-600 dark:text-blue-400">{FAKE_PAYLOAD.slice(0, 20)}…</span>
+                <span className="text-zinc-400">.</span>
+                <span className="text-emerald-600 dark:text-emerald-400">{FAKE_SIG.slice(0, 12)}…</span>
+              </div>
+            </>
+          )}
+          {stepIdx === 2 && (
+            <>
+              <div className="mb-1 text-[9px] text-zinc-400 uppercase tracking-wider">Authorization Header</div>
+              <span className="text-zinc-500">Bearer </span>
+              <span className="text-blue-600 dark:text-blue-400">{FAKE_HEADER.slice(0, 24)}…</span>
+            </>
+          )}
+          {stepIdx === 3 && (
+            <>
+              <div className="mb-1 text-[9px] text-zinc-400 uppercase tracking-wider">Decoded Payload</div>
+              <div className="text-zinc-600 dark:text-zinc-300 leading-relaxed">
+                <span className="text-zinc-400">sub: </span><span className="text-blue-600 dark:text-blue-400">&quot;{subject}&quot;</span>
+                {" · "}
+                <span className="text-zinc-400">iss: </span><span className="text-violet-600 dark:text-violet-400">&quot;{issuer}&quot;</span>
+                {" · "}
+                <span className="text-zinc-400">alg: </span><span className="text-emerald-600 dark:text-emerald-400">{algorithm}</span>
+              </div>
+            </>
+          )}
+          {stepIdx === 0 && (
+            <div className="h-full flex items-center justify-center text-[11px] text-zinc-400">
+              Credentials travel over HTTPS — no token yet
             </div>
-            <div className="mt-1.5 flex gap-3 text-[9px]">
-              <span className="text-violet-500">header</span>
-              <span className="text-blue-500">payload</span>
-              <span className="text-emerald-500">signature</span>
-            </div>
-          </div>
-        )}
-
-        {stepIdx === 2 && (
-          <div className="rounded-lg border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800/40 px-3 py-2 font-mono text-[10px] transition-all duration-500">
-            <div className="mb-1 text-[9px] text-zinc-400 uppercase tracking-wider">Authorization Header</div>
-            <span className="text-zinc-500">Bearer </span>
-            <span className="text-blue-600 dark:text-blue-400">{FAKE_HEADER.slice(0, 12)}...</span>
-          </div>
-        )}
-
-        {stepIdx === 3 && (
-          <div className="rounded-lg border border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/20 px-3 py-2 font-mono text-[10px] transition-all duration-500">
-            <div className="mb-1 text-[9px] text-zinc-400 uppercase tracking-wider">Decoded Payload</div>
-            <div className="text-zinc-600 dark:text-zinc-300">
-              <span className="text-zinc-400">sub: </span><span className="text-blue-600 dark:text-blue-400">&quot;{subject}&quot;</span><br />
-              <span className="text-zinc-400">iss: </span><span className="text-violet-600 dark:text-violet-400">&quot;{issuer}&quot;</span><br />
-              <span className="text-zinc-400">aud: </span><span className="text-amber-600 dark:text-amber-400">&quot;{audience}&quot;</span><br />
-              <span className="text-zinc-400">exp: </span><span className="text-emerald-600 dark:text-emerald-400">+{expiresIn} · alg: {algorithm}</span>
-            </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
 
-      <div className="px-4 py-3 border-t border-zinc-200 dark:border-zinc-800 flex items-center gap-2">
-        <button
-          onClick={() => setStepIdx((s) => Math.max(0, s - 1))}
-          disabled={stepIdx === 0}
-          className="text-[11px] px-2.5 py-1.5 rounded-lg border border-zinc-200 dark:border-zinc-700 text-zinc-500 disabled:opacity-30 hover:border-zinc-300 dark:hover:border-zinc-600 transition-all duration-500"
-        >
-          Back
-        </button>
-        <div className="flex gap-1.5 flex-1 justify-center">
+      <div className="px-4 py-3 border-t border-zinc-100 dark:border-zinc-800 flex items-center gap-3 bg-zinc-50 dark:bg-zinc-900/30 min-h-[52px]">
+        <div className="flex gap-1.5 flex-1">
           {STEPS.map((_, i) => (
-            <button
+            <div
               key={i}
-              onClick={() => setStepIdx(i)}
               className={cn(
                 "h-1.5 rounded-full transition-all duration-500",
-                i === stepIdx
-                  ? "bg-blue-500 w-6"
-                  : "bg-zinc-200 dark:bg-zinc-700 w-1.5 hover:bg-zinc-300 dark:hover:bg-zinc-600"
+                i === stepIdx ? "bg-blue-500 w-6" : i < stepIdx ? "bg-blue-300 dark:bg-blue-700 w-3" : "bg-zinc-200 dark:bg-zinc-700 w-3"
               )}
             />
           ))}
         </div>
-        {!isLastStep ? (
-          <button
-            onClick={() => setStepIdx((s) => Math.min(STEPS.length - 1, s + 1))}
-            className="text-[11px] px-3 py-1.5 rounded-lg bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 font-semibold hover:opacity-90 transition-all duration-500 flex items-center gap-1"
-          >
-            Next <ArrowRight className="size-3" />
-          </button>
-        ) : (
-          <button
-            onClick={() => setStepIdx(0)}
-            className="text-[11px] px-3 py-1.5 rounded-lg bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 font-semibold transition-all duration-500 flex items-center gap-1"
-          >
-            <CheckCircle2 className="size-3" /> Restart
-          </button>
+        <span className="text-sm text-zinc-500 dark:text-zinc-400 shrink-0 hidden sm:inline">{step.label}</span>
+        {interactive && (
+          !isLastStep ? (
+            <button
+              type="button"
+              onClick={() => setStepIdx((s) => Math.min(STEPS.length - 1, s + 1))}
+              className="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-all duration-500 flex items-center gap-1 shrink-0"
+            >
+              Next <ArrowRight className="size-3.5" />
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setStepIdx(0)}
+              className="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-all duration-500 flex items-center gap-1 shrink-0"
+            >
+              <CheckCircle2 className="size-3.5" /> Restart
+            </button>
+          )
         )}
       </div>
     </div>

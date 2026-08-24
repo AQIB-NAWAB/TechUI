@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { z } from "zod";
 import { cn } from "@/lib/utils";
-import { RefreshCw, ChevronDown, ChevronRight, Box, Layers } from "lucide-react";
+import { RefreshCw, Box, Layers } from "lucide-react";
 
 export const KubernetesDeploymentSchema = z.object({
   name: z.string().default("api-server"),
@@ -76,7 +76,6 @@ export function KubernetesDeployment({
   const [pods, setPods] = useState<Pod[]>(() => makePods(name, replicas, currentTag));
   const [rolling, setRolling] = useState(false);
   const [rolledOut, setRolledOut] = useState(false);
-  const [showSpec, setShowSpec] = useState(false);
   const [updatedCount, setUpdatedCount] = useState(0);
   const [activeStrategy, setActiveStrategy] = useState(strategy);
 
@@ -152,39 +151,22 @@ export function KubernetesDeployment({
     setUpdatedCount(0);
   }
 
-  const effectiveLabels = labels ?? { app: name, env: namespace === "default" ? "staging" : namespace };
-
   return (
     <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden text-sm">
 
-      <div className="flex items-center gap-2 h-12 px-4 bg-zinc-50 dark:bg-zinc-800/50 border-b border-zinc-100 dark:border-zinc-800">
+      <div className="flex items-center gap-2 h-12 px-4 border-b border-zinc-100 dark:border-zinc-800">
         <Layers className="size-4 text-violet-500 shrink-0" />
-        <span className="text-[10px] font-semibold text-zinc-400 uppercase tracking-widest">Deployment</span>
-        <span className="text-xs font-semibold text-zinc-800 dark:text-zinc-200 flex-1">{name}</span>
+        <span className="text-sm font-semibold text-zinc-800 dark:text-zinc-200 flex-1">{name}</span>
         <span className="text-[10px] font-mono text-zinc-400 border border-zinc-200 dark:border-zinc-700 px-1.5 py-0.5 rounded">{namespace}</span>
-        {interactive && (
-          <div className="flex items-center gap-1.5">
-            {rolledOut && (
-              <button onClick={reset} className="p-1 rounded text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-all duration-500" title="Reset">
-                <RefreshCw className="size-3.5" />
-              </button>
-            )}
-            {!rolledOut && (
-              <button
-                onClick={rollout}
-                disabled={rolling}
-                className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 hover:opacity-90 transition-all duration-500 disabled:opacity-40"
-              >
-                {rolling && <RefreshCw className="size-3 animate-spin" />}
-                {rolling ? "Updating…" : "Roll out"}
-              </button>
-            )}
-          </div>
-        )}
+        <span className="text-[10px] font-semibold text-zinc-500">{replicas} replicas</span>
+      </div>
+
+      <div className="text-sm text-zinc-500 dark:text-zinc-400 px-4 py-2 border-b border-zinc-100 dark:border-zinc-800">
+        Manages a set of identical pods — rolling updates replace old versions without downtime.
       </div>
 
       <div className={cn(
-        "px-4 py-2.5 border-b border-zinc-100 dark:border-zinc-800 text-[11px] leading-relaxed transition-all duration-500",
+        "px-4 py-2 border-b border-zinc-100 dark:border-zinc-800 text-xs leading-relaxed transition-all duration-500",
         activeStrategy === "RollingUpdate"
           ? "bg-blue-50 dark:bg-blue-950/20 text-blue-700 dark:text-blue-400"
           : "bg-amber-50 dark:bg-amber-950/20 text-amber-700 dark:text-amber-400"
@@ -247,7 +229,7 @@ export function KubernetesDeployment({
         <span className="ml-auto text-[10px] text-zinc-400">{readyCount}/{pods.length} ready</span>
       </div>
 
-      <div className="px-4 py-4 min-h-[88px] flex flex-wrap gap-2 items-start">
+      <div className="px-4 py-4 min-h-[120px] flex flex-wrap gap-2 items-start">
         {pods.map((pod, i) => {
           const sc = STATUS_CFG[pod.status];
           const isNew = pod.version === newTag;
@@ -288,22 +270,23 @@ export function KubernetesDeployment({
         )}
       </div>
 
-      <div className="border-t border-zinc-100 dark:border-zinc-800">
-        <button
-          onClick={() => setShowSpec((v) => !v)}
-          className="w-full flex items-center gap-2 px-4 py-2 text-left text-[11px] text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-all duration-500"
-        >
-          {showSpec ? <ChevronDown className="size-3 shrink-0" /> : <ChevronRight className="size-3 shrink-0" />}
-          Labels &amp; selector
-        </button>
-        {showSpec && (
-          <div className="px-4 pb-3 flex flex-wrap gap-1.5">
-            {Object.entries(effectiveLabels).map(([k, v]) => (
-              <span key={k} className="text-[10px] font-mono text-zinc-500 dark:text-zinc-400 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 px-2 py-0.5 rounded">
-                {k}={String(v)}
-              </span>
-            ))}
-          </div>
+      <div className="border-t border-zinc-100 dark:border-zinc-800 px-4 py-3 flex items-center gap-3">
+        <span className="text-sm text-zinc-500 dark:text-zinc-400 flex-1">
+          {rolling
+            ? `Updating ${updatedCount}/${replicas} replicas…`
+            : rolledOut
+            ? `Rollout complete — all pods on ${newTag}`
+            : `${readyCount}/${pods.length} pods ready · ${currentTag}`}
+        </span>
+        {interactive && (
+          <button
+            onClick={rolledOut ? reset : rollout}
+            disabled={rolling}
+            className="flex items-center gap-1.5 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-40 shrink-0"
+          >
+            {rolling && <RefreshCw className="size-3.5 animate-spin" />}
+            {rolling ? "Updating…" : rolledOut ? "Reset" : "Roll Out"}
+          </button>
         )}
       </div>
     </div>

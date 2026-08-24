@@ -2,7 +2,7 @@
 
 import { z } from "zod";
 import { useState, useEffect, useRef } from "react";
-import { Zap, Clock, Globe, Calendar, Database } from "lucide-react";
+import { Zap, Clock, Globe, Calendar, Database, RefreshCw } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export const ServerlessSchema = z.object({
@@ -56,6 +56,7 @@ export function Serverless({
   const [mode, setMode] = useState<"idle" | "cold" | "warm">("idle");
   const [phaseIdx, setPhaseIdx] = useState(-1);
   const [scaleStep, setScaleStep] = useState(0);
+  const [simMode, setSimMode] = useState<"cold" | "warm">("cold");
   const animRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
@@ -119,6 +120,12 @@ export function Serverless({
     animatePhases(WARM_PHASES);
   }
 
+  function handleSimulate() {
+    if (mode !== "idle") return;
+    if (simMode === "cold") handleCold();
+    else handleWarm();
+  }
+
   const phases = mode === "cold" ? COLD_PHASES : mode === "warm" ? WARM_PHASES : [];
   const total = mode === "cold" ? COLD_TOTAL : WARM_TOTAL;
 
@@ -148,6 +155,11 @@ export function Serverless({
         >
           {providerLabel}
         </span>
+        {mode !== "idle" && (
+          <button type="button" onClick={reset} className="p-1 rounded text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-all duration-500" title="Reset">
+            <RefreshCw className="size-3.5" />
+          </button>
+        )}
       </div>
 
       {/* Provider Tabs */}
@@ -176,10 +188,33 @@ export function Serverless({
 
       {/* Body */}
       <div className="px-4 py-4 min-h-[320px] flex flex-col gap-4">
-        {/* Runtime + memory */}
-        <div className="flex gap-3 text-xs text-zinc-500 dark:text-zinc-400 font-mono">
-          <span>Runtime: <span className="text-zinc-700 dark:text-zinc-300 font-semibold">{runtime}</span></span>
-          <span>Memory: <span className="text-zinc-700 dark:text-zinc-300 font-semibold">{memoryMb}MB</span></span>
+        {/* Runtime + memory + sim mode */}
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="flex gap-3 text-xs text-zinc-500 dark:text-zinc-400 font-mono">
+            <span>Runtime: <span className="text-zinc-700 dark:text-zinc-300 font-semibold">{runtime}</span></span>
+            <span>Memory: <span className="text-zinc-700 dark:text-zinc-300 font-semibold">{memoryMb}MB</span></span>
+          </div>
+          <div className="flex rounded-lg border border-zinc-200 dark:border-zinc-700 overflow-hidden ml-auto">
+            {(["cold", "warm"] as const).map((m) => (
+              <button
+                key={m}
+                type="button"
+                disabled={mode !== "idle"}
+                onClick={() => setSimMode(m)}
+                className={cn(
+                  "px-3 py-1 text-[10px] font-semibold uppercase transition-all duration-500",
+                  simMode === m
+                    ? m === "cold"
+                      ? "bg-amber-500 text-white"
+                      : "bg-emerald-500 text-white"
+                    : "text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300",
+                  mode !== "idle" && "opacity-50 cursor-not-allowed"
+                )}
+              >
+                {m === "cold" ? "Cold Start" : "Warm Start"}
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* Trigger types */}
@@ -222,7 +257,7 @@ export function Serverless({
           {/* Phase bars */}
           {mode === "idle" ? (
             <div className="text-xs text-zinc-500 text-center py-4">
-              Click a button below to simulate
+              Pick cold or warm above, then simulate below
             </div>
           ) : (
             <div className="flex flex-col gap-1.5">
@@ -329,36 +364,23 @@ export function Serverless({
       </div>
 
       {/* Footer */}
-      <div className="px-4 py-3 border-t border-zinc-100 dark:border-zinc-800 flex items-center gap-2 flex-wrap bg-zinc-50 dark:bg-zinc-900/30">
-        <span className="text-xs text-zinc-500 flex-1">
+      <div className="px-4 py-3 border-t border-zinc-100 dark:border-zinc-800 flex items-center gap-3 bg-zinc-50 dark:bg-zinc-900/30">
+        <span className="text-sm text-zinc-500 dark:text-zinc-400 flex-1">
           {mode === "idle"
-            ? "Simulate a cold or warm start to see the difference"
+            ? simMode === "cold"
+              ? "Cold start: container boots from scratch (~295ms)"
+              : "Warm start: container already running (~15ms)"
             : mode === "cold"
             ? "Cold start: container must boot before handling the request"
             : "Warm start: container already running — instant response"}
         </span>
         <button
-          onClick={handleCold}
-          disabled={mode !== "idle" && phaseIdx < phases.length}
-          className="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-40"
+          onClick={handleSimulate}
+          disabled={mode !== "idle"}
+          className="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-all duration-500 disabled:opacity-40 shrink-0"
         >
-          Simulate Cold Start
+          {mode !== "idle" ? "Running…" : simMode === "cold" ? "Simulate Cold Start" : "Simulate Warm Start"}
         </button>
-        <button
-          onClick={handleWarm}
-          disabled={mode !== "idle" && phaseIdx < phases.length}
-          className="bg-emerald-600 text-white rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-40"
-        >
-          Simulate Warm Start
-        </button>
-        {mode !== "idle" && (
-          <button
-            onClick={reset}
-            className="text-xs text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-all duration-500"
-          >
-            Reset
-          </button>
-        )}
       </div>
     </div>
   );

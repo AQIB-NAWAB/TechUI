@@ -244,7 +244,27 @@ export function DataReplication({
         Copies database writes from a primary to replica servers — async is fast but may lose data; sync waits for all replicas.
       </p>
 
-      <div className="min-h-[240px] p-4 flex flex-col gap-4">
+      <div className="min-h-[280px] p-4 flex flex-col gap-4">
+        <div className="flex flex-wrap gap-2">
+          <button
+            onClick={() => setMode((m) => m === "async" ? "sync" : "async")}
+            disabled={animating}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border border-zinc-200 dark:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all duration-500 text-zinc-600 dark:text-zinc-400 disabled:opacity-50"
+          >
+            <RefreshCw className="size-3.5" />
+            Switch to {mode === "async" ? "Sync" : "Async"}
+          </button>
+          {!crashed && (
+            <button
+              onClick={simulateCrash}
+              disabled={animating}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/20 transition-all duration-500 disabled:opacity-50"
+            >
+              <AlertTriangle className="size-3.5" />
+              Crash Primary
+            </button>
+          )}
+        </div>
         {/* Primary */}
         {primaryNode && <NodeBox node={primaryNode} lagMs={lagMs} />}
 
@@ -294,53 +314,39 @@ export function DataReplication({
           </div>
         </div>
 
-        {/* Log */}
-        {log.length > 0 && (
-          <div className="rounded-lg bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-100 dark:border-zinc-700 px-3 py-2 space-y-0.5">
-            {log.map((entry, i) => (
-              <div key={i} className={cn(
-                "text-[10px] font-mono transition-opacity",
-                i === 0 ? "text-zinc-700 dark:text-zinc-200" : "text-zinc-400"
-              )}>
-                {entry}
-              </div>
-            ))}
-          </div>
-        )}
+        {/* Log — fixed height slot */}
+        <div className="min-h-[72px]">
+          {log.length > 0 ? (
+            <div className="rounded-lg bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-100 dark:border-zinc-700 px-3 py-2 space-y-0.5">
+              {log.map((entry, i) => (
+                <div key={i} className={cn(
+                  "text-[10px] font-mono transition-opacity duration-500",
+                  i === 0 ? "text-zinc-700 dark:text-zinc-200" : "text-zinc-400"
+                )}>
+                  {entry}
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="rounded-lg border border-dashed border-zinc-200 dark:border-zinc-700 px-3 py-2 text-[10px] text-zinc-400">
+              Click Write to see how data flows to replicas
+            </div>
+          )}
+        </div>
       </div>
 
       <div className="border-t border-zinc-100 dark:border-zinc-800 px-4 py-3 flex items-center gap-2 flex-wrap bg-zinc-50 dark:bg-zinc-900/30">
         <span className="text-sm text-zinc-500 dark:text-zinc-400 flex-1 min-w-[140px]">
-          {animating ? "Replicating write…" : log[0] ?? `Write latency: ${writeLatency}`}
+          {animating ? "Replicating write…" : crashed ? "Primary failed — replica promoted" : log[0] ?? `Write latency: ${writeLatency}`}
         </span>
-        <button
-          onClick={() => setMode((m) => m === "async" ? "sync" : "async")}
-          disabled={animating}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border border-zinc-200 dark:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all duration-500 text-zinc-600 dark:text-zinc-400 disabled:opacity-50"
-        >
-          <RefreshCw className="size-3.5" />
-          {mode === "async" ? "Sync" : "Async"}
-        </button>
-        {!crashed && (
-          <button
-            onClick={simulateCrash}
-            disabled={animating}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/20 transition-all duration-500 disabled:opacity-50"
-          >
-            <AlertTriangle className="size-3.5" />
-            Crash
-          </button>
-        )}
         <button
           onClick={crashed ? resetAll : simulateWrite}
           disabled={animating && !crashed}
           className={cn(
-            "flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-semibold transition-all duration-500",
-            animating || (crashed === false && crashed)
-              ? "bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 hover:opacity-90 disabled:opacity-50"
-              : crashed
-                ? "bg-emerald-600 text-white hover:opacity-90"
-                : "bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 hover:opacity-90 disabled:opacity-50"
+            "flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-semibold transition-all duration-500 hover:opacity-90 disabled:opacity-50",
+            crashed
+              ? "bg-emerald-600 text-white"
+              : "bg-zinc-900 dark:bg-white text-white dark:text-zinc-900"
           )}
         >
           {crashed ? (

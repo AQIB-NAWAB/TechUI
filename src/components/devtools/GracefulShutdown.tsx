@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { z } from "zod";
 import { cn } from "@/lib/utils";
-import { Server, Monitor, Ban, Loader2, Power, CheckCircle2 } from "lucide-react";
+import { Server, Monitor, Ban, Loader2, Power, CheckCircle2, RefreshCw } from "lucide-react";
 
 export const GracefulShutdownSchema = z.object({
   serviceName: z.string().optional().default("api-server"),
@@ -43,6 +43,11 @@ export function GracefulShutdown({
   const [newRequestsBlocked, setNewRequestsBlocked] = useState(false);
   const [animating, setAnimating] = useState(false);
   const timersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
+
+  useEffect(() => {
+    reset();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialConnections, drainTimeoutSeconds, serviceName]);
 
   function clearTimers() {
     timersRef.current.forEach(clearTimeout);
@@ -116,7 +121,7 @@ export function GracefulShutdown({
 
   return (
     <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden">
-      <div className="flex items-center gap-3 px-4 h-12 border-b border-zinc-200 dark:border-zinc-800">
+      <div className="flex items-center gap-3 px-4 h-12 border-b border-zinc-100 dark:border-zinc-800">
         <Server className="size-4 text-zinc-400 shrink-0" />
         <span className="text-sm font-semibold text-zinc-800 dark:text-zinc-200 flex-1">
           Graceful Shutdown
@@ -130,6 +135,16 @@ export function GracefulShutdown({
         >
           {phase === "sigterm" ? "SIGTERM" : phase}
         </span>
+        {interactive && (
+          <button
+            type="button"
+            onClick={reset}
+            className="p-1 rounded text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-all duration-500"
+            title="Reset"
+          >
+            <RefreshCw className="size-3.5" />
+          </button>
+        )}
       </div>
 
       <div className="text-sm text-zinc-500 dark:text-zinc-400 px-4 py-2 border-b border-zinc-100 dark:border-zinc-800">
@@ -234,31 +249,27 @@ export function GracefulShutdown({
       </div>
 
       {interactive && (
-        <div className="border-t border-zinc-100 dark:border-zinc-800 px-4 py-3 flex items-center gap-3 bg-zinc-50 dark:bg-zinc-900/30">
+        <div className="border-t border-zinc-100 dark:border-zinc-800 px-4 py-3 flex items-center gap-3">
           <span className="text-sm text-zinc-500 dark:text-zinc-400 flex-1">{statusMessages[phase]}</span>
-          {phase === "complete" ? (
-            <button
-              type="button"
-              onClick={reset}
-              className="px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-500 shrink-0 hover:opacity-90 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900"
-            >
-              Reset
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={initiateShutdown}
-              disabled={animating || phase !== "running"}
-              className={cn(
-                "px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-500 shrink-0 hover:opacity-90 flex items-center gap-1.5",
-                "bg-zinc-900 dark:bg-white text-white dark:text-zinc-900",
-                (animating || phase !== "running") && "opacity-50 cursor-not-allowed"
-              )}
-            >
-              <Power className="size-3.5" />
-              Initiate Shutdown
-            </button>
-          )}
+          <button
+            type="button"
+            onClick={phase === "complete" ? reset : initiateShutdown}
+            disabled={animating && phase !== "complete"}
+            className={cn(
+              "px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-500 shrink-0 hover:opacity-90 flex items-center gap-1.5",
+              "bg-zinc-900 dark:bg-white text-white dark:text-zinc-900",
+              animating && phase !== "complete" && "opacity-50 cursor-not-allowed"
+            )}
+          >
+            {phase === "complete" ? (
+              "Run Again"
+            ) : (
+              <>
+                <Power className="size-3.5" />
+                Initiate Shutdown
+              </>
+            )}
+          </button>
         </div>
       )}
     </div>

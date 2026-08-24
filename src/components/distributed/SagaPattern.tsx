@@ -180,7 +180,7 @@ export function SagaPattern({
 
   return (
     <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden">
-      <div className="flex items-center gap-2 px-4 h-12 border-b border-zinc-100 dark:border-zinc-800">
+      <div className="flex items-center gap-2 px-4 h-12 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50">
         <RotateCcw className="size-4 text-violet-500 shrink-0" />
         <span className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 flex-1">Saga Pattern</span>
         <span className="text-xs font-mono text-zinc-400 border border-zinc-200 dark:border-zinc-700 px-2 py-0.5 rounded">
@@ -273,7 +273,7 @@ export function SagaPattern({
         </div>
       </div>
 
-      <div className="px-4 py-3 border-t border-zinc-100 dark:border-zinc-800 flex items-center gap-3">
+      <div className="px-4 py-3 border-t border-zinc-100 dark:border-zinc-800 flex items-center gap-3 bg-zinc-50 dark:bg-zinc-900/30">
         <span className={cn(
           "text-sm flex-1 transition-all duration-500",
           outcome === "success"     && "text-emerald-700 dark:text-emerald-400",

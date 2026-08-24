@@ -138,6 +138,10 @@ export function GraphQLQuery({
   const [ran, setRan] = useState(false);
   const [running, setRunning] = useState(false);
 
+  const desc =
+    description ??
+    "Ask for exactly the data you need in one request — the server returns a JSON tree matching your query shape.";
+
   const tabs: { id: Tab; label: string; available: boolean }[] = [
     { id: "query",     label: "Query",     available: !!query     },
     { id: "variables", label: "Variables", available: !!variables },
@@ -166,11 +170,9 @@ export function GraphQLQuery({
         <code className="text-[11px] text-zinc-400 font-mono ml-auto">{endpoint}</code>
       </div>
 
-      {description && (
-        <div className="px-4 py-2.5 border-b border-zinc-100 dark:border-zinc-800">
-          <p className="text-xs text-zinc-500 dark:text-zinc-400">{description}</p>
-        </div>
-      )}
+      <p className="text-sm text-zinc-500 dark:text-zinc-400 px-4 py-2 border-b border-zinc-100 dark:border-zinc-800">
+        {desc}
+      </p>
 
       {/* Tab bar */}
       <div className="flex border-b border-zinc-100 dark:border-zinc-800 mt-1">
@@ -200,23 +202,8 @@ export function GraphQLQuery({
           running ? "opacity-50" : "opacity-100"
         )}>
           {tab === "query" && query && (
-            <div className="relative pb-12">
-              <div className="rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 p-4">
-                <HighlightedQuery query={query} />
-              </div>
-              <button
-                onClick={runQuery}
-                disabled={running}
-                className={cn(
-                  "absolute bottom-0 right-0 flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-500",
-                  running
-                    ? "bg-zinc-200 dark:bg-zinc-700 text-zinc-400"
-                    : "bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 hover:opacity-90"
-                )}
-              >
-                <Play className="size-3.5" />
-                {running ? "Running…" : "Run Query"}
-              </button>
+            <div className="rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 p-4">
+              <HighlightedQuery query={query} />
             </div>
           )}
           {tab === "variables" && variables && (
@@ -240,13 +227,28 @@ export function GraphQLQuery({
       </div>
 
       {/* Footer */}
-      <div className="px-4 py-2.5 border-t border-zinc-100 dark:border-zinc-800 flex items-center gap-4">
-        <span className="text-[11px] text-zinc-400">
-          <span className="font-medium text-zinc-500">POST</span> {endpoint}
-          <span className="text-zinc-300 dark:text-zinc-700 mx-1.5">·</span>
-          Content-Type: application/json
+      <div className="border-t border-zinc-100 dark:border-zinc-800 px-4 py-3 flex items-center gap-3 bg-zinc-50 dark:bg-zinc-900/30 min-h-[52px]">
+        <span className="text-sm text-zinc-500 dark:text-zinc-400 flex-1">
+          {running
+            ? "Running query…"
+            : ran
+            ? "Response ready — switch to the Response tab to inspect"
+            : "Ready — click Run Query to fetch data"}
         </span>
-        <span className="ml-auto text-[10px] text-zinc-300 dark:text-zinc-700 font-mono">GraphQL</span>
+        <button
+          type="button"
+          onClick={runQuery}
+          disabled={running}
+          className={cn(
+            "flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-semibold transition-all duration-500 shrink-0 hover:opacity-90",
+            running
+              ? "bg-zinc-200 dark:bg-zinc-700 text-zinc-400 cursor-not-allowed"
+              : "bg-zinc-900 dark:bg-white text-white dark:text-zinc-900"
+          )}
+        >
+          <Play className="size-3.5" />
+          {running ? "Running…" : "Run Query"}
+        </button>
       </div>
     </div>
   );

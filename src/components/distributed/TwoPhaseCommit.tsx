@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 import { GitCommitHorizontal, RefreshCw, Database, Server } from "lucide-react";
 
 export const TwoPhaseCommitSchema = z.object({
-  transactionName: z.string().optional().default("Transfer $500"),
+  transactionName: z.string().optional().default("Transfer $500 (A → B)"),
   participants: z.array(z.object({
     id: z.string(),
     label: z.string(),
@@ -42,7 +42,7 @@ const STATE_LABEL: Record<ParticipantState, string> = {
 };
 
 export function TwoPhaseCommit({
-  transactionName = "Transfer $500",
+  transactionName = "Transfer $500 (A → B)",
   participants = [
     { id: "db-a", label: "Account DB (Shard A)", color: "blue" as const },
     { id: "db-b", label: "Ledger DB (Shard B)", color: "emerald" as const },
@@ -128,18 +128,22 @@ export function TwoPhaseCommit({
 
   return (
     <div className={cn(
-      "rounded-xl border bg-white dark:bg-zinc-950 overflow-hidden transition-all duration-500",
+      "rounded-xl border bg-white dark:bg-zinc-900 overflow-hidden transition-all duration-500",
       phase === "abort" ? "border-red-300 dark:border-red-800" : "border-zinc-200 dark:border-zinc-800"
     )}>
-      <div className="flex items-center gap-3 px-4 h-12 border-b border-zinc-100 dark:border-zinc-900 bg-zinc-50 dark:bg-zinc-900/50">
+      <div className="flex items-center gap-3 px-4 h-12 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50">
         <GitCommitHorizontal className="size-4 text-zinc-400 shrink-0" />
         <span className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 flex-1">Two-Phase Commit</span>
         <span className={cn("text-[10px] font-mono font-semibold", phaseColor)}>{phaseLabel}</span>
         {interactive && (
-          <button onClick={reset} className="p-1 rounded text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-all duration-500">
+          <button type="button" onClick={reset} className="p-1 rounded text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-all duration-500">
             <RefreshCw className="size-3.5" />
           </button>
         )}
+      </div>
+
+      <div className="text-sm text-zinc-500 dark:text-zinc-400 px-4 py-2 border-b border-zinc-100 dark:border-zinc-800">
+        A coordinator asks every database to prepare, then commits only if all participants vote yes.
       </div>
 
       <div className="p-4 min-h-[240px] space-y-4">
@@ -197,7 +201,7 @@ export function TwoPhaseCommit({
       </div>
 
       {interactive && (
-        <div className="border-t border-zinc-100 dark:border-zinc-900 px-4 py-3 flex items-center gap-3 bg-zinc-50 dark:bg-zinc-900/30">
+        <div className="border-t border-zinc-100 dark:border-zinc-800 px-4 py-3 flex items-center gap-3 bg-zinc-50 dark:bg-zinc-900/30 min-h-[52px]">
           <span className="text-sm text-zinc-500 dark:text-zinc-400 flex-1">
             {phase === "idle"
               ? simulateFailure
@@ -210,6 +214,7 @@ export function TwoPhaseCommit({
               : "Coordinator is coordinating the distributed transaction…"}
           </span>
           <button
+            type="button"
             onClick={runTransaction}
             disabled={running}
             className={cn(

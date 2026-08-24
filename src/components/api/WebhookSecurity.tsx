@@ -184,14 +184,14 @@ export function WebhookSecurity({
         ))}
       </div>
 
-      <div className="min-h-[240px] px-4 py-4 space-y-2">
+      <div className="min-h-[280px] px-4 py-4 space-y-2">
         {steps.map((s, i) => {
           const state = stepState(i);
           return (
             <div
               key={i}
               className={cn(
-                "rounded-lg border p-3 transition-all duration-500",
+                "rounded-lg border p-3 transition-all duration-500 min-h-[72px]",
                 state === "active" ? "border-blue-300 dark:border-blue-700 bg-blue-50 dark:bg-blue-950/30" :
                 state === "done" ? "border-emerald-200 dark:border-emerald-800 bg-emerald-50/50 dark:bg-emerald-950/10" :
                 state === "error" ? "border-red-300 dark:border-red-700 bg-red-50 dark:bg-red-950/20" :
@@ -210,12 +210,14 @@ export function WebhookSecurity({
           );
         })}
 
-        {result === "rejected" && (
-          <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-red-100 dark:bg-red-900/30 border border-red-300 dark:border-red-700 transition-all duration-500">
-            <ShieldX className="size-4 text-red-600 shrink-0" />
-            <span className="text-sm font-bold text-red-700">REJECTED — signatures don&apos;t match</span>
-          </div>
-        )}
+        <div className={cn("min-h-[44px] transition-all duration-500", result === "rejected" ? "opacity-100" : "opacity-0")}>
+          {result === "rejected" && (
+            <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-red-100 dark:bg-red-900/30 border border-red-300 dark:border-red-700">
+              <ShieldX className="size-4 text-red-600 shrink-0" />
+              <span className="text-sm font-bold text-red-700">REJECTED — signatures don&apos;t match</span>
+            </div>
+          )}
+        </div>
       </div>
 
       <div className="border-t border-zinc-100 dark:border-zinc-800 px-4 py-3 flex items-center gap-3">

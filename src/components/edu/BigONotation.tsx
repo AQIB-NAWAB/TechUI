@@ -8,6 +8,7 @@ import { TrendingUp } from "lucide-react";
 export const BigONotationSchema = z.object({
   selectedComplexity: z.enum(["O1", "Ologn", "On", "Onlogn", "On2"]).optional().default("On"),
   inputSize: z.number().default(10),
+  interactive: z.boolean().optional().default(true),
 });
 
 export type BigONotationProps = z.infer<typeof BigONotationSchema>;
@@ -77,6 +78,7 @@ function formatOps(n: number): string {
 export function BigONotation({
   selectedComplexity: initialComplexity = "On",
   inputSize: initialInputSize = 10,
+  interactive = true,
 }: BigONotationProps) {
   const [selected, setSelected] = useState<string>(initialComplexity);
   const [inputSize, setInputSize] = useState<number>(initialInputSize);
@@ -100,6 +102,7 @@ export function BigONotation({
         How runtime grows as input size increases — pick a complexity to compare.
       </p>
 
+      <div className="min-h-[220px]">
       <div className="px-4 pt-3 pb-2 flex flex-wrap gap-1.5">
         {COMPLEXITIES.map((c) => {
           const colors = COLOR_CLASSES[c.color];
@@ -141,7 +144,7 @@ export function BigONotation({
       </div>
 
       {/* Bar chart */}
-      <div className="min-h-[220px] px-4 pb-3 space-y-2">
+      <div className="min-h-[220px] max-h-[220px] px-4 pb-3 space-y-2 overflow-hidden">
         {COMPLEXITIES.map((c) => {
           const { ops: opCount } = ops.find((o) => o.key === c.key) ?? { ops: 1 };
           const colors = COLOR_CLASSES[c.color];
@@ -184,37 +187,40 @@ export function BigONotation({
           );
         })}
 
-        {/* Selected complexity detail */}
-        <div className={cn(
-          "rounded-lg border px-3 py-2.5 transition-all duration-500",
-          COLOR_CLASSES[selectedDef.color].badge,
-          "border-current/20"
-        )}>
-          <div className={cn("text-xs font-semibold mb-1", COLOR_CLASSES[selectedDef.color].text)}>
-            {selectedDef.label} — {selectedDef.desc}
-          </div>
-          <ul className="space-y-0.5">
-            {examples.map((ex) => (
-              <li key={ex} className="text-[11px] text-zinc-600 dark:text-zinc-400 flex items-start gap-1.5">
-                <span className="mt-0.5 shrink-0">•</span>
-                {ex}
-              </li>
-            ))}
-          </ul>
-        </div>
       </div>
 
-      <div className="px-4 py-3 border-t border-zinc-100 dark:border-zinc-800 flex items-center gap-3">
-        <span className="text-sm text-zinc-500 dark:text-zinc-400 flex-1">
+      <div className={cn(
+        "mx-4 mb-3 rounded-lg border px-3 py-2.5 min-h-[88px] max-h-[88px] overflow-hidden transition-all duration-500",
+        COLOR_CLASSES[selectedDef.color].badge,
+        "border-current/20"
+      )}>
+        <div className={cn("text-xs font-semibold mb-1", COLOR_CLASSES[selectedDef.color].text)}>
           {selectedDef.label} — {selectedDef.desc}
-        </span>
-        <button
-          onClick={() => setInputSize(inputSize >= 1000 ? 10 : inputSize >= 100 ? 1000 : 100)}
-          className="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-opacity shrink-0"
-        >
-          Try n={inputSize >= 1000 ? 10 : inputSize >= 100 ? 1000 : 100}
-        </button>
+        </div>
+        <ul className="space-y-0.5">
+          {examples.map((ex) => (
+            <li key={ex} className="text-[11px] text-zinc-600 dark:text-zinc-400 flex items-start gap-1.5">
+              <span className="mt-0.5 shrink-0">•</span>
+              {ex}
+            </li>
+          ))}
+        </ul>
       </div>
+      </div>
+
+      {interactive && (
+        <div className="px-4 py-3 border-t border-zinc-100 dark:border-zinc-800 flex items-center gap-3 bg-zinc-50 dark:bg-zinc-900/30">
+          <span className="text-sm text-zinc-500 dark:text-zinc-400 flex-1">
+            {selectedDef.label} — {selectedDef.desc}
+          </span>
+          <button
+            onClick={() => setInputSize(inputSize >= 1000 ? 10 : inputSize >= 100 ? 1000 : 100)}
+            className="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-all duration-500 shrink-0"
+          >
+            Try n={inputSize >= 1000 ? 10 : inputSize >= 100 ? 1000 : 100}
+          </button>
+        </div>
+      )}
     </div>
   );
 }

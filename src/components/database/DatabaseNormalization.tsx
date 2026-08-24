@@ -264,8 +264,11 @@ export function DatabaseNormalization({ normalForm = "denormalized" }: DatabaseN
         </div>
       </div>
 
-      {/* Content */}
-      <div className="min-h-[300px] px-4 pt-3 pb-3 flex flex-col gap-3">
+      <p className="text-sm text-zinc-500 dark:text-zinc-400 px-4 py-2 border-b border-zinc-100 dark:border-zinc-800">
+        Split wide tables into smaller ones to eliminate duplicate data and update anomalies.
+      </p>
+
+      <div className="min-h-[220px] px-4 pt-3 pb-3 flex flex-col gap-3">
 
         {/* ── Denormalized ── */}
         {tab === "denormalized" && (
@@ -360,6 +363,25 @@ export function DatabaseNormalization({ normalForm = "denormalized" }: DatabaseN
           {tab === "2nf" && <><strong className="text-zinc-600 dark:text-zinc-300">2NF:</strong> Partial dependency = column depends on part of composite key. Fix: extract into its own table with full PK.</>}
           {tab === "3nf" && <><strong className="text-zinc-600 dark:text-zinc-300">Normalization eliminates redundancy</strong> — data stored once, referenced everywhere. Update in one place, reflects everywhere.</>}
         </div>
+      </div>
+
+      <div className="border-t border-zinc-100 dark:border-zinc-800 px-4 py-3 flex items-center gap-3 bg-zinc-50 dark:bg-zinc-900/30">
+        <span className="text-sm text-zinc-500 dark:text-zinc-400 flex-1">
+          {tab === "denormalized" && "Raw table — duplication causes update/delete/insert anomalies"}
+          {tab === "1nf" && "1NF — each cell holds a single atomic value"}
+          {tab === "2nf" && "2NF — non-key columns depend on the whole primary key"}
+          {tab === "3nf" && "3NF — no transitive dependencies between non-key columns"}
+        </span>
+        <button
+          onClick={() => {
+            const order = ["denormalized", "1nf", "2nf", "3nf"] as const;
+            const idx = order.indexOf(tab);
+            setTab(order[(idx + 1) % order.length]!);
+          }}
+          className="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-all duration-500"
+        >
+          Next Form
+        </button>
       </div>
     </div>
   );

@@ -146,7 +146,7 @@ export function OpenApiSpec({
         A machine-readable contract describing every endpoint, request, and response.
       </div>
 
-      <div className="min-h-[280px] flex flex-col">
+      <div className="min-h-[220px] flex flex-col">
         <div className="px-4 py-2 border-b border-zinc-100 dark:border-zinc-800 flex flex-wrap gap-1 max-h-[100px] overflow-y-auto">
           {Array.from(groups.entries()).flatMap(([, tagEndpoints]) =>
             tagEndpoints.map((ep) => {
@@ -240,7 +240,7 @@ export function OpenApiSpec({
         )}
       </div>
 
-      <div className="px-4 py-3 border-t border-zinc-100 dark:border-zinc-800 flex items-center gap-3">
+      <div className="px-4 py-3 border-t border-zinc-100 dark:border-zinc-800 flex items-center gap-3 bg-zinc-50 dark:bg-zinc-900/30 min-h-[52px]">
         <span className="text-sm text-zinc-500 dark:text-zinc-400 flex-1">
           {phase === "done" && responseCode
             ? `Response: ${responseCode} — ${selected?.responses.find((r) => r.code === responseCode)?.description ?? "OK"}`
@@ -251,7 +251,7 @@ export function OpenApiSpec({
         <button
           onClick={tryEndpoint}
           disabled={phase === "sending" || !selected}
-          className="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-50"
+          className="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-all duration-500 disabled:opacity-50"
         >
           Try Endpoint
         </button>

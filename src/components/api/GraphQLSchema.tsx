@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { z } from "zod";
 import { cn } from "@/lib/utils";
-import { Braces, Link } from "lucide-react";
+import { Braces, ChevronRight, Link2, Circle } from "lucide-react";
 
 const FieldSchema = z.object({
   name: z.string(),
@@ -26,84 +26,26 @@ export const GraphQLSchemaSchema = z.object({
 
 export type GraphQLSchemaProps = z.infer<typeof GraphQLSchemaSchema>;
 
-const KIND_STYLES: Record<string, { pill: string; keyword: string; label: string }> = {
-  type:      { pill: "bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800",      keyword: "text-blue-500 dark:text-blue-400",   label: "type" },
-  input:     { pill: "bg-violet-100 dark:bg-violet-900/40 text-violet-700 dark:text-violet-300 border border-violet-200 dark:border-violet-800", keyword: "text-violet-500 dark:text-violet-400", label: "input" },
-  enum:      { pill: "bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800",   keyword: "text-amber-500 dark:text-amber-400",  label: "enum" },
-  interface: { pill: "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800", keyword: "text-emerald-500 dark:text-emerald-400", label: "interface" },
+const KIND_COLORS: Record<string, { node: string; pill: string; line: string }> = {
+  type: { node: "border-blue-400 dark:border-blue-600 bg-blue-50 dark:bg-blue-950/40", pill: "bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300", line: "stroke-blue-400" },
+  input: { node: "border-violet-400 dark:border-violet-600 bg-violet-50 dark:bg-violet-950/40", pill: "bg-violet-100 dark:bg-violet-900 text-violet-700 dark:text-violet-300", line: "stroke-violet-400" },
+  enum: { node: "border-amber-400 dark:border-amber-600 bg-amber-50 dark:bg-amber-950/40", pill: "bg-amber-100 dark:bg-amber-900 text-amber-700 dark:text-amber-300", line: "stroke-amber-400" },
+  interface: { node: "border-emerald-400 dark:border-emerald-600 bg-emerald-50 dark:bg-emerald-950/40", pill: "bg-emerald-100 dark:bg-emerald-900 text-emerald-700 dark:text-emerald-300", line: "stroke-emerald-400" },
 };
 
 const SCALAR_TYPES = new Set(["ID", "String", "Float", "Int", "Boolean"]);
 
+function baseType(type: string): string {
+  return type.replace(/[\[\]!]/g, "");
+}
+
 function isScalarType(type: string): boolean {
-  // Strip wrapping characters like [ ] !
-  const base = type.replace(/[\[\]!]/g, "");
-  return SCALAR_TYPES.has(base);
-}
-
-function TypeBadge({ kind }: { kind: string }) {
-  const style = KIND_STYLES[kind] ?? KIND_STYLES.type;
-  return (
-    <span className={cn("text-[10px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wide", style.pill)}>
-      {style.label}
-    </span>
-  );
-}
-
-function FieldTypeDisplay({
-  type,
-  isRelation,
-  typeNames,
-  onJump,
-}: {
-  type: string;
-  isRelation?: boolean;
-  typeNames: Set<string>;
-  onJump: (name: string) => void;
-}) {
-  // Strip wrappers to find base type name
-  const base = type.replace(/[\[\]!]/g, "");
-  const prefix = type.startsWith("[") ? "[" : "";
-  const suffix = type.endsWith("!") ? (type.startsWith("[") ? "]!" : "!") : type.startsWith("[") ? "]" : "";
-  const innerBang = type.startsWith("[") && type.includes("!]") ? "!" : "";
-
-  const isKnownType = typeNames.has(base);
-
-  if (isRelation && isKnownType) {
-    return (
-      <span className="flex items-center gap-1">
-        {prefix && <span className="text-zinc-400 dark:text-zinc-500">{prefix}</span>}
-        <button
-          onClick={() => onJump(base)}
-          className="text-blue-500 dark:text-blue-400 hover:underline font-mono font-semibold text-[12px] transition-colors"
-          title={`Jump to ${base}`}
-        >
-          {base}
-        </button>
-        {innerBang && <span className="text-red-500 dark:text-red-400 font-mono">{innerBang}</span>}
-        {suffix && <span className="text-zinc-400 dark:text-zinc-500">{suffix.replace("!", "")}</span>}
-        {type.endsWith("!") && <span className="text-red-500 dark:text-red-400 font-mono">!</span>}
-        <Link className="size-3 text-zinc-400 dark:text-zinc-500 shrink-0" />
-      </span>
-    );
-  }
-
-  // Scalar or unknown relation
-  const color = isScalarType(type)
-    ? "text-emerald-600 dark:text-emerald-400"
-    : "text-blue-500 dark:text-blue-400";
-
-  return (
-    <span className="flex items-center gap-0.5 font-mono text-[12px]">
-      <span className={color}>{type.replace("!", "")}</span>
-      {type.endsWith("!") && <span className="text-red-500 dark:text-red-400">!</span>}
-      {isRelation && <Link className="size-3 text-zinc-400 dark:text-zinc-500 ml-1 shrink-0" />}
-    </span>
-  );
+  return SCALAR_TYPES.has(baseType(type));
 }
 
 export function GraphQLSchema({ types = [] }: GraphQLSchemaProps) {
   const [selectedIdx, setSelectedIdx] = useState(0);
+  const [expandedField, setExpandedField] = useState<string | null>(null);
 
   const safeTypes = types.length > 0 ? types : [];
   const selected = safeTypes[Math.min(selectedIdx, safeTypes.length - 1)];
@@ -111,7 +53,10 @@ export function GraphQLSchema({ types = [] }: GraphQLSchemaProps) {
 
   function jumpToType(name: string) {
     const idx = safeTypes.findIndex((t) => t.name === name);
-    if (idx !== -1) setSelectedIdx(idx);
+    if (idx !== -1) {
+      setSelectedIdx(idx);
+      setExpandedField(null);
+    }
   }
 
   if (!selected) {
@@ -122,145 +67,157 @@ export function GraphQLSchema({ types = [] }: GraphQLSchemaProps) {
     );
   }
 
-  const kindStyle = KIND_STYLES[selected.kind] ?? KIND_STYLES.type;
-  const isEnum = selected.kind === "enum";
+  const kindColor = KIND_COLORS[selected.kind] ?? KIND_COLORS.type;
+  const relations = selected.fields.filter((f) => f.isRelation && typeNames.has(baseType(f.type)));
 
   return (
     <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden">
-      {/* Header */}
-      <div className="flex items-center gap-2.5 px-4 py-2.5 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/60">
-        <Braces className="size-3.5 text-zinc-400 shrink-0" />
-        <span className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 flex-1">GraphQL Schema</span>
-        <span className="text-[11px] text-zinc-400">{safeTypes.length} type{safeTypes.length !== 1 ? "s" : ""}</span>
-        <TypeBadge kind={selected.kind} />
+      <div className="flex items-center gap-3 px-4 h-12 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50">
+        <Braces className="size-4 text-zinc-400 shrink-0" />
+        <span className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 flex-1">GraphQL Schema</span>
+        <span className="text-[11px] text-zinc-400">{safeTypes.length} types</span>
       </div>
 
-      {/* Type pills */}
-      <div className="flex flex-wrap gap-1.5 px-4 pt-3 pb-2">
-        {safeTypes.map((t, i) => {
-          const ks = KIND_STYLES[t.kind] ?? KIND_STYLES.type;
-          const isActive = i === selectedIdx;
-          return (
-            <button
-              key={t.name}
-              onClick={() => setSelectedIdx(i)}
-              className={cn(
-                "text-xs font-semibold px-3 py-1 rounded-full border transition-all duration-500",
-                isActive
-                  ? cn(ks.pill, "shadow-sm scale-105")
-                  : "border-zinc-200 dark:border-zinc-700 text-zinc-500 dark:text-zinc-400 hover:border-zinc-300 dark:hover:border-zinc-600 hover:text-zinc-700 dark:hover:text-zinc-300",
-              )}
-            >
-              {t.name}
-            </button>
-          );
-        })}
-      </div>
+      <p className="text-sm text-zinc-500 dark:text-zinc-400 px-4 py-2 border-b border-zinc-100 dark:border-zinc-800">
+        Types connect like a family tree — click a type, then explore its fields and jump to related types.
+      </p>
 
-      {/* Schema view */}
-      <div className="px-4 pb-4 min-h-[280px] transition-all duration-500">
-        <div className="rounded-lg border border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950/50 overflow-hidden">
-          {/* Type header */}
-          <div className="px-4 py-3 border-b border-zinc-100 dark:border-zinc-800 flex items-start gap-2 flex-wrap">
-            <div className="flex items-center gap-2 flex-1 min-w-0">
-              <span className={cn("text-sm font-mono font-semibold", kindStyle.keyword)}>
+      <div className="flex min-h-[240px]">
+        <div className="w-36 shrink-0 border-r border-zinc-100 dark:border-zinc-800 p-3 space-y-1.5 overflow-y-auto">
+          <div className="text-[10px] font-semibold uppercase tracking-widest text-zinc-400 mb-2">Type tree</div>
+          {safeTypes.map((t, i) => {
+            const kc = KIND_COLORS[t.kind] ?? KIND_COLORS.type;
+            const isActive = i === selectedIdx;
+            const relCount = t.fields.filter((f) => f.isRelation).length;
+            return (
+              <button
+                key={t.name}
+                onClick={() => { setSelectedIdx(i); setExpandedField(null); }}
+                className={cn(
+                  "w-full text-left rounded-lg border px-2.5 py-2 transition-all duration-500 flex items-center gap-1.5",
+                  isActive
+                    ? cn(kc.node, "ring-1 ring-zinc-300 dark:ring-zinc-600 shadow-sm")
+                    : "border-transparent hover:bg-zinc-50 dark:hover:bg-zinc-800/50"
+                )}
+              >
+                <Circle className={cn("size-2 shrink-0 fill-current", isActive ? "text-zinc-600 dark:text-zinc-300" : "text-zinc-300 dark:text-zinc-600")} />
+                <div className="min-w-0 flex-1">
+                  <div className={cn("text-xs font-semibold truncate", isActive ? "text-zinc-800 dark:text-zinc-100" : "text-zinc-600 dark:text-zinc-400")}>
+                    {t.name}
+                  </div>
+                  {relCount > 0 && (
+                    <div className="text-[9px] text-zinc-400">{relCount} link{relCount !== 1 ? "s" : ""}</div>
+                  )}
+                </div>
+              </button>
+            );
+          })}
+        </div>
+
+        <div className="flex-1 p-4 flex flex-col gap-3 min-w-0">
+          <div className={cn("rounded-lg border-2 p-3 transition-all duration-500", kindColor.node)}>
+            <div className="flex items-center gap-2 mb-1">
+              <span className={cn("text-[10px] font-bold px-1.5 py-0.5 rounded uppercase", kindColor.pill)}>
                 {selected.kind}
               </span>
-              <span className="text-sm font-mono font-bold text-zinc-800 dark:text-zinc-100">
-                {selected.name}
-              </span>
-              <span className="text-sm font-mono text-zinc-400 dark:text-zinc-600">{"{"}</span>
+              <span className="text-sm font-bold text-zinc-800 dark:text-zinc-100">{selected.name}</span>
             </div>
             {selected.description && (
-              <p className="text-[11px] italic text-zinc-400 dark:text-zinc-500 w-full mt-0.5">
-                {/* "{selected.description}" */}
-                &quot;{selected.description}&quot;
-              </p>
+              <p className="text-[11px] text-zinc-500 dark:text-zinc-400">{selected.description}</p>
             )}
           </div>
 
-          {/* Fields */}
-          <div className="px-4 py-2">
-            {isEnum ? (
-              // Enum values as badges
-              <div className="flex flex-wrap gap-1.5 py-1">
-                {selected.fields.map((f) => (
-                  <span
+          {selected.kind === "enum" ? (
+            <div className="flex flex-wrap gap-1.5">
+              {selected.fields.map((f) => (
+                <span
+                  key={f.name}
+                  className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800 transition-all duration-500"
+                >
+                  {f.name}
+                </span>
+              ))}
+            </div>
+          ) : (
+            <div className="space-y-1.5 flex-1 overflow-y-auto max-h-[140px]">
+              {selected.fields.map((f) => {
+                const base = baseType(f.type);
+                const isRel = f.isRelation && typeNames.has(base);
+                const isExpanded = expandedField === f.name;
+                return (
+                  <button
                     key={f.name}
-                    className="text-[11px] font-mono font-semibold px-2.5 py-1 rounded bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800"
+                    type="button"
+                    onClick={() => {
+                      if (isRel) {
+                        jumpToType(base);
+                      } else {
+                        setExpandedField(isExpanded ? null : f.name);
+                      }
+                    }}
+                    className={cn(
+                      "w-full text-left rounded-lg border px-3 py-2 transition-all duration-500 flex items-center gap-2 group",
+                      isExpanded || isRel
+                        ? "border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800/50"
+                        : "border-zinc-100 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800/30"
+                    )}
                   >
-                    {f.name}
-                  </span>
-                ))}
+                    <span className="text-xs font-semibold text-blue-600 dark:text-blue-400 shrink-0">{f.name}</span>
+                    <ChevronRight className="size-3 text-zinc-300 dark:text-zinc-600 shrink-0" />
+                    <span className={cn(
+                      "text-xs font-mono truncate flex-1",
+                      isScalarType(f.type) ? "text-emerald-600 dark:text-emerald-400" : "text-blue-500 dark:text-blue-400"
+                    )}>
+                      {f.type}
+                    </span>
+                    {isRel && <Link2 className="size-3.5 text-blue-400 shrink-0 opacity-0 group-hover:opacity-100 transition-all duration-500" />}
+                    {f.required && <span className="text-[10px] text-red-500 font-bold shrink-0">req</span>}
+                  </button>
+                );
+              })}
+            </div>
+          )}
+
+          {relations.length > 0 && (
+            <div className="border-t border-zinc-100 dark:border-zinc-800 pt-3">
+              <div className="text-[10px] font-semibold uppercase tracking-widest text-zinc-400 mb-2">Connections</div>
+              <div className="flex items-center gap-2 flex-wrap">
+                <div className={cn("rounded-lg border px-2.5 py-1 text-xs font-semibold", kindColor.node)}>
+                  {selected.name}
+                </div>
+                {relations.map((f) => {
+                  const target = baseType(f.type);
+                  const tk = safeTypes.find((t) => t.name === target);
+                  const tkc = KIND_COLORS[tk?.kind ?? "type"] ?? KIND_COLORS.type;
+                  return (
+                    <div key={f.name} className="flex items-center gap-1">
+                      <ChevronRight className={cn("size-4 shrink-0", kindColor.pill.includes("blue") ? "text-blue-400" : "text-zinc-400")} />
+                      <button
+                        onClick={() => jumpToType(target)}
+                        className={cn("rounded-lg border px-2.5 py-1 text-xs font-semibold transition-all duration-500 hover:scale-105", tkc.node)}
+                      >
+                        {target}
+                      </button>
+                    </div>
+                  );
+                })}
               </div>
-            ) : (
-              // Regular fields
-              <table className="w-full text-[12px] font-mono">
-                <tbody>
-                  {selected.fields.map((f) => (
-                    <tr
-                      key={f.name}
-                      className="group border-b border-zinc-50 dark:border-zinc-800/50 last:border-b-0"
-                    >
-                      <td className="py-1.5 pr-4 w-8">
-                        <span className="text-zinc-200 dark:text-zinc-700 group-hover:text-zinc-300 dark:group-hover:text-zinc-600 transition-colors">
-                          {f.isRelation ? (
-                            <Link className="size-3 text-zinc-300 dark:text-zinc-600" />
-                          ) : null}
-                        </span>
-                      </td>
-                      <td className="py-1.5 pr-4 align-top">
-                        <span className="text-blue-600 dark:text-blue-400 font-semibold">{f.name}</span>
-                        <span className="text-zinc-400 dark:text-zinc-600">:</span>
-                      </td>
-                      <td className="py-1.5 align-top">
-                        <FieldTypeDisplay
-                          type={f.type}
-                          isRelation={f.isRelation}
-                          typeNames={typeNames}
-                          onJump={jumpToType}
-                        />
-                      </td>
-                      {f.description && (
-                        <td className="py-1.5 pl-4 align-top">
-                          <span className="text-zinc-400 dark:text-zinc-500 text-[10px] not-italic">
-                            # {f.description}
-                          </span>
-                        </td>
-                      )}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
-          </div>
-
-          {/* Closing brace */}
-          <div className="px-4 py-2 border-t border-zinc-50 dark:border-zinc-800/50">
-            <span className="text-sm font-mono text-zinc-400 dark:text-zinc-600">{"}"}</span>
-          </div>
-        </div>
-
-        {/* Legend */}
-        <div className="flex flex-wrap items-center gap-3 mt-3 px-1">
-          <span className="text-[10px] text-zinc-400 font-semibold uppercase tracking-wide">Legend:</span>
-          <span className="flex items-center gap-1 text-[10px] text-zinc-500 dark:text-zinc-400">
-            <span className="text-red-500 font-mono font-bold">!</span> required
-          </span>
-          <span className="flex items-center gap-1 text-[10px] text-zinc-500 dark:text-zinc-400">
-            <span className="text-emerald-600 dark:text-emerald-400 font-mono font-semibold">String</span> scalar
-          </span>
-          <span className="flex items-center gap-1 text-[10px] text-zinc-500 dark:text-zinc-400">
-            <Link className="size-3" /> relation (click to jump)
-          </span>
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Footer */}
-      <div className="border-t border-zinc-100 dark:border-zinc-800 px-4 py-2 bg-zinc-50/50 dark:bg-zinc-900/30">
-        <p className="text-[10px] text-zinc-400">
-          Click a type pill to explore it · Click relation types (blue) to jump to that type
-        </p>
+      <div className="border-t border-zinc-100 dark:border-zinc-800 px-4 py-3 flex items-center gap-3 bg-zinc-50 dark:bg-zinc-900/30 min-h-[52px]">
+        <span className="text-sm text-zinc-500 dark:text-zinc-400 flex-1">
+          Exploring <span className="font-semibold text-zinc-700 dark:text-zinc-300">{selected.name}</span>
+          {relations.length > 0 ? ` — ${relations.length} connected type${relations.length !== 1 ? "s" : ""}` : ""}
+        </span>
+        <button
+          onClick={() => setSelectedIdx((i) => (i + 1) % safeTypes.length)}
+          className="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-all duration-500 shrink-0"
+        >
+          Next Type
+        </button>
       </div>
     </div>
   );

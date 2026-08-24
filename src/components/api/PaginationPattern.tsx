@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { z } from "zod";
 import { cn } from "@/lib/utils";
-import { ChevronRight, ChevronLeft, User, FileText, CheckCircle2, XCircle } from "lucide-react";
+import { ChevronRight, User, FileText, CheckCircle2, XCircle } from "lucide-react";
 
 export const PaginationPatternSchema = z.object({
   pattern: z.enum(["offset", "cursor", "keyset"]).default("cursor"),
@@ -112,11 +112,9 @@ export function PaginationPattern({
       </div>
 
       {/* Description */}
-      <div className="px-4 py-2 border-b border-zinc-100 dark:border-zinc-800">
-        <p className="text-sm text-zinc-500 dark:text-zinc-400">
-          Fetch results in chunks, not all at once
-        </p>
-      </div>
+      <p className="text-sm text-zinc-500 dark:text-zinc-400 px-4 py-2 border-b border-zinc-100 dark:border-zinc-800">
+        Fetch results in chunks instead of all at once — each pattern trades simplicity for stability on live data.
+      </p>
 
       {/* Main visual area — fixed height */}
       <div className="min-h-[220px] px-4 py-4 flex flex-col gap-4">
@@ -144,7 +142,7 @@ export function PaginationPattern({
           ))}
         </div>
 
-        {/* Page controls */}
+        {/* Page indicator */}
         <div className="flex flex-col items-center gap-2">
           {cursorValue && (
             <div className="flex items-center gap-2 px-3 py-1 rounded-lg bg-violet-50 dark:bg-violet-950/40 border border-violet-200 dark:border-violet-800">
@@ -154,27 +152,9 @@ export function PaginationPattern({
               <code className="text-[11px] font-mono text-violet-700 dark:text-violet-300">{cursorValue}</code>
             </div>
           )}
-          <div className="flex items-center justify-center gap-4">
-          <button
-            onClick={() => goTo(page - 1)}
-            disabled={page === 0 || !interactive}
-            className="flex items-center gap-1 px-3 py-1.5 rounded-lg border border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 text-sm font-medium hover:bg-zinc-50 dark:hover:bg-zinc-800 disabled:opacity-30 disabled:cursor-not-allowed transition-all duration-500"
-          >
-            <ChevronLeft className="size-4" />
-            Prev
-          </button>
-          <span className="text-sm text-zinc-600 dark:text-zinc-400 font-medium min-w-[90px] text-center">
+          <span className="text-sm text-zinc-600 dark:text-zinc-400 font-medium">
             Page {page + 1} of {totalPages}
           </span>
-          <button
-            onClick={() => goTo(page + 1)}
-            disabled={page >= totalPages - 1 || !interactive}
-            className="flex items-center gap-1 px-3 py-1.5 rounded-lg border border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 text-sm font-medium hover:bg-zinc-50 dark:hover:bg-zinc-800 disabled:opacity-30 disabled:cursor-not-allowed transition-all duration-500"
-          >
-            Next
-            <ChevronRight className="size-4" />
-          </button>
-          </div>
         </div>
       </div>
 
@@ -185,8 +165,8 @@ export function PaginationPattern({
         </code>
       </div>
 
-      {/* Comparison footer */}
-      <div className="border-t border-zinc-100 dark:border-zinc-800 px-4 py-2.5 flex items-center gap-3 flex-wrap">
+      {/* Comparison traits */}
+      <div className="border-t border-zinc-100 dark:border-zinc-800 px-4 py-2 flex items-center gap-3 flex-wrap min-h-[36px]">
         {[
           { label: "Jump to any page", supported: cmp.jumpToPage },
           { label: "Stable on inserts", supported: cmp.stable },
@@ -203,6 +183,32 @@ export function PaginationPattern({
           </span>
         ))}
       </div>
+
+      {interactive && (
+        <div className="border-t border-zinc-100 dark:border-zinc-800 px-4 py-3 flex items-center gap-3 bg-zinc-50 dark:bg-zinc-900/30 min-h-[52px]">
+          <span className="text-sm text-zinc-500 dark:text-zinc-400 flex-1">
+            {page === 0
+              ? "Use Next to load the next chunk of results"
+              : page >= totalPages - 1
+              ? "Last page — switch pattern tabs to compare approaches"
+              : `Showing items ${offset + 1}–${offset + pageNames.length} of ${totalItems}`}
+          </span>
+          <button
+            type="button"
+            onClick={() => goTo(page + 1)}
+            disabled={page >= totalPages - 1}
+            className={cn(
+              "flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-semibold transition-all duration-500 shrink-0 hover:opacity-90",
+              page >= totalPages - 1
+                ? "bg-zinc-100 dark:bg-zinc-800 text-zinc-400 cursor-not-allowed"
+                : "bg-zinc-900 dark:bg-white text-white dark:text-zinc-900"
+            )}
+          >
+            Next Page
+            <ChevronRight className="size-3.5" />
+          </button>
+        </div>
+      )}
     </div>
   );
 }

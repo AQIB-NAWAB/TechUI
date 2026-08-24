@@ -2,11 +2,16 @@
   "name": "techui",
   "version": "0.1.0",
   "private": true,
+  "workspaces": [
+    "packages/cli"
+  ],
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "npm run generate:registry && next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "generate:registry": "node scripts/generate-registry.mjs",
+    "cli": "node packages/cli/bin/techui.js"
   },
   "dependencies": {
     "@radix-ui/react-collapsible": "^1.1.20",

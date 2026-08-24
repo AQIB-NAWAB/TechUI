@@ -158,7 +158,7 @@ export function BloomFilter({
         Probabilistic set — never false negatives, but can have false positives.
       </p>
 
-      <div className="min-h-[220px] px-4 pt-4 pb-3 flex flex-col gap-4">
+      <div className="min-h-[260px] px-4 pt-4 pb-3 flex flex-col gap-4">
 
         <div className="border border-zinc-100 dark:border-zinc-800 rounded-lg p-3 bg-zinc-50 dark:bg-zinc-800/40">
           <div className="text-[10px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500 mb-2">Bit array</div>
@@ -208,57 +208,81 @@ export function BloomFilter({
           )}
         </div>
 
-        {/* Check result */}
-        {checkResult && (
-          <div className={cn(
-            "rounded-lg px-3 py-2.5 border text-xs transition-all duration-500",
-            checkResult.falsePositive
-              ? "bg-amber-50 dark:bg-amber-900/20 border-amber-300 dark:border-amber-700"
-              : checkResult.inSet
-              ? "bg-emerald-50 dark:bg-emerald-900/20 border-emerald-300 dark:border-emerald-700"
-              : "bg-red-50 dark:bg-red-900/20 border-red-300 dark:border-red-700"
-          )}>
-            <div className="flex items-start gap-2 mb-1.5">
-              <span className="font-semibold text-zinc-600 dark:text-zinc-300">Check:</span>
-              <code className="font-mono font-bold text-zinc-800 dark:text-zinc-100">&quot;{checkResult.item}&quot;</code>
-            </div>
-            <div className="flex flex-wrap gap-2 mb-2">
-              {checkResult.bits.map((bit, idx) => (
-                <span key={idx} className={cn(
-                  "text-[11px] font-mono transition-all duration-500",
-                  idx < animatingStep
-                    ? bitArray[bit]
-                      ? "text-emerald-600 dark:text-emerald-400"
-                      : "text-red-500 dark:text-red-400"
-                    : "text-zinc-400"
-                )}>
-                  Hash {idx + 1}: {bit}{" "}
-                  {idx < animatingStep
-                    ? bitArray[bit] ? "✓" : "✗"
-                    : "…"}
-                </span>
-              ))}
-            </div>
-            {animatingStep >= checkResult.bits.length && (
-              <div className={cn(
-                "font-bold text-sm transition-all duration-500 flex items-center gap-1.5",
-                checkResult.falsePositive
-                  ? "text-amber-600 dark:text-amber-400"
-                  : checkResult.inSet
-                  ? "text-emerald-700 dark:text-emerald-400"
-                  : "text-red-600 dark:text-red-400"
-              )}>
-                {checkResult.falsePositive ? (
-                  <><AlertCircle className="size-4" /> FALSE POSITIVE — all bits set, but item was never inserted!</>
-                ) : checkResult.inSet ? (
-                  <><CheckCircle className="size-4" /> PROBABLY in set</>
-                ) : (
-                  <><XCircle className="size-4" /> DEFINITELY NOT in set — at least one bit is 0</>
-                )}
+        {/* Check result — fixed height slot */}
+        <div className="min-h-[88px]">
+          {checkResult ? (
+            <div className={cn(
+              "rounded-lg px-3 py-2.5 border text-xs transition-all duration-500",
+              checkResult.falsePositive
+                ? "bg-amber-50 dark:bg-amber-950 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-800"
+                : checkResult.inSet
+                ? "bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800"
+                : "bg-red-50 dark:bg-red-950 text-red-700 dark:text-red-400 border-red-200 dark:border-red-800"
+            )}>
+              <div className="flex items-start gap-2 mb-1.5">
+                <span className="font-semibold text-zinc-600 dark:text-zinc-300">Check:</span>
+                <code className="font-mono font-bold text-zinc-800 dark:text-zinc-100">&quot;{checkResult.item}&quot;</code>
               </div>
-            )}
-          </div>
-        )}
+              <div className="flex flex-wrap gap-2 mb-2">
+                {checkResult.bits.map((bit, idx) => (
+                  <span key={idx} className={cn(
+                    "text-[11px] font-mono transition-all duration-500",
+                    idx < animatingStep
+                      ? bitArray[bit]
+                        ? "text-emerald-600 dark:text-emerald-400"
+                        : "text-red-500 dark:text-red-400"
+                      : "text-zinc-400"
+                  )}>
+                    Hash {idx + 1}: {bit}{" "}
+                    {idx < animatingStep
+                      ? bitArray[bit] ? "✓" : "✗"
+                      : "…"}
+                  </span>
+                ))}
+              </div>
+              {animatingStep >= checkResult.bits.length && (
+                <div className={cn(
+                  "font-bold text-sm transition-all duration-500 flex items-center gap-1.5",
+                  checkResult.falsePositive
+                    ? "text-amber-600 dark:text-amber-400"
+                    : checkResult.inSet
+                    ? "text-emerald-700 dark:text-emerald-400"
+                    : "text-red-600 dark:text-red-400"
+                )}>
+                  {checkResult.falsePositive ? (
+                    <><AlertCircle className="size-4" /> FALSE POSITIVE — all bits set, but item was never inserted!</>
+                  ) : checkResult.inSet ? (
+                    <><CheckCircle className="size-4" /> PROBABLY in set</>
+                  ) : (
+                    <><XCircle className="size-4" /> DEFINITELY NOT in set — at least one bit is 0</>
+                  )}
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="rounded-lg border border-dashed border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800/40 px-3 py-2.5 text-xs text-zinc-400">
+              Pick a name below and click Check Item — watch each hash bit light up
+            </div>
+          )}
+        </div>
+
+        <div className="flex items-center gap-2 flex-wrap border border-zinc-100 dark:border-zinc-800 rounded-lg p-3 bg-zinc-50 dark:bg-zinc-800/40">
+          <span className="text-[10px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500 w-full">Try checking</span>
+          {CHECK_ITEMS.map((item) => (
+            <button
+              key={item}
+              onClick={() => runCheck(item)}
+              className={cn(
+                "px-2.5 py-1 rounded-md text-[11px] font-mono border transition-all duration-500",
+                checkResult?.item === item
+                  ? "bg-violet-100 dark:bg-violet-900/40 border-violet-400 text-violet-700 dark:text-violet-300"
+                  : "border-zinc-200 dark:border-zinc-700 text-zinc-500 hover:bg-white dark:hover:bg-zinc-800"
+              )}
+            >
+              {item}
+            </button>
+          ))}
+        </div>
 
         <div className="flex gap-2">
           <input
@@ -266,7 +290,7 @@ export function BloomFilter({
             value={newItemInput}
             onChange={(e) => setNewItemInput(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && addItem()}
-            placeholder='Add item (e.g. "dave")'
+            placeholder='Insert new name (e.g. "dave")'
             className="flex-1 text-xs font-mono px-3 py-1.5 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-violet-400 transition-all duration-500"
           />
           <button
@@ -280,22 +304,15 @@ export function BloomFilter({
       </div>
 
       <div className="px-4 py-3 border-t border-zinc-100 dark:border-zinc-800 flex items-center gap-3">
-        <div className="flex gap-1.5 flex-1 flex-wrap">
-          {CHECK_ITEMS.map((item) => (
-            <button
-              key={item}
-              onClick={() => runCheck(item)}
-              className={cn(
-                "px-2 py-0.5 rounded-md text-[10px] font-mono border transition-all duration-500",
-                checkResult?.item === item
-                  ? "bg-violet-100 dark:bg-violet-900/40 border-violet-400 text-violet-700 dark:text-violet-300"
-                  : "border-zinc-200 dark:border-zinc-700 text-zinc-500 hover:bg-zinc-50 dark:hover:bg-zinc-800"
-              )}
-            >
-              {item}
-            </button>
-          ))}
-        </div>
+        <span className="text-sm text-zinc-500 dark:text-zinc-400 flex-1">
+          {checkResult && animatingStep >= checkResult.bits.length
+            ? checkResult.falsePositive
+              ? "False positive — bits matched but item was never added"
+              : checkResult.inSet
+                ? "Probably in set — all hash bits are 1"
+                : "Definitely not in set — a bit is still 0"
+            : `${insertedItems.length} items inserted · tap Check Item to test a name`}
+        </span>
         <button
           onClick={() => runCheck(checkResult?.item ?? CHECK_ITEMS[0]!)}
           className="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-opacity shrink-0"

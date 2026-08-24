@@ -77,9 +77,9 @@ export function CodeDiff({
         <span className="text-[10px] font-mono text-zinc-400 border border-zinc-200 dark:border-zinc-700 px-2 py-0.5 rounded">{language}</span>
       </div>
 
-      {description && (
-        <p className="text-sm text-zinc-500 dark:text-zinc-400 px-4 py-2 border-b border-zinc-100 dark:border-zinc-800">{description}</p>
-      )}
+      <p className="text-sm text-zinc-500 dark:text-zinc-400 px-4 py-2 border-b border-zinc-100 dark:border-zinc-800">
+        {description ?? "See what changed between the old code and the improved version."}
+      </p>
 
       <div className="min-h-[220px] p-4 flex gap-3 flex-col sm:flex-row">
         <div className="flex-1 rounded-lg border-l-4 border-l-red-400 border border-zinc-200 dark:border-zinc-700 overflow-hidden min-w-0">
@@ -133,7 +133,7 @@ export function CodeDiff({
         </span>
         <button
           onClick={() => setHighlighted((h) => !h)}
-          className="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-opacity shrink-0"
+          className="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-all duration-500 shrink-0"
         >
           {highlighted ? "Show All" : "Highlight Changes"}
         </button>

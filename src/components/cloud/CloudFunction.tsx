@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { z } from "zod";
 import { cn } from "@/lib/utils";
-import { Zap, Monitor, CheckCircle, AlertTriangle, Clock, ChevronDown, ChevronRight, Cloud } from "lucide-react";
+import { Zap, Monitor, CheckCircle, ChevronDown, ChevronRight, Cloud } from "lucide-react";
 
 const ProviderEnum = z.enum(["aws", "gcp", "azure"]);
 const RuntimeEnum = z.enum([
@@ -161,18 +161,20 @@ export function CloudFunction({
             <span className="text-[10px] text-zinc-400">{RUNTIME_LABELS[runtime] ?? runtime} · {region}</span>
           </div>
         </div>
-        <button
-          onClick={invoke}
-          disabled={invokeState !== "idle"}
-          className={cn(
-            "flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-500",
-            invokeState === "idle"
-              ? "bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 hover:opacity-90"
-              : "bg-zinc-200 dark:bg-zinc-800 text-zinc-400 cursor-not-allowed"
-          )}
-        >
-          Invoke
-        </button>
+        {invokeState !== "idle" && (
+          <span className={cn(
+            "text-[10px] font-semibold px-2 py-0.5 rounded transition-all duration-500",
+            invokeState === "done-success" ? "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300"
+            : invokeState === "done-error" ? "bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300"
+            : "bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300"
+          )}>
+            {statusLabel}
+          </span>
+        )}
+      </div>
+
+      <div className="text-sm text-zinc-500 dark:text-zinc-400 px-4 py-2 border-b border-zinc-100 dark:border-zinc-800">
+        Runs your code on demand without managing a server — click Invoke to watch it execute.
       </div>
 
       <div className="px-4 py-4 border-b border-zinc-100 dark:border-zinc-800 min-h-[220px]">
@@ -252,8 +254,8 @@ export function CloudFunction({
           </div>
 
           <div className={cn(
-            "transition-all duration-500",
-            showColdBar ? "opacity-100" : "opacity-0 h-0 overflow-hidden"
+            "transition-all duration-500 min-h-[28px]",
+            showColdBar ? "opacity-100" : "opacity-0"
           )}>
             <div className="flex items-center gap-3">
               <span className="text-[10px] text-zinc-500 dark:text-zinc-400 w-20 shrink-0">Cold Start</span>
@@ -335,23 +337,30 @@ export function CloudFunction({
         </div>
       )}
 
-      <div className="px-4 py-3 flex items-center gap-2 text-[10px] text-zinc-400 border-t border-zinc-100 dark:border-zinc-800">
-        {invokeState === "done-success" && (
-          <span className="text-emerald-600 dark:text-emerald-400 font-semibold flex items-center gap-1">
-            <CheckCircle className="size-3" /> Invocation complete
-          </span>
-        )}
-        {invokeState === "done-error" && (
-          <span className="text-red-600 dark:text-red-400 font-semibold flex items-center gap-1">
-            <AlertTriangle className="size-3" /> Invocation failed
-          </span>
-        )}
-        {invokeState === "idle" && (
-          <>
-            <Clock className="size-3" />
-            <span>{trigger.toUpperCase()} trigger · {timeout}s timeout · {memory} MB allocated</span>
-          </>
-        )}
+      <div className="border-t border-zinc-100 dark:border-zinc-800 px-4 py-3 flex items-center gap-3 bg-zinc-50 dark:bg-zinc-900/30 min-h-[52px]">
+        <span className="text-sm text-zinc-500 dark:text-zinc-400 flex-1">
+          {invokeState === "done-success"
+            ? "Invocation complete — function returned successfully."
+            : invokeState === "done-error"
+            ? "Invocation failed — check logs for error details."
+            : invokeState === "cold-start"
+            ? "Cold start — spinning up a new container instance…"
+            : invokeState === "executing"
+            ? "Executing your function code…"
+            : `${trigger.toUpperCase()} trigger · ${timeout}s timeout · ${memory} MB`}
+        </span>
+        <button
+          onClick={invoke}
+          disabled={invokeState !== "idle"}
+          className={cn(
+            "px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-500 shrink-0 hover:opacity-90",
+            invokeState === "idle"
+              ? "bg-zinc-900 dark:bg-white text-white dark:text-zinc-900"
+              : "bg-zinc-200 dark:bg-zinc-700 text-zinc-400 cursor-not-allowed opacity-60"
+          )}
+        >
+          {invokeState === "idle" ? "Invoke" : invokeState === "done-success" || invokeState === "done-error" ? "Done" : "Running…"}
+        </button>
       </div>
     </div>
   );

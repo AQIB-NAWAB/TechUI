@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { z } from "zod";
 import { cn } from "@/lib/utils";
 import { Clock, CheckCircle, AlertCircle, XCircle, Info, History } from "lucide-react";
@@ -54,35 +55,72 @@ const TYPE_CFG = {
 };
 
 export function Timeline({ title, events, compact = false }: TimelineProps) {
+  const [activeIdx, setActiveIdx] = useState<number | null>(null);
+
+  const atEnd = activeIdx !== null && activeIdx >= events.length - 1;
+  const visibleCount = activeIdx === null ? events.length : activeIdx + 1;
+
+  function nextEvent() {
+    if (activeIdx === null) {
+      setActiveIdx(0);
+    } else if (activeIdx < events.length - 1) {
+      setActiveIdx(activeIdx + 1);
+    } else {
+      setActiveIdx(null);
+    }
+  }
+
+  const currentEvent = activeIdx !== null ? events[activeIdx] : null;
+
   return (
     <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden">
-      {title && (
-        <div className="flex items-center gap-3 px-4 h-12 border-b border-zinc-100 dark:border-zinc-800">
-          <History className="size-4 text-zinc-400 shrink-0" />
-          <span className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">{title}</span>
-        </div>
-      )}
+      <div className="flex items-center gap-3 px-4 h-12 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50">
+        <History className="size-4 text-zinc-400 shrink-0" />
+        <span className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 flex-1">{title ?? "Timeline"}</span>
+        <span className="text-[10px] font-mono text-zinc-400 bg-zinc-100 dark:bg-zinc-800 px-2 py-0.5 rounded">
+          {events.length} events
+        </span>
+      </div>
 
-      <div className="px-4 py-4 min-h-[220px]">
-        <div className="relative border border-zinc-100 dark:border-zinc-800 rounded-lg p-4 bg-zinc-50 dark:bg-zinc-800/30">
+      <div className="text-sm text-zinc-500 dark:text-zinc-400 px-4 py-2 border-b border-zinc-100 dark:border-zinc-800">
+        Events listed in order so you can see what happened and when.
+      </div>
+
+      <div className="px-4 py-4 min-h-[220px] flex flex-col">
+        <div className="relative border border-zinc-100 dark:border-zinc-800 rounded-lg p-4 bg-zinc-50 dark:bg-zinc-800/30 flex-1">
           <div className="absolute left-[22px] top-6 bottom-6 w-px bg-zinc-200 dark:bg-zinc-700" />
 
           <div className="space-y-4">
-            {events.map((event, i) => {
+            {events.slice(0, visibleCount).map((event, i) => {
               const cfg = TYPE_CFG[event.type ?? "default"];
               const Icon = cfg.icon;
+              const isActive = activeIdx === i;
+              const isPast = activeIdx !== null && i < activeIdx;
+
               return (
-                <div key={i} className="flex gap-3 transition-all duration-500">
+                <div
+                  key={i}
+                  className={cn(
+                    "flex gap-3 transition-all duration-500",
+                    isActive ? "opacity-100" : isPast || activeIdx === null ? "opacity-100" : "opacity-40"
+                  )}
+                >
                   <div
                     className={cn(
                       "size-7 rounded-full flex items-center justify-center border-2 border-white dark:border-zinc-900 z-10 shrink-0 transition-all duration-500",
-                      cfg.ring
+                      cfg.ring,
+                      isActive && "ring-2 ring-blue-400 scale-110"
                     )}
                   >
                     <Icon className={cn("size-3.5", cfg.iconColor)} />
                   </div>
 
-                  <div className="flex-1 min-w-0 border border-zinc-100 dark:border-zinc-800 rounded-lg p-3 bg-white dark:bg-zinc-900 transition-all duration-500">
+                  <div
+                    className={cn(
+                      "flex-1 min-w-0 border border-zinc-100 dark:border-zinc-800 rounded-lg p-3 bg-white dark:bg-zinc-900 transition-all duration-500",
+                      isActive && "ring-2 ring-blue-200 dark:ring-blue-800"
+                    )}
+                  >
                     <div className="flex items-start gap-2 flex-wrap">
                       <span className="text-xs font-semibold text-zinc-800 dark:text-zinc-200 flex-1 leading-tight">
                         {event.title}
@@ -106,6 +144,23 @@ export function Timeline({ title, events, compact = false }: TimelineProps) {
             })}
           </div>
         </div>
+      </div>
+
+      <div className="border-t border-zinc-100 dark:border-zinc-800 px-4 py-3 flex items-center gap-3 bg-zinc-50 dark:bg-zinc-900/30">
+        <span className="text-sm text-zinc-500 dark:text-zinc-400 flex-1">
+          {activeIdx === null
+            ? "All events visible — step through one at a time"
+            : currentEvent
+            ? `Event ${activeIdx + 1}/${events.length}: ${currentEvent.title}`
+            : "Timeline complete"}
+        </span>
+        <button
+          type="button"
+          onClick={nextEvent}
+          className="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-opacity"
+        >
+          {activeIdx === null ? "Step Through" : atEnd ? "Show All" : "Next Event"}
+        </button>
       </div>
     </div>
   );

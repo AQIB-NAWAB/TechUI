@@ -231,17 +231,11 @@ export function DnsPropagation({
             : `${total - propagated} resolver${total - propagated !== 1 ? "s" : ""} still cached`}
         </span>
         <button
-          onClick={handleReset}
-          className="px-3 py-2 text-sm font-semibold rounded-lg border border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all duration-500"
+          onClick={propagated === total ? handleReset : () => simulateTime(3600)}
+          disabled={simulating}
+          className="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-40 disabled:cursor-not-allowed shrink-0"
         >
-          Reset
-        </button>
-        <button
-          onClick={() => simulateTime(3600)}
-          disabled={simulating || propagated === total}
-          className="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-40 disabled:cursor-not-allowed"
-        >
-          {simulating ? "Simulating…" : "Simulate +1h"}
+          {simulating ? "Simulating…" : propagated === total ? "Reset" : "Simulate +1h"}
         </button>
       </div>
     </div>

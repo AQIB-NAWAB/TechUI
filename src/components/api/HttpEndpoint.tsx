@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { z } from "zod";
 import { cn } from "@/lib/utils";
-import { ArrowUpRight } from "lucide-react";
+import { Copy, Check, ArrowUpRight } from "lucide-react";
 
 export const HttpEndpointSchema = z.object({
   method: z
@@ -158,6 +158,11 @@ export function HttpEndpoint({
 
   const currentParams = tabs.find((t) => t.id === paramTab)?.params ?? [];
   const currentResponse = responses?.[selectedResponse];
+  const [copied, setCopied] = useState(false);
+
+  const desc =
+    description ??
+    "One API operation — its URL, parameters, and the responses the server can return.";
 
   const AUTH_LABEL: Record<string, string> = {
     bearer: "Bearer", apikey: "API Key", basic: "Basic", oauth2: "OAuth 2.0",
@@ -190,23 +195,9 @@ export function HttpEndpoint({
         )}
       </div>
 
-      {/* Description + tags */}
-      {(description || tags?.length) && (
-        <div className="px-4 py-2.5 border-b border-zinc-100 dark:border-zinc-800 space-y-1.5">
-          {description && (
-            <p className="text-zinc-500 dark:text-zinc-400 text-[13px] leading-relaxed">{description}</p>
-          )}
-          {tags && tags.length > 0 && (
-            <div className="flex flex-wrap gap-1.5">
-              {tags.map((tag) => (
-                <span key={tag} className="text-[11px] text-zinc-400 bg-zinc-100 dark:bg-zinc-800 px-2 py-0.5 rounded-full">
-                  {tag}
-                </span>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
+      <p className="text-sm text-zinc-500 dark:text-zinc-400 px-4 py-2 border-b border-zinc-100 dark:border-zinc-800">
+        {desc}
+      </p>
 
       {/* Two-column body */}
       <div className="flex divide-x divide-zinc-100 dark:divide-zinc-800 min-h-[220px]">
@@ -318,6 +309,36 @@ export function HttpEndpoint({
             </div>
           )}
         </div>
+      </div>
+
+      {tags && tags.length > 0 && (
+        <div className="border-t border-zinc-100 dark:border-zinc-800 px-4 py-2 flex flex-wrap gap-1.5">
+          {tags.map((tag) => (
+            <span key={tag} className="text-[11px] text-zinc-400 bg-zinc-100 dark:bg-zinc-800 px-2 py-0.5 rounded-full">
+              {tag}
+            </span>
+          ))}
+        </div>
+      )}
+
+      <div className="border-t border-zinc-100 dark:border-zinc-800 px-4 py-3 flex items-center gap-3 bg-zinc-50 dark:bg-zinc-900/30 min-h-[52px]">
+        <span className="text-sm text-zinc-500 dark:text-zinc-400 flex-1">
+          {currentResponse
+            ? `${currentResponse.status} — ${currentResponse.description}`
+            : "Select a response code to inspect the payload"}
+        </span>
+        <button
+          type="button"
+          onClick={() => {
+            navigator.clipboard.writeText(`${method} ${path}`);
+            setCopied(true);
+            setTimeout(() => setCopied(false), 1500);
+          }}
+          className="flex items-center gap-1.5 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-all duration-500 shrink-0"
+        >
+          {copied ? <Check className="size-3.5" /> : <Copy className="size-3.5" />}
+          {copied ? "Copied" : "Copy Endpoint"}
+        </button>
       </div>
     </div>
   );

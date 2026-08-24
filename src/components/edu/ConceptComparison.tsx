@@ -42,6 +42,7 @@ export function ConceptComparison({
   verdict,
 }: ConceptComparisonProps) {
   const [highlightedRow, setHighlightedRow] = useState<number | null>(null);
+  const [showVerdict, setShowVerdict] = useState(false);
 
   const LeftIcon = leftIcon && ICON_MAP[leftIcon] ? ICON_MAP[leftIcon] : null;
   const RightIcon = rightIcon && ICON_MAP[rightIcon] ? ICON_MAP[rightIcon] : null;
@@ -130,13 +131,40 @@ export function ConceptComparison({
       </div>
 
       {verdict && (
-        <div className="border-t border-zinc-100 dark:border-zinc-800 px-4 py-3">
-          <div className="bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-100 dark:border-zinc-800 rounded-lg px-3 py-2 flex items-start gap-2">
-            <Scale className="size-4 text-zinc-400 mt-0.5 shrink-0" />
-            <p className="text-sm text-zinc-600 dark:text-zinc-400">{verdict}</p>
+        <div className="min-h-[72px] px-4 border-t border-zinc-100 dark:border-zinc-800">
+          <div className={cn(
+            "py-3 transition-all duration-500",
+            showVerdict ? "opacity-100" : "opacity-0"
+          )}>
+            <div className="bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-100 dark:border-zinc-800 rounded-lg px-3 py-2 flex items-start gap-2">
+              <Scale className="size-4 text-zinc-400 mt-0.5 shrink-0" />
+              <p className="text-sm text-zinc-600 dark:text-zinc-400">{verdict}</p>
+            </div>
           </div>
         </div>
       )}
+
+      <div className="px-4 py-3 border-t border-zinc-100 dark:border-zinc-800 flex items-center gap-3 bg-zinc-50 dark:bg-zinc-900/30">
+        <span className="text-sm text-zinc-500 dark:text-zinc-400 flex-1">
+          {highlightedRow !== null
+            ? `Comparing: ${rows[highlightedRow]?.concern}`
+            : "Click a row to highlight a tradeoff"}
+        </span>
+        <button
+          onClick={() => {
+            if (verdict) {
+              setShowVerdict((v) => !v);
+            } else if (highlightedRow === null) {
+              setHighlightedRow(0);
+            } else {
+              setHighlightedRow((r) => (r === null || r >= rows.length - 1 ? 0 : r + 1));
+            }
+          }}
+          className="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-all duration-500 shrink-0"
+        >
+          {verdict ? (showVerdict ? "Hide Verdict" : "Show Verdict") : highlightedRow === null ? "Start Compare" : "Next Row"}
+        </button>
+      </div>
     </div>
   );
 }

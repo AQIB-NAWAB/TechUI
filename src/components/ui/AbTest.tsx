@@ -3,7 +3,7 @@
 import { useState, useCallback } from "react";
 import { z } from "zod";
 import { cn } from "@/lib/utils";
-import { CheckCircle2 } from "lucide-react";
+import { CheckCircle2, FlaskConical, User, GitBranch } from "lucide-react";
 
 export const AbTestSchema = z.object({
   name: z.string().optional().default("Checkout button color"),
@@ -121,10 +121,10 @@ export function AbTest({
 
   return (
     <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden">
-      <div className="h-12 px-4 flex items-center gap-3 border-b border-zinc-200 dark:border-zinc-800">
-        <span className="text-lg">🧪</span>
-        <span className="text-sm font-semibold text-zinc-800 dark:text-zinc-200 flex-1">{name}</span>
-        <span className="text-[10px] text-zinc-500 bg-zinc-100 dark:bg-zinc-800 px-2 py-0.5 rounded-full font-medium">
+      <div className="h-12 px-4 flex items-center gap-3 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50">
+        <FlaskConical className="size-4 text-zinc-400 shrink-0" />
+        <span className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 flex-1">{name}</span>
+        <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">
           Running · {totalUsers.toLocaleString()} users
         </span>
       </div>
@@ -133,18 +133,22 @@ export function AbTest({
         Traffic is split between two variants — whichever converts more users wins. Live conversion rates update as users are added.
       </div>
 
-      <div className="min-h-[260px] px-4 py-4 flex flex-col gap-3">
+      <div className="min-h-[220px] px-4 py-4 flex flex-col gap-3">
         <div className="flex flex-col items-center gap-1.5">
           <div className="flex items-center gap-1 text-[11px] text-zinc-500">
             {[...Array(5)].map((_, i) => (
-              <span key={i} className={cn("transition-all duration-500", animating ? "scale-110 opacity-100" : "opacity-70")}>👤</span>
+              <User
+                key={i}
+                className={cn(
+                  "size-3.5 transition-all duration-500",
+                  animating ? "scale-110 text-zinc-600 dark:text-zinc-300" : "text-zinc-400"
+                )}
+              />
             ))}
             <span className="ml-1 font-semibold text-zinc-600 dark:text-zinc-400">Users</span>
           </div>
 
-          <div className="flex items-center gap-2 text-[10px] text-zinc-400">
-            <div className="w-px h-4 bg-zinc-300 dark:bg-zinc-600" />
-          </div>
+          <GitBranch className="size-3.5 text-zinc-300 dark:text-zinc-600 transition-all duration-500" />
 
           <div className="flex items-center gap-2 text-[11px] font-semibold">
             <div
@@ -156,11 +160,6 @@ export function AbTest({
             >
               {splitPercent}% / {100 - splitPercent}%
             </div>
-          </div>
-
-          <div className="flex items-center gap-1 text-[10px] text-zinc-400">
-            <div className="w-px h-3 bg-zinc-300 dark:bg-zinc-600 -ml-8" />
-            <div className="w-px h-3 bg-zinc-300 dark:bg-zinc-600 ml-8" />
           </div>
         </div>
 
@@ -253,8 +252,8 @@ export function AbTest({
         </div>
       </div>
 
-      <div className="px-4 py-3 border-t border-zinc-200 dark:border-zinc-800 flex items-center gap-3">
-        <span className="text-[11px] text-zinc-500 flex-1">
+      <div className="px-4 py-3 border-t border-zinc-100 dark:border-zinc-800 flex items-center gap-3 bg-zinc-50 dark:bg-zinc-900/30">
+        <span className="text-sm text-zinc-500 dark:text-zinc-400 flex-1">
           {sig >= 95
             ? `Statistically significant — ${winnerIsA ? variantA.label : variantB.label} wins!`
             : `Add more users to reach 95% confidence (${sig}% now)`}

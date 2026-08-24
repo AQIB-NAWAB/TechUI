@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { z } from "zod";
 import { cn } from "@/lib/utils";
-import { Scale, CheckCircle, Clock, AlertCircle, ArrowRight } from "lucide-react";
+import { Scale, CheckCircle, Clock, AlertCircle } from "lucide-react";
 
 export const TechDecisionSchema = z.object({
   decision: z.string(),
@@ -44,12 +44,12 @@ export function TechDecision({ decision, status = "accepted", context, options, 
       </div>
 
       <p className="text-sm text-zinc-500 dark:text-zinc-400 px-4 py-2 border-b border-zinc-100 dark:border-zinc-800">
-        {decision}
+        Compare the options, then reveal which one the team picked and why.
       </p>
 
       <div className="min-h-[220px] px-4 pt-3 pb-2 flex flex-col gap-3">
         <div className="border border-zinc-100 dark:border-zinc-800 rounded-lg p-3 bg-zinc-50 dark:bg-zinc-800/50">
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-zinc-400 mb-1.5">Context</p>
+          <p className="text-[10px] font-semibold uppercase tracking-widest text-zinc-400 mb-1.5">Decision · {decision}</p>
           <p className="text-sm text-zinc-700 dark:text-zinc-300">{context}</p>
         </div>
 
@@ -86,10 +86,13 @@ export function TechDecision({ decision, status = "accepted", context, options, 
           </div>
         )}
 
-        {revealed && consequences && consequences.length > 0 && (
-          <div className="border border-amber-200 dark:border-amber-800 rounded-lg p-3 bg-amber-50 dark:bg-amber-950/30 transition-all duration-500">
+        {consequences && consequences.length > 0 && (
+          <div className={cn(
+            "border border-amber-200 dark:border-amber-800 rounded-lg p-3 bg-amber-50 dark:bg-amber-950/30 min-h-[56px] transition-all duration-500",
+            !revealed && "opacity-40"
+          )}>
             <p className="text-[10px] font-semibold uppercase tracking-widest text-amber-600 mb-1.5">Trade-offs accepted</p>
-            <div className="space-y-1">
+            <div className={cn("space-y-1 transition-all duration-500", !revealed && "blur-[3px] select-none")}>
               {consequences.map((c, i) => (
                 <p key={i} className="text-xs text-zinc-700 dark:text-zinc-300">{c}</p>
               ))}
@@ -98,8 +101,7 @@ export function TechDecision({ decision, status = "accepted", context, options, 
         )}
       </div>
 
-      <div className="px-4 py-3 border-t border-zinc-100 dark:border-zinc-800 flex items-center gap-3">
-        <ArrowRight className="size-4 text-zinc-400 shrink-0" />
+      <div className="px-4 py-3 border-t border-zinc-100 dark:border-zinc-800 flex items-center gap-3 bg-zinc-50 dark:bg-zinc-900/30">
         <span className="text-sm text-zinc-500 dark:text-zinc-400 flex-1">
           {revealed
             ? chosenOption ? `Chose: ${chosenOption.name}` : "Decision revealed"
@@ -107,7 +109,7 @@ export function TechDecision({ decision, status = "accepted", context, options, 
         </span>
         <button
           onClick={() => setRevealed((r) => !r)}
-          className="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-opacity shrink-0"
+          className="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-all duration-500 shrink-0"
         >
           {revealed ? "Hide Choice" : "Reveal Choice"}
         </button>

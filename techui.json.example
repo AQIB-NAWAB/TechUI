@@ -1,0 +1,17 @@
+{
+  "$schema": "https://techui.dev/schema/techui.json",
+  "style": "default",
+  "rsc": true,
+  "tsx": true,
+  "tailwind": {
+    "config": "",
+    "css": "src/app/globals.css",
+    "baseColor": "zinc",
+    "cssVariables": true
+  },
+  "aliases": {
+    "components": "@/components/techui",
+    "utils": "@/lib/utils"
+  },
+  "registry": "https://techui.vercel.app/r"
+}

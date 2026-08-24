@@ -125,10 +125,20 @@ export function IdempotencyConsumer({
 
   return (
     <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden">
-      <div className="h-12 px-4 flex items-center gap-3 border-b border-zinc-200 dark:border-zinc-800">
+      <div className="flex items-center gap-3 px-4 h-12 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50">
         <Mail className="size-4 text-zinc-400 shrink-0" />
         <span className="text-sm font-semibold text-zinc-800 dark:text-zinc-200 flex-1">Idempotency Consumer</span>
         <span className="text-[10px] font-mono text-zinc-400 bg-zinc-100 dark:bg-zinc-800 px-2 py-0.5 rounded">{queueName}</span>
+        {interactive && (
+          <button
+            type="button"
+            onClick={reset}
+            className="p-1 rounded text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-all duration-500"
+            title="Reset"
+          >
+            <RefreshCw className="size-3.5" />
+          </button>
+        )}
       </div>
 
       <div className="text-sm text-zinc-500 dark:text-zinc-400 px-4 py-2 border-b border-zinc-100 dark:border-zinc-800">
@@ -234,19 +244,13 @@ export function IdempotencyConsumer({
       </div>
 
       {interactive && (
-        <div className="border-t border-zinc-100 dark:border-zinc-800 px-4 py-3 flex items-center gap-3">
-          <span className="text-[11px] text-zinc-500 flex-1">{statusText}</span>
+        <div className="border-t border-zinc-100 dark:border-zinc-800 px-4 py-3 flex items-center gap-3 bg-zinc-50 dark:bg-zinc-900/30">
+          <span className="text-sm text-zinc-500 dark:text-zinc-400 flex-1">{statusText}</span>
           <button
-            onClick={reset}
-            className="p-1.5 rounded-lg text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors"
-            title="Reset"
-          >
-            <RefreshCw className="size-3.5" />
-          </button>
-          <button
+            type="button"
             onClick={simulate}
             disabled={running}
-            className="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-50"
+            className="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-all duration-500 disabled:opacity-50"
           >
             Simulate
           </button>

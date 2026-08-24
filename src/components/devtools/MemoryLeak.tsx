@@ -119,6 +119,16 @@ export function MemoryLeak({
         <span className={cn("flex items-center gap-1 text-[10px] font-semibold", statusBadge.className)}>
           <StatusBadgeIcon className="size-3" /> {statusBadge.label}
         </span>
+        {status !== "leaking" && (
+          <button
+            type="button"
+            onClick={reset}
+            className="p-1 rounded text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-all duration-500"
+            title="Reset simulation"
+          >
+            <RefreshCw className="size-3.5" />
+          </button>
+        )}
       </div>
 
       <p className="text-sm text-zinc-500 dark:text-zinc-400 px-4 py-2 border-b border-zinc-100 dark:border-zinc-800">
@@ -278,22 +288,18 @@ export function MemoryLeak({
 
       <div className="px-4 py-3 border-t border-zinc-100 dark:border-zinc-800 flex items-center gap-3">
         <span className="text-sm text-zinc-500 dark:text-zinc-400 flex-1">
-          {status === "leaking" ? "Fix the leak before memory runs out" : "Reset to simulate again"}
+          {status === "leaking"
+            ? "Memory keeps climbing — fix the leak before the process crashes"
+            : status === "crashed"
+            ? "Process ran out of memory — reset to try again"
+            : "Leak fixed — heap is stable again"}
         </span>
         <button
-          onClick={reset}
-          className="flex items-center gap-1 border border-zinc-200 dark:border-zinc-700 rounded-lg px-3 py-2 text-xs font-medium text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all duration-500"
+          onClick={status === "leaking" ? fixLeak : reset}
+          className="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-opacity shrink-0"
         >
-          <RefreshCw className="size-3" /> Reset
+          {status === "leaking" ? "Fix Leak" : "Run Again"}
         </button>
-        {status === "leaking" && (
-          <button
-            onClick={fixLeak}
-            className="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-opacity shrink-0"
-          >
-            Fix Leak
-          </button>
-        )}
       </div>
     </div>
   );

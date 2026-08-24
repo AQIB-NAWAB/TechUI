@@ -120,9 +120,13 @@ export function CiPipeline({
   stages,
   interactive = false,
 }: CiPipelineProps) {
-  const [expanded, setExpanded] = useState<Set<number>>(
-    () => new Set(stages.map((_, i) => i).filter((i) => stages[i]?.status === "failed" || stages[i]?.status === "running"))
-  );
+  const [expanded, setExpanded] = useState<Set<number>>(() => {
+    const failedOrRunning = stages
+      .map((_, i) => i)
+      .filter((i) => stages[i]?.status === "failed" || stages[i]?.status === "running");
+    if (failedOrRunning.length > 0) return new Set(failedOrRunning);
+    return stages.length > 0 ? new Set([0]) : new Set();
+  });
 
   function toggle(i: number) {
     setExpanded((prev) => {
@@ -261,14 +265,20 @@ export function CiPipeline({
 
       <div className="px-4 py-3 border-t border-zinc-100 dark:border-zinc-800 flex items-center gap-3">
         <span className="text-sm text-zinc-500 dark:text-zinc-400 flex-1 truncate">
-          {failedLog ? "Pipeline failed — check the error log above" : `${Math.round(progress)}% complete`}
+          {failedLog ? "Build failed — read the red log above" : `${Math.round(progress)}% complete · click a stage to inspect`}
         </span>
-        {interactive && (
-          <button className="flex items-center gap-1.5 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-opacity shrink-0">
-            <Play className="size-3.5" />
-            Re-run
-          </button>
-        )}
+        <button
+          type="button"
+          onClick={() => {
+            const next = stages.findIndex((_, i) => !expanded.has(i));
+            if (next >= 0) setExpanded(new Set([next]));
+            else setExpanded(new Set(stages.map((_, i) => i)));
+          }}
+          className="flex items-center gap-1.5 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-opacity shrink-0"
+        >
+          {interactive ? <Play className="size-3.5" /> : null}
+          {expanded.size < stages.length ? "Next Stage" : interactive ? "Re-run" : "Show All Stages"}
+        </button>
       </div>
     </div>
   );

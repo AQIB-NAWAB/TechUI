@@ -75,7 +75,7 @@ export function ColorPalette({ title = "Color Palette", scales, swatches }: Colo
         Design tokens for your UI — click any swatch to copy its hex value to the clipboard.
       </div>
 
-      <div className="min-h-[220px] p-4 space-y-4">
+      <div className="min-h-[220px] p-4 flex flex-col justify-center space-y-4">
         {scales?.map((scale, i) => (
           <div key={i} className="rounded-lg border border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/30 p-3">
             <div className="text-[10px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500 mb-2">
@@ -93,12 +93,34 @@ export function ColorPalette({ title = "Color Palette", scales, swatches }: Colo
         ))}
 
         {swatches && (
-          <div className="grid grid-cols-4 sm:grid-cols-6 gap-3">
-            {swatches.map((s, i) => (
-              <Swatch key={i} swatch={s} onCopy={setLastCopied} />
-            ))}
+          <div className="rounded-lg border border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/30 p-3">
+            <div className="text-[10px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500 mb-2">
+              Swatches
+            </div>
+            <div className="grid grid-cols-4 sm:grid-cols-6 gap-3">
+              {swatches.map((s, i) => (
+                <Swatch key={i} swatch={s} onCopy={setLastCopied} />
+              ))}
+            </div>
           </div>
         )}
+
+        <div className="min-h-[52px] rounded-lg border border-zinc-100 dark:border-zinc-800 p-3 flex items-center gap-3 transition-all duration-500">
+          {lastCopied ? (
+            <>
+              <div
+                className="size-10 rounded-lg border border-zinc-200/50 dark:border-zinc-700/50 shrink-0"
+                style={{ backgroundColor: lastCopied }}
+              />
+              <div className="text-xs text-zinc-500 dark:text-zinc-400">
+                Preview —{" "}
+                <code className="font-mono bg-zinc-100 dark:bg-zinc-800 px-1.5 py-0.5 rounded">{lastCopied}</code>
+              </div>
+            </>
+          ) : (
+            <span className="text-xs text-zinc-400">Click a swatch to preview the copied color here</span>
+          )}
+        </div>
       </div>
 
       <div className="border-t border-zinc-100 dark:border-zinc-800 px-4 py-3 flex items-center gap-3 bg-zinc-50 dark:bg-zinc-900/30">
@@ -109,6 +131,15 @@ export function ColorPalette({ title = "Color Palette", scales, swatches }: Colo
             "Click a color swatch to copy its value"
           )}
         </span>
+        {lastCopied && (
+          <button
+            type="button"
+            onClick={() => navigator.clipboard.writeText(lastCopied)}
+            className="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-opacity"
+          >
+            Copy Again
+          </button>
+        )}
       </div>
     </div>
   );

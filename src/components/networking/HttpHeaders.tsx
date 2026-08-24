@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { z } from "zod";
 import { cn } from "@/lib/utils";
-import { Lock, Shield, Network } from "lucide-react";
+import { Lock, Shield, Network, ArrowUpRight } from "lucide-react";
 
 const HeaderSchema = z.object({
   name: z.string(),
@@ -69,13 +69,11 @@ function HeaderRow({
         dimmed && "opacity-40"
       )}
     >
-      {/* Icon prefix */}
       <div className="shrink-0 mt-0.5 w-3.5 flex items-center justify-center">
         {isSecurityHeader && <Lock className="size-3 text-zinc-400 dark:text-zinc-500" />}
         {isAuthHeader && !isSecurityHeader && <Shield className="size-3 text-zinc-400 dark:text-zinc-500" />}
       </div>
 
-      {/* Name + description */}
       <div className="flex-1 min-w-0">
         <div className="flex items-baseline gap-1.5">
           <code
@@ -107,7 +105,6 @@ function HeaderRow({
         )}
       </div>
 
-      {/* Value */}
       <code
         className="text-xs font-mono text-zinc-600 dark:text-zinc-400 truncate max-w-[180px] shrink-0"
         title={header.value}
@@ -123,14 +120,14 @@ function Panel({
   headers,
   accentClass,
   headerCountClass,
+  activeCategory,
 }: {
   label: string;
   headers: z.infer<typeof HeaderSchema>[];
   accentClass: string;
   headerCountClass: string;
+  activeCategory: Category;
 }) {
-  const [activeCategory, setActiveCategory] = useState<Category>("all");
-
   const categories: Category[] = ["all", "auth", "content", "cache", "security", "custom"];
   const presentCategories = categories.filter(
     (c) => c === "all" || headers.some((h) => h.highlight === c)
@@ -138,7 +135,6 @@ function Panel({
 
   return (
     <div className={cn("flex-1 min-w-0 border-l-4 rounded-r-lg overflow-hidden", accentClass)}>
-      {/* Panel header */}
       <div className="px-3 py-2 bg-zinc-50 dark:bg-zinc-900/40 border-b border-zinc-100 dark:border-zinc-800">
         <div className="flex items-center gap-2 mb-2">
           <Network className="size-3 text-zinc-400" />
@@ -147,26 +143,23 @@ function Panel({
           </span>
           <span className="text-[10px] text-zinc-400 ml-auto">({headers.length})</span>
         </div>
-        {/* Category pills */}
         <div className="flex items-center gap-1 flex-wrap">
           {presentCategories.map((cat) => (
-            <button
+            <span
               key={cat}
-              onClick={() => setActiveCategory(cat)}
               className={cn(
                 "text-[10px] px-2 py-0.5 rounded-full font-medium transition-all duration-500",
                 activeCategory === cat
                   ? "bg-zinc-800 dark:bg-zinc-200 text-white dark:text-zinc-900"
-                  : "bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700"
+                  : "bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400"
               )}
             >
               {CATEGORY_LABELS[cat]}
-            </button>
+            </span>
           ))}
         </div>
       </div>
 
-      {/* Header rows */}
       <div className="p-1.5 space-y-0">
         {headers.map((h, i) => {
           const dimmed = activeCategory !== "all" && h.highlight !== activeCategory;
@@ -183,24 +176,42 @@ export function HttpHeaders({
   requestHeaders,
   responseHeaders,
 }: HttpHeadersProps) {
+  const [activeCategory, setActiveCategory] = useState<Category>("all");
   const showRequest = (direction === "request" || direction === "both") && requestHeaders && requestHeaders.length > 0;
   const showResponse = (direction === "response" || direction === "both") && responseHeaders && responseHeaders.length > 0;
 
+  const allHeaders = [...(requestHeaders ?? []), ...(responseHeaders ?? [])];
+  const securityCount = allHeaders.filter((h) => h.highlight === "security").length;
+
+  function cycleCategory() {
+    const order: Category[] = ["all", "security", "auth", "cache", "content", "custom"];
+    const present = order.filter((c) => c === "all" || allHeaders.some((h) => h.highlight === c));
+    const idx = present.indexOf(activeCategory);
+    setActiveCategory(present[(idx + 1) % present.length] ?? "all");
+  }
+
   return (
     <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 overflow-hidden">
-      {/* Header */}
-      <div className="px-4 h-12 border-b border-zinc-100 dark:border-zinc-900 bg-zinc-50 dark:bg-zinc-900/50 flex items-center">
-        <span className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">{title}</span>
+      <div className="flex items-center gap-3 px-4 h-12 border-b border-zinc-100 dark:border-zinc-900">
+        <ArrowUpRight className="size-4 text-zinc-400 shrink-0" />
+        <span className="text-sm font-semibold text-zinc-800 dark:text-zinc-200 flex-1">{title}</span>
+        <span className="text-[10px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500">
+          {direction}
+        </span>
       </div>
 
-      {/* Two-panel layout */}
-      <div className={cn("flex gap-0 divide-x divide-zinc-100 dark:divide-zinc-800", direction === "both" ? "flex-row" : "flex-col")}>
+      <div className="text-sm text-zinc-500 dark:text-zinc-400 px-4 py-2 border-b border-zinc-100 dark:border-zinc-900">
+        Extra metadata sent with every request and response — auth, caching rules, and security policies.
+      </div>
+
+      <div className={cn("flex gap-0 divide-x divide-zinc-100 dark:divide-zinc-800 min-h-[220px]", direction === "both" ? "flex-row" : "flex-col")}>
         {showRequest && (
           <Panel
             label="Request"
             headers={requestHeaders!}
             accentClass="border-l-blue-400 dark:border-l-blue-500"
             headerCountClass="text-blue-600 dark:text-blue-400"
+            activeCategory={activeCategory}
           />
         )}
         {showResponse && (
@@ -209,8 +220,26 @@ export function HttpHeaders({
             headers={responseHeaders!}
             accentClass="border-l-emerald-400 dark:border-l-emerald-500"
             headerCountClass="text-emerald-600 dark:text-emerald-400"
+            activeCategory={activeCategory}
           />
         )}
+      </div>
+
+      <div className="border-t border-zinc-100 dark:border-zinc-900 px-4 py-3 flex items-center gap-3">
+        <span className="text-sm text-zinc-500 dark:text-zinc-400 flex-1">
+          {activeCategory === "all"
+            ? `${allHeaders.length} headers shown`
+            : `Showing ${activeCategory} headers only`}
+          {securityCount > 0 && activeCategory === "all" && (
+            <span className="ml-1 text-red-500 dark:text-red-400">· {securityCount} security</span>
+          )}
+        </span>
+        <button
+          onClick={cycleCategory}
+          className="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-opacity shrink-0"
+        >
+          Filter: {CATEGORY_LABELS[activeCategory]}
+        </button>
       </div>
     </div>
   );

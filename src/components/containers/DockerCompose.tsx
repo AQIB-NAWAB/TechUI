@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { z } from "zod";
 import { cn } from "@/lib/utils";
-import { Box, Heart, HardDrive, ArrowRight, Play, ChevronDown, ChevronUp } from "lucide-react";
+import { Box, Heart, HardDrive, ArrowRight, Play } from "lucide-react";
 
 const ServiceSchema = z.object({
   name: z.string(),
@@ -150,7 +150,7 @@ export function DockerCompose({
         </div>
       </div>
 
-      <div className="min-h-[220px] p-4">
+      <div className="min-h-[220px] p-4 flex flex-col gap-3">
         <div className="grid grid-cols-2 gap-3">
           {services.map((svc) => {
             const colors = COLOR_MAP[svc.color ?? "blue"]!;
@@ -170,7 +170,6 @@ export function DockerCompose({
                   "hover:shadow-sm"
                 )}
               >
-                {/* Service name + status dot */}
                 <div className="flex items-center gap-2 mb-1">
                   <span className={cn(
                     "size-1.5 rounded-full shrink-0 transition-all duration-500",
@@ -179,15 +178,12 @@ export function DockerCompose({
                     "bg-zinc-300 dark:bg-zinc-600"
                   )} />
                   <span className="text-xs font-bold text-zinc-800 dark:text-zinc-200">{svc.name}</span>
-                  {isSelected ? <ChevronUp className="size-3 text-zinc-400 ml-auto" /> : <ChevronDown className="size-3 text-zinc-400 ml-auto" />}
                 </div>
 
-                {/* Image */}
                 <div className="text-[10px] font-mono text-zinc-500 dark:text-zinc-400 truncate mb-1.5">
                   {svc.image}
                 </div>
 
-                {/* Icons row */}
                 <div className="flex items-center gap-2 flex-wrap">
                   {(svc.ports ?? []).length > 0 && (
                     <div className="flex gap-1 flex-wrap">
@@ -209,62 +205,44 @@ export function DockerCompose({
                     </span>
                   )}
                 </div>
-
-                {/* Expanded details */}
-                {isSelected && (
-                  <div className="mt-2.5 pt-2.5 border-t border-zinc-100 dark:border-zinc-800 space-y-2">
-                    {(svc.dependsOn ?? []).length > 0 && (
-                      <div>
-                        <div className="text-[9px] font-semibold text-zinc-400 uppercase tracking-wide mb-1">depends on</div>
-                        <div className="flex gap-1 flex-wrap">
-                          {(svc.dependsOn ?? []).map((d) => (
-                            <span key={d} className="text-[10px] bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 px-1.5 py-0.5 rounded font-mono">
-                              {d}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                    {(svc.ports ?? []).length > 0 && (
-                      <div>
-                        <div className="text-[9px] font-semibold text-zinc-400 uppercase tracking-wide mb-1">ports</div>
-                        <div className="space-y-0.5">
-                          {(svc.ports ?? []).map((p) => (
-                            <div key={p} className="text-[10px] font-mono text-zinc-600 dark:text-zinc-300">
-                              <span className="text-blue-500">{p.split(":")[0]}</span>:{p.split(":")[1]} (host:container)
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                    {(svc.volumes ?? []).length > 0 && (
-                      <div>
-                        <div className="text-[9px] font-semibold text-zinc-400 uppercase tracking-wide mb-1">volumes</div>
-                        <div className="space-y-0.5">
-                          {(svc.volumes ?? []).map((v) => (
-                            <div key={v} className="text-[10px] font-mono text-zinc-500 dark:text-zinc-400 truncate">{v}</div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                    {svc.healthcheck && (
-                      <div className="flex items-center gap-1 text-[10px] text-emerald-600 dark:text-emerald-400">
-                        <Heart className="size-3" />
-                        healthcheck enabled
-                      </div>
-                    )}
-                  </div>
-                )}
               </button>
             );
           })}
         </div>
 
-        {!selected && services.length > 0 && (
-          <p className="text-center text-[10px] text-zinc-400 mt-3">
-            Click a service card to see its ports, volumes &amp; dependencies
-          </p>
-        )}
+        <div className="min-h-[72px] rounded-lg border border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/30 p-3 transition-all duration-500">
+          {selected ? (
+            <div className="space-y-2">
+              <div className="text-[10px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500">
+                {selected.name} details
+              </div>
+              {(selected.dependsOn ?? []).length > 0 && (
+                <div className="flex gap-1 flex-wrap items-center">
+                  <span className="text-[10px] text-zinc-400">depends on:</span>
+                  {(selected.dependsOn ?? []).map((d) => (
+                    <span key={d} className="text-[10px] bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 px-1.5 py-0.5 rounded font-mono">
+                      {d}
+                    </span>
+                  ))}
+                </div>
+              )}
+              {(selected.ports ?? []).length > 0 && (
+                <div className="text-[10px] font-mono text-zinc-600 dark:text-zinc-300">
+                  ports: {(selected.ports ?? []).join(", ")}
+                </div>
+              )}
+              {(selected.volumes ?? []).length > 0 && (
+                <div className="text-[10px] font-mono text-zinc-500 dark:text-zinc-400 truncate">
+                  volumes: {(selected.volumes ?? []).join(", ")}
+                </div>
+              )}
+            </div>
+          ) : (
+            <p className="text-xs text-zinc-400 text-center py-2">
+              Click a service to see ports, volumes &amp; dependencies
+            </p>
+          )}
+        </div>
       </div>
 
       <div className="border-t border-zinc-100 dark:border-zinc-800 px-4 py-3 flex items-center gap-3 bg-zinc-50 dark:bg-zinc-900/30">

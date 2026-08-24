@@ -167,7 +167,7 @@ export function EventSourcing({ entityType = "ShoppingCart", events = [] }: Even
 
   return (
     <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden">
-      <div className="flex items-center gap-2 px-4 h-12 border-b border-zinc-100 dark:border-zinc-800">
+      <div className="flex items-center gap-2 px-4 h-12 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50">
         <ListOrdered className="size-4 text-zinc-400 shrink-0" />
         <span className="text-sm font-semibold text-zinc-800 dark:text-zinc-200 flex-1">
           Event Sourcing
@@ -280,7 +280,7 @@ export function EventSourcing({ entityType = "ShoppingCart", events = [] }: Even
         </div>
       </div>
 
-      <div className="px-4 py-3 border-t border-zinc-100 dark:border-zinc-800 flex items-center gap-3">
+      <div className="px-4 py-3 border-t border-zinc-100 dark:border-zinc-800 flex items-center gap-3 bg-zinc-50 dark:bg-zinc-900/30">
         <div className="flex items-center gap-1.5 flex-1 min-w-0">
           <Database className="size-3.5 text-zinc-400 shrink-0" />
           <span className="text-sm text-zinc-500 dark:text-zinc-400 truncate">{footerStatus}</span>

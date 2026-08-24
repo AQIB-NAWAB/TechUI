@@ -55,14 +55,6 @@ const ALGO_INFO: Record<Algorithm, { duration: number; durationLabel: string; de
   sha256:  { duration: 400,  durationLabel: "~0.003ms", description: "General-purpose hash — NOT designed for passwords" },
 };
 
-const BCRYPT_COSTS = [
-  { cost: 10, label: "~65ms" },
-  { cost: 11, label: "~130ms" },
-  { cost: 12, label: "~250ms" },
-  { cost: 13, label: "~500ms" },
-  { cost: 14, label: "~1000ms" },
-];
-
 type HashState = "idle" | "hashing" | "done";
 type VerifyState = "idle" | "verifying" | "match" | "no-match";
 
@@ -171,6 +163,10 @@ export function PasswordHashing({
         </span>
       </div>
 
+      <div className="text-sm text-zinc-500 dark:text-zinc-400 px-4 py-2 border-b border-zinc-100 dark:border-zinc-800">
+        Turns passwords into one-way hashes so the real password is never stored in plain text.
+      </div>
+
       {/* Tabs */}
       <div className="flex border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/40">
         {TABS.map((tab) => (
@@ -193,219 +189,95 @@ export function PasswordHashing({
       </div>
 
       {/* Body */}
-      <div className="p-4 space-y-4 min-h-[280px]">
-
-        {/* SHA-256 warning banner */}
+      <div className="p-4 space-y-3 min-h-[280px] flex flex-col">
         {isSha && (
           <div className="flex items-start gap-2 rounded-lg bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800 px-3 py-2">
             <AlertTriangle className="size-3.5 text-red-500 shrink-0 mt-0.5" />
             <p className="text-xs text-red-700 dark:text-red-400 font-medium">
-              DO NOT use SHA-256 for passwords. It has no salt and runs in ~0.003ms — an attacker can check billions of guesses per second with a GPU.
+              SHA-256 is NOT for passwords — no salt, runs in ~0.003ms.
             </p>
           </div>
         )}
 
-        {/* Hash flow */}
-        <div className="space-y-2">
-          {/* Input row */}
-          <div className="flex items-center gap-2 text-xs">
-            <span className="text-zinc-400 dark:text-zinc-500 w-14 shrink-0">Input:</span>
-            <span className="font-mono bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 rounded px-2 py-0.5">
-              &quot;{password}&quot;
-            </span>
-          </div>
-
-          {/* Down arrow */}
-          <div className="flex items-center gap-2 text-xs pl-16">
-            <span className="text-zinc-300 dark:text-zinc-600">↓</span>
-          </div>
-
-          {/* Algorithm box + progress */}
-          <div className="flex items-start gap-2 text-xs">
-            <span className="text-zinc-400 dark:text-zinc-500 w-14 shrink-0 pt-1">Function:</span>
-            <div className="flex-1 space-y-2">
-              <div className="flex items-center gap-2">
-                <span className={cn(
-                  "font-semibold rounded px-2 py-0.5",
-                  isSha
-                    ? "bg-red-100 dark:bg-red-950 text-red-700 dark:text-red-400"
-                    : "bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300"
-                )}>
-                  {algorithm}
-                </span>
-                {!isSha && (
-                  <span className="text-zinc-400 dark:text-zinc-500">
-                    {algorithm === "bcrypt"
-                      ? `work factor: ${workFactor}`
-                      : `t=${workFactor}, m=65536`}
-                  </span>
-                )}
-                <span className={cn(
-                  "ml-auto text-[10px] font-semibold",
-                  isSha ? "text-red-500" : "text-zinc-400 dark:text-zinc-500"
-                )}>
-                  {info.durationLabel}
-                </span>
-              </div>
-
-              {/* Progress bar */}
-              {hashState !== "idle" && (
-                <div className="space-y-1">
-                  <div className="relative h-2 rounded-full bg-zinc-100 dark:bg-zinc-800 overflow-hidden">
-                    <div
-                      className={cn(
-                        "h-full rounded-full transition-none",
-                        isSha ? "bg-red-400 dark:bg-red-500" : "bg-blue-500 dark:bg-blue-400"
-                      )}
-                      style={{ width: `${progressPct}%` }}
-                    />
-                  </div>
-                  <div className="flex justify-between text-[10px] text-zinc-400 dark:text-zinc-500">
-                    <span>{hashState === "hashing" ? "Computing…" : "Done"}</span>
-                    <span>{progressPct}%</span>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Down arrow */}
-          {hash && (
-            <div className="flex items-center gap-2 text-xs pl-16">
-              <span className="text-zinc-300 dark:text-zinc-600">↓</span>
-            </div>
-          )}
-
-          {/* Hash output */}
-          {hash && (
-            <div className="flex items-start gap-2 text-xs">
-              <span className="text-zinc-400 dark:text-zinc-500 w-14 shrink-0 pt-1">Hash:</span>
-              <div
-                className={cn(
-                  "flex-1 font-mono text-[10px] rounded-lg px-3 py-2 break-all cursor-default select-all transition-all duration-500",
-                  isSha
-                    ? "bg-red-50 dark:bg-red-950/30 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-800"
-                    : "bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800"
-                )}
-                title={hash}
-              >
-                {hash.length > 70 ? hash.slice(0, 70) + "…" : hash}
-              </div>
-            </div>
-          )}
+        <div className="flex items-center gap-2 text-xs">
+          <span className="text-zinc-400 w-14 shrink-0">Input:</span>
+          <span className="font-mono bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 rounded px-2 py-0.5">
+            &quot;{password}&quot;
+          </span>
+          <span className={cn("ml-auto text-[10px] font-semibold", isSha ? "text-red-500" : "text-zinc-400")}>
+            {info.durationLabel}
+          </span>
         </div>
 
-        {/* Bcrypt cost comparison */}
-        {algorithm === "bcrypt" && (
-          <div className="rounded-lg bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-100 dark:border-zinc-700 px-3 py-2 space-y-1.5">
-            <p className="text-[10px] font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wide">
-              Work factor comparison (cost doubles time)
-            </p>
-            <div className="flex gap-3 flex-wrap">
-              {BCRYPT_COSTS.map(({ cost, label }) => (
-                <div key={cost} className={cn(
-                  "text-[10px] rounded px-1.5 py-0.5 font-mono",
-                  cost === workFactor
-                    ? "bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 font-bold"
-                    : "bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400"
-                )}>
-                  cost={cost}: {label}
-                </div>
-              ))}
-            </div>
+        <div className="rounded-lg border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800/40 p-3 space-y-2 min-h-[100px]">
+          <div className="flex items-center gap-2">
+            <span className={cn(
+              "text-xs font-semibold rounded px-2 py-0.5",
+              isSha ? "bg-red-100 dark:bg-red-950 text-red-700" : "bg-blue-100 dark:bg-blue-950 text-blue-700"
+            )}>
+              {algorithm}
+            </span>
+            {!isSha && (
+              <span className="text-[10px] text-zinc-400">
+                {algorithm === "bcrypt" ? `cost ${workFactor}` : `t=${workFactor}`}
+              </span>
+            )}
           </div>
-        )}
 
-        {/* Argon2 params */}
-        {algorithm === "argon2" && (
-          <div className="rounded-lg bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-100 dark:border-zinc-700 px-3 py-2 space-y-1">
-            <p className="text-[10px] font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wide">Argon2id parameters</p>
-            <div className="flex gap-3 text-[10px] font-mono text-zinc-600 dark:text-zinc-400 flex-wrap">
-              <span className="bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300 rounded px-1.5 py-0.5">m=65536 (64MB RAM)</span>
-              <span className="bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300 rounded px-1.5 py-0.5">t={workFactor} iterations</span>
-              <span className="bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300 rounded px-1.5 py-0.5">p=4 threads</span>
-            </div>
-            <p className="text-[10px] text-zinc-400 dark:text-zinc-500">Memory-hard = GPUs can&apos;t parallelize cheaply</p>
+          <div className="relative h-2 rounded-full bg-zinc-100 dark:bg-zinc-800 overflow-hidden">
+            <div
+              className={cn("h-full rounded-full", isSha ? "bg-red-400" : "bg-blue-500")}
+              style={{ width: `${progressPct}%` }}
+            />
           </div>
-        )}
 
-        {/* Insight line */}
-        <p className="text-[10px] text-zinc-400 dark:text-zinc-500 italic">{info.description}</p>
+          <div className={cn(
+            "font-mono text-[10px] rounded-lg px-3 py-2 break-all min-h-[40px] transition-all duration-500",
+            hash
+              ? isSha
+                ? "bg-red-50 dark:bg-red-950/30 text-red-700 border border-red-200"
+                : "bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 border border-emerald-200"
+              : "bg-zinc-100 dark:bg-zinc-800 text-zinc-400 border border-dashed border-zinc-200 dark:border-zinc-700"
+          )}>
+            {hash ? (hash.length > 70 ? hash.slice(0, 70) + "…" : hash) : "Hash output appears here"}
+          </div>
+        </div>
 
-        {/* Hash button */}
+        <div className="rounded-lg border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800/40 p-3 min-h-[72px]">
+          <p className="text-[10px] font-semibold uppercase tracking-widest text-zinc-400 mb-2">Verify</p>
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={verifyInput}
+              onChange={(e) => { setVerifyInput(e.target.value); setVerifyState("idle"); setVerifyProgress(0); }}
+              placeholder="Enter password to verify…"
+              disabled={!hash}
+              className="flex-1 px-2 py-1.5 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-xs font-mono outline-none disabled:opacity-40"
+            />
+            {verifyState === "match" && <CheckCircle2 className="size-4 text-emerald-500 shrink-0 self-center" />}
+            {verifyState === "no-match" && <XCircle className="size-4 text-red-500 shrink-0 self-center" />}
+          </div>
+        </div>
+      </div>
+
+      <div className="px-4 py-3 border-t border-zinc-100 dark:border-zinc-800 flex items-center gap-3">
+        <span className="text-sm text-zinc-500 dark:text-zinc-400 flex-1">
+          {hashState === "hashing" ? "Computing hash…" :
+           hashState === "done" ? (verifyState === "match" ? "Password verified!" : verifyState === "no-match" ? "No match" : "Hash ready — try verifying") :
+           info.description}
+        </span>
         <button
-          onClick={runHash}
-          disabled={hashState === "hashing"}
+          onClick={hash ? runVerify : runHash}
+          disabled={hashState === "hashing" || verifyState === "verifying" || (!!hash && !verifyInput)}
           className={cn(
-            "bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold transition-opacity",
-            hashState === "hashing" ? "opacity-40 cursor-not-allowed" : "hover:opacity-90"
+            "bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold transition-opacity shrink-0",
+            (hashState === "hashing" || verifyState === "verifying" || (!!hash && !verifyInput)) ? "opacity-40 cursor-not-allowed" : "hover:opacity-90"
           )}
         >
-          {hashState === "idle" ? "Hash Password"
-            : hashState === "hashing" ? "Hashing…"
-            : "Hash Again"}
+          {hashState === "hashing" ? "Hashing…" :
+           verifyState === "verifying" ? "Checking…" :
+           hash ? "Verify Password" : "Hash Password"}
         </button>
-
-        {/* Verify section */}
-        {hash && (
-          <div className="border-t border-zinc-100 dark:border-zinc-800 pt-4 space-y-3">
-            <p className="text-xs font-semibold text-zinc-600 dark:text-zinc-300">Verify a password:</p>
-            <div className="flex gap-2">
-              <input
-                type="text"
-                value={verifyInput}
-                onChange={(e) => { setVerifyInput(e.target.value); setVerifyState("idle"); setVerifyProgress(0); }}
-                placeholder="Enter password to verify…"
-                className="flex-1 px-3 py-2 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 text-sm text-zinc-800 dark:text-zinc-200 placeholder:text-zinc-400 outline-none focus:ring-2 focus:ring-zinc-300 dark:focus:ring-zinc-600 font-mono transition"
-              />
-              <button
-                onClick={runVerify}
-                disabled={!verifyInput || verifyState === "verifying"}
-                className={cn(
-                  "bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold transition-opacity shrink-0",
-                  (!verifyInput || verifyState === "verifying") ? "opacity-40 cursor-not-allowed" : "hover:opacity-90"
-                )}
-              >
-                {verifyState === "verifying" ? "Checking…" : "Verify"}
-              </button>
-            </div>
-
-            {/* Verify progress */}
-            {verifyState === "verifying" && (
-              <div className="space-y-1">
-                <div className="relative h-1.5 rounded-full bg-zinc-100 dark:bg-zinc-800 overflow-hidden">
-                  <div
-                    className="h-full rounded-full bg-amber-400 dark:bg-amber-500 transition-none"
-                    style={{ width: `${Math.round(verifyProgress * 100)}%` }}
-                  />
-                </div>
-                <p className="text-[10px] text-zinc-400 dark:text-zinc-500">
-                  Re-hashing to compare… ({info.durationLabel})
-                </p>
-              </div>
-            )}
-
-            {/* Result */}
-            {verifyState === "match" && (
-              <div className="flex items-center gap-2 text-sm text-emerald-600 dark:text-emerald-400 font-semibold">
-                <CheckCircle2 className="size-4 shrink-0" />
-                Passwords match!
-              </div>
-            )}
-            {verifyState === "no-match" && (
-              <div className="flex items-center gap-2 text-sm text-red-600 dark:text-red-400 font-semibold">
-                <XCircle className="size-4 shrink-0" />
-                Passwords do not match.
-              </div>
-            )}
-
-            {/* SHA-256 vs bcrypt comparison footer */}
-            <div className="flex items-center justify-between text-[10px] rounded-lg bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-100 dark:border-zinc-700 px-3 py-2 mt-1">
-              <span className="text-zinc-500 dark:text-zinc-400">SHA-256 would take: <span className="text-red-500 font-semibold">0.003ms</span></span>
-              <span className="text-red-500 font-semibold">← brute-forceable!</span>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );

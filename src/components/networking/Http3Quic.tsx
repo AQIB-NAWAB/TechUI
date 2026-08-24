@@ -86,8 +86,8 @@ export function Http3Quic({
     setRunning(true);
 
     let step = 0;
-    const totalSteps = 40;
-    const packetLossStep = 10;
+    const totalSteps = 20;
+    const packetLossStep = 5;
 
     function tick() {
       step++;
@@ -101,16 +101,16 @@ export function Http3Quic({
           }
 
           if (s.id === 2) {
-            if (packetLoss && step >= packetLossStep && step < packetLossStep + 8) {
+            if (packetLoss && step >= packetLossStep && step < packetLossStep + 3) {
               return { ...s, progress: (packetLossStep / totalSteps) * 100, stalled: true, phase: "stalled" };
             }
-            const effectiveStep = packetLoss ? Math.max(0, step - 8) : step;
+            const effectiveStep = packetLoss ? Math.max(0, step - 3) : step;
             const progress = Math.min((effectiveStep / totalSteps) * 100, 100);
             return { ...s, progress, stalled: false, done: progress >= 100, phase: progress >= 100 ? "done" : "transfer" };
           }
 
           if (s.id === 3) {
-            if (protocol === "http2" && packetLoss && step >= packetLossStep && step < packetLossStep + 8) {
+            if (protocol === "http2" && packetLoss && step >= packetLossStep && step < packetLossStep + 3) {
               return { ...s, progress: (packetLossStep / totalSteps) * 100, stalled: true, phase: "stalled" };
             }
             const progress = Math.min(base * 100, 100);
@@ -127,13 +127,13 @@ export function Http3Quic({
       }
 
       if (step < totalSteps) {
-        animFrameRef.current = setTimeout(tick, 100);
+        animFrameRef.current = setTimeout(tick, 500);
       } else {
         setRunning(false);
       }
     }
 
-    animFrameRef.current = setTimeout(tick, 100);
+    animFrameRef.current = setTimeout(tick, 500);
   }
 
   const rttInfo = RTT_INFO[protocol];

@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { z } from "zod";
 import { cn } from "@/lib/utils";
-import { Rocket, ChevronRight, RotateCcw, AlertTriangle, TrendingUp, TrendingDown } from "lucide-react";
+import { Rocket, ChevronRight, RotateCcw, Undo2, AlertTriangle, TrendingUp, TrendingDown } from "lucide-react";
 
 export const FeatureRolloutSchema = z.object({
   featureName: z.string().default("New Checkout Flow"),
@@ -136,7 +136,18 @@ export function FeatureRollout({
         <Rocket className="size-4 text-zinc-400 shrink-0" />
         <span className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 flex-1">Feature Rollout</span>
         <span className="text-xs font-mono text-zinc-500 truncate max-w-[140px]">&quot;{featureName}&quot;</span>
-        <button onClick={resetRollout} className="p-1 rounded text-zinc-400 hover:text-zinc-600 transition-all duration-500">
+        {stageIdx > 0 && (
+          <button
+            type="button"
+            onClick={rollback}
+            disabled={animating}
+            title="Rollback to previous stage"
+            className="p-1 rounded text-red-400 hover:text-red-600 dark:hover:text-red-300 transition-all duration-500 disabled:opacity-40"
+          >
+            <Undo2 className="size-3.5" />
+          </button>
+        )}
+        <button type="button" onClick={resetRollout} className="p-1 rounded text-zinc-400 hover:text-zinc-600 transition-all duration-500" title="Reset rollout">
           <RotateCcw className="size-3.5" />
         </button>
       </div>
@@ -146,7 +157,27 @@ export function FeatureRollout({
       </p>
 
       <div className="min-h-[280px] px-4 py-3 flex flex-col gap-3">
-        <div className="space-y-2 overflow-y-auto max-h-[140px]">
+        <div className="rounded-lg border border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/50 px-3 py-2">
+          <div className="text-[10px] font-semibold uppercase tracking-widest text-zinc-400 mb-1">Users on new version</div>
+          <div className="flex items-center gap-2">
+            <div className="flex gap-0.5 flex-1">
+              {Array.from({ length: 10 }).map((_, i) => (
+                <div
+                  key={i}
+                  className={cn(
+                    "h-6 flex-1 rounded-sm transition-all duration-500",
+                    i < Math.round(currentPercent / 10)
+                      ? "bg-blue-500"
+                      : "bg-zinc-200 dark:bg-zinc-700"
+                  )}
+                />
+              ))}
+            </div>
+            <span className="text-sm font-bold font-mono text-blue-600 dark:text-blue-400 w-12 text-right">{currentPercent}%</span>
+          </div>
+        </div>
+
+        <div className="space-y-2 overflow-y-auto max-h-[120px]">
           {stages.map((stage, i) => {
             const isActive = i === stageIdx;
             const isDone = i < stageIdx;
@@ -261,27 +292,17 @@ export function FeatureRollout({
       <div className="border-t border-zinc-100 dark:border-zinc-800 px-4 py-3 flex items-center gap-3">
         <span className="text-sm text-zinc-500 dark:text-zinc-400 flex-1">
           {stageIdx >= stages.length - 1
-            ? "100% deployment complete"
+            ? "Fully rolled out — 100% of users on the new version"
             : animating
             ? "Advancing rollout stage…"
-            : `${currentPercent}% of users on new version`}
+            : warningVisible
+            ? "Metrics look bad — use ↺ in header to rollback"
+            : `${currentPercent}% of users see the new feature`}
         </span>
-        <button
-          onClick={rollback}
-          disabled={animating || stageIdx <= 0}
-          className={cn(
-            "px-3 py-2 rounded-lg text-sm font-semibold border transition-all duration-500",
-            animating || stageIdx <= 0
-              ? "border-zinc-200 text-zinc-300 cursor-not-allowed"
-              : "border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950"
-          )}
-        >
-          Rollback
-        </button>
         <button
           onClick={advance}
           disabled={animating || stageIdx >= stages.length - 1}
-          className="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-40"
+          className="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-40 shrink-0"
         >
           {stageIdx >= stages.length - 1 ? "Fully Rolled Out" : animating ? "Advancing…" : "Advance Stage"}
         </button>

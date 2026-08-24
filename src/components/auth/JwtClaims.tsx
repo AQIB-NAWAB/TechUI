@@ -49,18 +49,19 @@ function formatTs(unix: number): string {
   }
 }
 
-function CopyButton({ text }: { text: string }) {
+function CopyButton({ text, onCopy }: { text: string; onCopy?: () => void }) {
   const [copied, setCopied] = useState(false);
   return (
     <button
       onClick={() => {
         navigator.clipboard.writeText(text).catch(() => {});
         setCopied(true);
+        onCopy?.();
         setTimeout(() => setCopied(false), 1500);
       }}
-      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 hover:opacity-90 transition-opacity"
+      className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 hover:opacity-90 transition-opacity"
     >
-      {copied ? <Check className="size-3" /> : <Copy className="size-3" />}
+      {copied ? <Check className="size-3.5" /> : <Copy className="size-3.5" />}
       {copied ? "Copied!" : "Copy Token"}
     </button>
   );
@@ -116,41 +117,25 @@ export function JwtClaims({
   return (
     <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden">
       {/* Header bar */}
-      <div className="h-12 px-4 flex items-center gap-3 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50">
-        <KeyRound className="size-3.5 text-zinc-400 shrink-0" />
+      <div className="h-12 px-4 flex items-center gap-3 border-b border-zinc-100 dark:border-zinc-800">
+        <KeyRound className="size-4 text-zinc-400 shrink-0" />
         <span className="text-sm font-semibold text-zinc-800 dark:text-zinc-200 flex-1">JWT Claims</span>
         <span className="text-[10px] font-mono bg-zinc-100 dark:bg-zinc-800 text-zinc-500 px-2 py-0.5 rounded">
           {algorithm}
         </span>
-        <CopyButton text={fullToken} />
       </div>
 
-      {/* Token string — clickable */}
-      <div className="relative px-4 py-3 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-950/30">
-        <button
-          onClick={handleCopyToken}
-          className="w-full text-left font-mono text-[11px] break-all leading-loose hover:opacity-80 transition-opacity"
-          title="Click to copy token"
-        >
-          <span className="text-violet-600 dark:text-violet-400">
-            {encodedHeader.slice(0, 20)}…
-          </span>
-          <span className="text-zinc-400">.</span>
-          <span className="text-blue-600 dark:text-blue-400">
-            {encodedPayload.slice(0, 24)}…
-          </span>
-          <span className="text-zinc-400">.</span>
-          <span className="text-emerald-600 dark:text-emerald-400">
-            {signature.slice(0, 16)}…
-          </span>
-        </button>
+      <div className="text-sm text-zinc-500 dark:text-zinc-400 px-4 py-2 border-b border-zinc-100 dark:border-zinc-800">
+        Standard claims identify the user; custom claims carry app-specific data.
+      </div>
 
-        {/* Toast */}
-        <div className={cn(
-          "absolute right-4 top-1/2 -translate-y-1/2 bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 text-[10px] font-semibold px-2 py-1 rounded pointer-events-none transition-all duration-500",
-          toastVisible ? "opacity-100 translate-x-0" : "opacity-0 translate-x-2"
-        )}>
-          Copied!
+      <div className="px-4 py-2 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-950/30">
+        <div className="py-2 font-mono text-[11px] break-all leading-loose">
+          <span className="text-violet-600 dark:text-violet-400">{encodedHeader.slice(0, 20)}…</span>
+          <span className="text-zinc-400">.</span>
+          <span className="text-blue-600 dark:text-blue-400">{encodedPayload.slice(0, 24)}…</span>
+          <span className="text-zinc-400">.</span>
+          <span className="text-emerald-600 dark:text-emerald-400">{signature.slice(0, 16)}…</span>
         </div>
       </div>
 
@@ -272,6 +257,13 @@ export function JwtClaims({
           <Badge label="C" variant="custom" />
           <span>Custom: {customEntries.map(([k]) => k).join(", ") || "none"}</span>
         </div>
+      </div>
+
+      <div className="px-4 py-3 border-t border-zinc-100 dark:border-zinc-800 flex items-center gap-3">
+        <span className="text-sm text-zinc-500 dark:text-zinc-400 flex-1">
+          {toastVisible ? "Token copied!" : "Payload is base64 — anyone can read it"}
+        </span>
+        <CopyButton text={fullToken} onCopy={handleCopyToken} />
       </div>
     </div>
   );

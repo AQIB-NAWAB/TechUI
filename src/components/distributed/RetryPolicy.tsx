@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { z } from "zod";
 import { cn } from "@/lib/utils";
-import { RefreshCw, CheckCircle2, XCircle, Clock, AlertTriangle } from "lucide-react";
+import { RefreshCw, CheckCircle2, XCircle, Clock } from "lucide-react";
 
 const BackoffEnum = z.enum(["fixed", "linear", "exponential", "exponential-jitter"]);
 
@@ -155,27 +155,26 @@ export function RetryPolicy({
     setSuccessAttempt(null);
   }
 
-  const lastDone = [...states].reverse().find((s) => s === "success" || s === "failure");
   const succeeded = successAttempt !== null;
 
   return (
-    <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 overflow-hidden">
-      {/* Header */}
-      <div className="flex items-center gap-3 px-4 py-2.5 border-b border-zinc-100 dark:border-zinc-900 bg-zinc-50 dark:bg-zinc-900/50">
-        <RefreshCw className="size-3.5 text-zinc-400 shrink-0" />
-        <span className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 flex-1">{name}</span>
-        <div className="flex items-center gap-2">
-          <span className="text-[10px] font-mono text-zinc-400 bg-zinc-100 dark:bg-zinc-800 px-2 py-0.5 rounded">{strategy}</span>
-          <span className="text-[10px] text-zinc-400">{maxAttempts} max</span>
-        </div>
+    <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden">
+      <div className="flex items-center gap-3 px-4 h-12 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50">
+        <RefreshCw className="size-4 text-zinc-400 shrink-0" />
+        <span className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 flex-1">{name}</span>
+        <span className="text-[10px] font-mono text-zinc-400 bg-zinc-100 dark:bg-zinc-800 px-2 py-0.5 rounded">{strategy}</span>
+        <span className="text-[10px] text-zinc-400">{maxAttempts} max</span>
         {interactive && (
-          <button onClick={reset} className="p-1 rounded text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors">
+          <button type="button" onClick={reset} className="p-1 rounded text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-all duration-500">
             <RefreshCw className="size-3.5" />
           </button>
         )}
       </div>
 
-      {/* Vertical timeline */}
+      <div className="text-sm text-zinc-500 dark:text-zinc-400 px-4 py-2 border-b border-zinc-100 dark:border-zinc-800">
+        When a request fails, wait and try again — each wait gets longer with exponential backoff.
+      </div>
+
       <div className="px-6 py-4 min-h-[280px]">
         <div className="space-y-0">
           {Array.from({ length: maxAttempts }, (_, i) => {
@@ -279,32 +278,29 @@ export function RetryPolicy({
       </div>
 
       {/* Result + simulate button */}
-      <div className="border-t border-zinc-100 dark:border-zinc-900 px-4 py-2.5 flex items-center gap-3 bg-zinc-50 dark:bg-zinc-900/30 min-h-[52px]">
-        <div className={cn(
-          "flex items-center gap-2 px-3 py-1.5 rounded-lg text-[11px] font-semibold flex-1 transition-all duration-500",
+      <div className="border-t border-zinc-100 dark:border-zinc-800 px-4 py-3 flex items-center gap-3 bg-zinc-50 dark:bg-zinc-900/30 min-h-[52px]">
+        <span className={cn(
+          "text-sm flex-1 transition-all duration-500",
           totalTime !== null
             ? succeeded
-              ? "bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800"
-              : "bg-red-50 dark:bg-red-950/30 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-800"
-            : "opacity-0 border border-transparent"
+              ? "text-emerald-700 dark:text-emerald-400"
+              : "text-red-700 dark:text-red-400"
+            : "text-zinc-500 dark:text-zinc-400"
         )}>
-          {totalTime !== null && (
-            <>
-              {succeeded ? <CheckCircle2 className="size-3.5 shrink-0" /> : <AlertTriangle className="size-3.5 shrink-0" />}
-              {succeeded
-                ? `✓ Succeeded on attempt ${successAttempt} (${formatMs(Math.round(totalTime))} total)`
-                : `✗ Exhausted all ${maxAttempts} attempts`
-              }
-            </>
-          )}
-        </div>
+          {totalTime !== null
+            ? succeeded
+              ? `✓ Succeeded on attempt ${successAttempt} (${formatMs(Math.round(totalTime))} total)`
+              : `✗ Exhausted all ${maxAttempts} attempts`
+            : "Click Simulate to watch retries with backoff delays"}
+        </span>
         {interactive && (
           <button
+            type="button"
             onClick={simulate}
             disabled={running}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 text-xs font-semibold hover:opacity-90 transition-opacity disabled:opacity-50 shrink-0"
+            className="flex items-center gap-1.5 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-50 shrink-0"
           >
-            <RefreshCw className={cn("size-3", running && "animate-spin")} />
+            <RefreshCw className={cn("size-3.5", running && "animate-spin")} />
             {running ? "Running…" : "Simulate"}
           </button>
         )}

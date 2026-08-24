@@ -202,13 +202,11 @@ export function SolidPrinciples({ principle: initialPrinciple = "S" }: SolidPrin
 
         <p className="text-xs text-zinc-500 dark:text-zinc-400 italic">{data.summary}</p>
 
-        <div className="grid grid-cols-2 gap-3 flex-1">
+        <div className="min-h-[160px]">
           <div
             className={cn(
               "rounded-lg border p-3 transition-all duration-500 bg-zinc-50 dark:bg-zinc-800/50",
-              showGood
-                ? "border-zinc-200 dark:border-zinc-700 opacity-50"
-                : "border-red-300 dark:border-red-700"
+              showGood ? "hidden" : "border-red-300 dark:border-red-700"
             )}
           >
             <div className="flex items-center gap-1.5 mb-2">
@@ -235,9 +233,7 @@ export function SolidPrinciples({ principle: initialPrinciple = "S" }: SolidPrin
           <div
             className={cn(
               "rounded-lg border p-3 transition-all duration-500 bg-zinc-50 dark:bg-zinc-800/50",
-              showGood
-                ? "border-emerald-300 dark:border-emerald-700"
-                : "border-zinc-200 dark:border-zinc-700 opacity-50"
+              showGood ? "border-emerald-300 dark:border-emerald-700" : "hidden"
             )}
           >
             <div className="flex items-center gap-1.5 mb-2">

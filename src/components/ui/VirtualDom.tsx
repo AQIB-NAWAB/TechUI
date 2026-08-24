@@ -35,18 +35,16 @@ const SCENARIOS: Record<string, Scenario> = {
     before: [
       { tag: "div", status: "same" },
       { tag: "h1", text: "Hello", status: "same" },
-      { tag: "p",  text: "old text", status: "modified" },
+      { tag: "p", text: "old text", status: "modified" },
       { tag: "button", text: "OK", status: "same" },
     ],
     after: [
       { tag: "div", status: "same" },
       { tag: "h1", text: "Hello", status: "same" },
-      { tag: "p",  text: "new text", status: "modified" },
+      { tag: "p", text: "new text", status: "modified" },
       { tag: "button", text: "OK", status: "same" },
     ],
-    patch: [
-      'textContent of <p> → "new text"',
-    ],
+    patch: ['textContent of <p> → "new text"'],
     domOps: 1,
     insight: "Only the changed text node is updated — React skips identical siblings.",
   },
@@ -54,18 +52,16 @@ const SCENARIOS: Record<string, Scenario> = {
     label: "Add Node",
     before: [
       { tag: "ul", status: "same" },
-      { tag: "li", text: "Apple",  status: "same" },
+      { tag: "li", text: "Apple", status: "same" },
       { tag: "li", text: "Banana", status: "same" },
     ],
     after: [
       { tag: "ul", status: "same" },
-      { tag: "li", text: "Apple",  status: "same" },
+      { tag: "li", text: "Apple", status: "same" },
       { tag: "li", text: "Banana", status: "same" },
       { tag: "li", text: "Cherry", status: "added" },
     ],
-    patch: [
-      'appendChild(<li>Cherry</li>)',
-    ],
+    patch: ["appendChild(<li>Cherry</li>)"],
     domOps: 1,
     insight: "React inserts only the new node — existing nodes are untouched.",
   },
@@ -73,52 +69,82 @@ const SCENARIOS: Record<string, Scenario> = {
     label: "Remove Node",
     before: [
       { tag: "ul", status: "same" },
-      { tag: "li", text: "Apple",  status: "same" },
+      { tag: "li", text: "Apple", status: "same" },
       { tag: "li", text: "Banana", status: "removed" },
       { tag: "li", text: "Cherry", status: "same" },
     ],
     after: [
       { tag: "ul", status: "same" },
-      { tag: "li", text: "Apple",  status: "same" },
+      { tag: "li", text: "Apple", status: "same" },
       { tag: "li", text: "Cherry", status: "same" },
     ],
-    patch: [
-      'removeChild(<li>Banana</li>)',
-    ],
+    patch: ["removeChild(<li>Banana</li>)"],
     domOps: 1,
     insight: "Only the removed node gets a removeChild call — everything else stays.",
   },
-  "reorder": {
+  reorder: {
     label: "Reorder (keys)",
     before: [
       { tag: "ul", status: "same" },
-      { tag: "li", text: "Alice",   status: "same",     key: "1" },
-      { tag: "li", text: "Bob",     status: "modified", key: "2" },
-      { tag: "li", text: "Charlie", status: "same",     key: "3" },
+      { tag: "li", text: "Alice", status: "same", key: "1" },
+      { tag: "li", text: "Bob", status: "modified", key: "2" },
+      { tag: "li", text: "Charlie", status: "same", key: "3" },
     ],
     after: [
       { tag: "ul", status: "same" },
-      { tag: "li", text: "Alice",   status: "same",  key: "1" },
-      { tag: "li", text: "Charlie", status: "same",  key: "3" },
-      { tag: "li", text: "Bob",     status: "added", key: "2" },
+      { tag: "li", text: "Alice", status: "same", key: "1" },
+      { tag: "li", text: "Charlie", status: "same", key: "3" },
+      { tag: "li", text: "Bob", status: "added", key: "2" },
     ],
-    patch: [
-      'insertBefore(<li key="2">Bob</li>, null)',
-      'Without keys: 3 textContent updates',
-    ],
+    patch: ['insertBefore(<li key="2">Bob</li>, null)', "Without keys: 3 textContent updates"],
     domOps: 1,
-    insight: 'Keys let React move Bob to the end with 1 op — without keys it would re-render all 3.',
+    insight: "Keys let React move Bob to the end with 1 op — without keys it would re-render all 3.",
   },
 };
 
-const STATUS_STYLES: Record<NodeStatus, { bg: string; border: string; text: string; badge: string; badgeText: string }> = {
-  same:     { bg: "bg-emerald-50 dark:bg-emerald-950/20",  border: "border-emerald-200 dark:border-emerald-800", text: "text-emerald-700 dark:text-emerald-300",  badge: "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400", badgeText: "same" },
-  modified: { bg: "bg-amber-50 dark:bg-amber-950/20",      border: "border-amber-200 dark:border-amber-800",     text: "text-amber-700 dark:text-amber-300",      badge: "bg-amber-100 dark:bg-amber-900/40 text-amber-600 dark:text-amber-400",       badgeText: "patch!" },
-  added:    { bg: "bg-blue-50 dark:bg-blue-950/20",        border: "border-blue-200 dark:border-blue-800",       text: "text-blue-700 dark:text-blue-300",        badge: "bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400",         badgeText: "added" },
-  removed:  { bg: "bg-red-50 dark:bg-red-950/20",          border: "border-red-200 dark:border-red-800",         text: "text-red-700 dark:text-red-300",          badge: "bg-red-100 dark:bg-red-900/40 text-red-600 dark:text-red-400",           badgeText: "removed" },
+const STATUS_STYLES: Record<
+  NodeStatus,
+  { bg: string; border: string; text: string; badge: string; badgeText: string }
+> = {
+  same: {
+    bg: "bg-emerald-50 dark:bg-emerald-950/20",
+    border: "border-emerald-200 dark:border-emerald-800",
+    text: "text-emerald-700 dark:text-emerald-300",
+    badge: "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400",
+    badgeText: "same",
+  },
+  modified: {
+    bg: "bg-amber-50 dark:bg-amber-950/20",
+    border: "border-amber-200 dark:border-amber-800",
+    text: "text-amber-700 dark:text-amber-300",
+    badge: "bg-amber-100 dark:bg-amber-900/40 text-amber-600 dark:text-amber-400",
+    badgeText: "patch!",
+  },
+  added: {
+    bg: "bg-blue-50 dark:bg-blue-950/20",
+    border: "border-blue-200 dark:border-blue-800",
+    text: "text-blue-700 dark:text-blue-300",
+    badge: "bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400",
+    badgeText: "added",
+  },
+  removed: {
+    bg: "bg-red-50 dark:bg-red-950/20",
+    border: "border-red-200 dark:border-red-800",
+    text: "text-red-700 dark:text-red-300",
+    badge: "bg-red-100 dark:bg-red-900/40 text-red-600 dark:text-red-400",
+    badgeText: "removed",
+  },
 };
 
-function TreeView({ nodes, diffingIdx, side }: { nodes: TreeNode[]; diffingIdx: number; side: "before" | "after" }) {
+function TreeView({
+  nodes,
+  diffingIdx,
+  side,
+}: {
+  nodes: TreeNode[];
+  diffingIdx: number;
+  side: "before" | "after";
+}) {
   return (
     <div className="space-y-1.5">
       {nodes.map((node, i) => {
@@ -130,9 +156,11 @@ function TreeView({ nodes, diffingIdx, side }: { nodes: TreeNode[]; diffingIdx: 
             key={`${side}-${i}-${node.tag}-${node.text}`}
             className={cn(
               "flex items-center gap-2 rounded-md border px-2 py-1 text-xs font-mono transition-all duration-500",
-              style.bg, style.border, style.text,
+              style.bg,
+              style.border,
+              style.text,
               isRoot ? "font-bold" : "ml-4",
-              isHighlighted && "ring-2 ring-violet-500 ring-offset-1 scale-[1.02]",
+              isHighlighted && "ring-2 ring-violet-500 ring-offset-1 scale-[1.02]"
             )}
           >
             <span className="opacity-60">&lt;</span>
@@ -187,7 +215,7 @@ export function VirtualDom({ scenario = "text-change" }: VirtualDomProps) {
       timerRef.current = setTimeout(step, 1200);
     };
 
-    timerRef.current = setTimeout(step, 200);
+    timerRef.current = setTimeout(step, 1000);
   }, [diffing, data]);
 
   useEffect(() => {
@@ -195,22 +223,102 @@ export function VirtualDom({ scenario = "text-change" }: VirtualDomProps) {
     setShowPatch(false);
     setDiffing(false);
     clearTimers();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeScenario]);
 
   useEffect(() => () => clearTimers(), []);
 
   const TABS = ["text-change", "add-node", "remove-node", "reorder"] as const;
 
+  const statusText = diffing
+    ? "Walking the tree — nodes highlight one at a time…"
+    : showPatch
+    ? `${data.domOps} real DOM op(s) — ${data.insight}`
+    : "Click Diff to compare before/after trees and see minimal patch operations.";
+
   return (
     <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden">
-      {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-100 dark:border-zinc-800">
-        <div className="flex items-center gap-2">
-          <GitCompare className="size-4 text-blue-500" />
-          <span className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">Virtual DOM</span>
+      <div className="flex items-center gap-3 px-4 h-12 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50">
+        <GitCompare className="size-4 text-zinc-400 shrink-0" />
+        <span className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 flex-1">Virtual DOM</span>
+        <span className="text-[10px] font-mono text-zinc-400 bg-zinc-100 dark:bg-zinc-800 px-2 py-0.5 rounded">
+          {data.domOps} DOM op
+        </span>
+      </div>
+
+      <div className="text-sm text-zinc-500 dark:text-zinc-400 px-4 py-2 border-b border-zinc-100 dark:border-zinc-800">
+        React diffs two virtual trees and applies only the smallest changes to the real DOM.
+      </div>
+
+      <div className="flex border-b border-zinc-100 dark:border-zinc-800 overflow-x-auto">
+        {TABS.map((tab) => (
+          <button
+            key={tab}
+            type="button"
+            onClick={() => setActiveScenario(tab)}
+            className={cn(
+              "px-3 py-2 text-[10px] font-semibold whitespace-nowrap transition-all duration-500 border-r last:border-r-0 border-zinc-100 dark:border-zinc-800",
+              activeScenario === tab
+                ? "bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 border-b-2 border-b-zinc-900 dark:border-b-zinc-100"
+                : "text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 bg-zinc-50 dark:bg-zinc-900/50"
+            )}
+          >
+            {SCENARIOS[tab].label}
+          </button>
+        ))}
+      </div>
+
+      <div className="min-h-[220px] p-4">
+        <div className="grid grid-cols-2 gap-4">
+          <div className="rounded-lg border border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/30 p-3">
+            <div className="text-[10px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500 mb-2">
+              Before (VDOM)
+            </div>
+            <TreeView nodes={data.before} diffingIdx={diffingIdx} side="before" />
+          </div>
+          <div className="rounded-lg border border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/30 p-3">
+            <div className="text-[10px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500 mb-2">
+              After (VDOM)
+            </div>
+            <TreeView nodes={data.after} diffingIdx={diffingIdx} side="after" />
+          </div>
         </div>
+
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-3">
+          {(["same", "modified", "added", "removed"] as NodeStatus[]).map((s) => (
+            <span key={s} className={cn("text-[9px] font-semibold px-1.5 py-0.5 rounded", STATUS_STYLES[s].badge)}>
+              {s}
+            </span>
+          ))}
+        </div>
+
+        <div className="mt-4 min-h-[72px]">
+          <div className="text-[10px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500 mb-2">
+            Patch operations — Real DOM ops:{" "}
+            <span className={cn("transition-all duration-500", showPatch ? "text-blue-500" : "text-zinc-400")}>
+              {showPatch ? data.domOps : "—"}
+            </span>
+          </div>
+          <div
+            className={cn(
+              "rounded-lg border border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/50 p-2.5 space-y-1 transition-opacity duration-500",
+              showPatch ? "opacity-100" : "opacity-30"
+            )}
+          >
+            {(showPatch ? data.patch : ["Run Diff to reveal patch operations"]).map((op, i) => (
+              <div key={i} className="flex items-start gap-2 text-xs">
+                <span className="text-blue-500 font-semibold shrink-0">›</span>
+                <code className="font-mono text-zinc-700 dark:text-zinc-300">{op}</code>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div className="border-t border-zinc-100 dark:border-zinc-800 px-4 py-3 flex items-center gap-3 bg-zinc-50 dark:bg-zinc-900/30">
+        <span className="text-sm text-zinc-500 dark:text-zinc-400 flex-1">{statusText}</span>
         <button
+          type="button"
           onClick={runDiff}
           disabled={diffing}
           className={cn(
@@ -220,77 +328,6 @@ export function VirtualDom({ scenario = "text-change" }: VirtualDomProps) {
         >
           {diffing ? "Diffing…" : showPatch ? "Re-diff" : "Diff"}
         </button>
-      </div>
-
-      {/* Tabs */}
-      <div className="flex border-b border-zinc-100 dark:border-zinc-800 overflow-x-auto">
-        {TABS.map((tab) => (
-          <button
-            key={tab}
-            onClick={() => setActiveScenario(tab)}
-            className={cn(
-              "px-3 py-2 text-xs font-medium whitespace-nowrap transition-all duration-500",
-              activeScenario === tab
-                ? "border-b-2 border-blue-500 text-blue-600 dark:text-blue-400"
-                : "text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300"
-            )}
-          >
-            {SCENARIOS[tab].label}
-          </button>
-        ))}
-      </div>
-
-      {/* Tree comparison */}
-      <div className="min-h-[280px] p-4">
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <div className="text-[10px] font-semibold text-zinc-400 uppercase tracking-widest mb-2">Before (VDOM)</div>
-            <TreeView nodes={data.before} diffingIdx={diffingIdx} side="before" />
-          </div>
-          <div>
-            <div className="text-[10px] font-semibold text-zinc-400 uppercase tracking-widest mb-2">After (VDOM)</div>
-            <TreeView nodes={data.after} diffingIdx={diffingIdx} side="after" />
-          </div>
-        </div>
-
-        {/* Legend */}
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-3">
-          {(["same", "modified", "added", "removed"] as NodeStatus[]).map((s) => (
-            <span key={s} className={cn("text-[9px] font-semibold px-1.5 py-0.5 rounded", STATUS_STYLES[s].badge)}>
-              {s}
-            </span>
-          ))}
-        </div>
-
-        {/* Patch operations */}
-        <div className={cn("mt-4 transition-all duration-500", showPatch ? "opacity-100" : "opacity-0")}>
-          <div className="text-[10px] font-semibold text-zinc-400 uppercase tracking-widest mb-2">
-            Patch operations — Real DOM ops: <span className="text-blue-500">{data.domOps}</span>
-          </div>
-          <div className="rounded-lg border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800/50 p-2.5 space-y-1">
-            {data.patch.map((op, i) => (
-              <div key={i} className="flex items-start gap-2 text-xs">
-                <span className="text-blue-500 font-semibold shrink-0">›</span>
-                <code className="font-mono text-zinc-700 dark:text-zinc-300">{op}</code>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Idle hint */}
-        {!diffing && !showPatch && (
-          <p className="mt-4 text-[11px] text-zinc-400 dark:text-zinc-500">
-            Click <strong>Diff</strong> to animate the comparison — nodes highlight one at a time
-          </p>
-        )}
-      </div>
-
-      {/* Insight footer */}
-      <div className="px-4 py-2.5 border-t border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/40">
-        <p className="text-[11px] text-zinc-500 dark:text-zinc-400">
-          <strong className="text-zinc-700 dark:text-zinc-300">Key insight:</strong>{" "}
-          {data.insight}
-        </p>
       </div>
     </div>
   );

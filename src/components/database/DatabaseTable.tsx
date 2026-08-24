@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Key, Search, ChevronUp, ChevronDown, CheckCircle, XCircle } from "lucide-react";
+import { Key, Search, ChevronUp, ChevronDown, CheckCircle, XCircle, Database } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { z } from "zod";
 
@@ -82,34 +82,37 @@ export function DatabaseTable({
   }
 
   return (
-    <div className="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 overflow-hidden font-mono text-[13px]">
-
-      {/* Header */}
-      <div className="flex items-center gap-3 px-4 py-3 border-b border-zinc-100 dark:border-zinc-900">
-        <span className="text-zinc-800 dark:text-zinc-200 font-semibold">
+    <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden font-mono text-[13px]">
+      <div className="flex items-center gap-3 px-4 h-12 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50">
+        <Database className="size-4 text-zinc-400 shrink-0" />
+        <span className="text-sm font-semibold text-zinc-800 dark:text-zinc-200 font-sans flex-1">
           {schema ? <span className="text-zinc-400 dark:text-zinc-500">{schema}.</span> : null}{name}
         </span>
-        <span className="text-[11px] text-zinc-400 font-sans">{columns.length} cols</span>
+        <span className="text-[10px] text-zinc-400 font-sans">{columns.length} cols</span>
         {rows && rows.length > 0 && (
-          <span className="text-[11px] text-zinc-400 font-sans">{rows.length} rows</span>
-        )}
-        {rows && rows.length > 0 && (
-          <div className="ml-auto flex items-center gap-2">
-            <div className="relative">
-              <Search className="absolute left-2 top-1/2 -translate-y-1/2 size-3 text-zinc-400" />
-              <input
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Filter…"
-                className="h-6 pl-6 pr-2 rounded bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-[11px] text-zinc-700 dark:text-zinc-300 placeholder:text-zinc-400 outline-none font-sans w-24"
-              />
-            </div>
-          </div>
+          <span className="text-[10px] text-zinc-400 font-sans">{rows.length} rows</span>
         )}
       </div>
 
-      {/* Schema — always visible */}
-      <div className="overflow-x-auto">
+      <div className="text-sm text-zinc-500 dark:text-zinc-400 px-4 py-2 border-b border-zinc-100 dark:border-zinc-800 font-sans">
+        A table stores rows of data with typed columns — primary keys identify rows, foreign keys link tables.
+      </div>
+
+      {rows && rows.length > 0 && (
+        <div className="px-4 py-2 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/20">
+          <div className="relative max-w-[200px]">
+            <Search className="absolute left-2 top-1/2 -translate-y-1/2 size-3 text-zinc-400" />
+            <input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Filter rows…"
+              className="h-7 w-full pl-7 pr-2 rounded-md bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-[11px] text-zinc-700 dark:text-zinc-300 placeholder:text-zinc-400 outline-none font-sans"
+            />
+          </div>
+        </div>
+      )}
+
+      <div className="min-h-[180px] overflow-x-auto">
         <table className="w-full border-collapse">
           <thead>
             <tr>
@@ -179,20 +182,10 @@ export function DatabaseTable({
         </table>
       </div>
 
-      {/* Rows — progressive disclosure toggle */}
       {showRows && rows && rows.length > 0 && (
-        <div className="border-t border-zinc-100 dark:border-zinc-900">
-          <button
-            onClick={() => setShowData(!showData)}
-            className="w-full flex items-center gap-2 px-4 py-2 text-[11px] font-sans text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors text-left"
-          >
-            {showData ? <ChevronUp className="size-3" /> : <ChevronDown className="size-3" />}
-            {displayRows.length} row{displayRows.length !== 1 ? "s" : ""}
-            {search && ` (filtered from ${rows.length})`}
-          </button>
-
+        <div className="border-t border-zinc-100 dark:border-zinc-800">
           {showData && (
-            <div className="overflow-x-auto border-t border-zinc-50 dark:border-zinc-900/50">
+            <div className="overflow-x-auto border-t border-zinc-50 dark:border-zinc-800/50 min-h-[120px]">
               <table className="w-full border-collapse">
                 <thead>
                   <tr>
@@ -237,6 +230,22 @@ export function DatabaseTable({
               </table>
             </div>
           )}
+        </div>
+      )}
+
+      {showRows && rows && rows.length > 0 && (
+        <div className="border-t border-zinc-100 dark:border-zinc-800 px-4 py-3 flex items-center gap-3 bg-zinc-50 dark:bg-zinc-900/30 font-sans">
+          <span className="text-sm text-zinc-500 dark:text-zinc-400 flex-1">
+            {displayRows.length} row{displayRows.length !== 1 ? "s" : ""} shown
+            {search && ` (filtered from ${rows.length})`}
+          </span>
+          <button
+            type="button"
+            onClick={() => setShowData(!showData)}
+            className="flex items-center gap-1.5 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-opacity shrink-0"
+          >
+            {showData ? <><ChevronUp className="size-3.5" /> Hide Rows</> : <><ChevronDown className="size-3.5" /> Show Rows</>}
+          </button>
         </div>
       )}
     </div>

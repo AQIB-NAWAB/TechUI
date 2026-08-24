@@ -228,7 +228,7 @@ export function ConnectionPool({
           "px-4 py-3 border-t border-zinc-100 dark:border-zinc-800 flex items-center gap-3 transition-all duration-500",
           flash === "queued" ? "bg-amber-50 dark:bg-amber-900/10" : "bg-zinc-50 dark:bg-zinc-900/30"
         )}>
-          <span className="text-xs text-zinc-500 flex-1">
+          <span className="text-sm text-zinc-500 flex-1">
             {flash === "queued"
               ? "All connections busy — request queued!"
               : flash === "ok"
@@ -239,7 +239,7 @@ export function ConnectionPool({
           </span>
           <button
             onClick={sendRequest}
-            className="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-opacity shrink-0"
+            className="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-all duration-500 shrink-0"
           >
             Send Request
           </button>

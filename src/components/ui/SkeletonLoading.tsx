@@ -15,8 +15,8 @@ export type SkeletonLoadingProps = z.infer<typeof SkeletonLoadingSchema>;
 const PATTERNS = ["card", "list", "profile", "table"] as const;
 const PATTERN_LABELS: Record<string, string> = { card: "Card", list: "List", profile: "Profile", table: "Table" };
 
-// Skeleton base class
-const SK = "bg-zinc-200 dark:bg-zinc-700 rounded animate-pulse";
+// Skeleton base class — shimmer via opacity, not animate-pulse (header icon handles loading motion)
+const SK = "bg-zinc-200 dark:bg-zinc-700 rounded";
 
 /* ── Card pattern ── */
 function CardSkeleton() {
@@ -252,18 +252,13 @@ export function SkeletonLoading({
         ))}
       </div>
 
-      {/* Content area */}
+      {/* Content area — fixed height, no layout shift */}
       <div className="min-h-[220px] px-4 py-4 flex flex-col justify-center">
-        <div className={cn(
-          "transition-all duration-500",
-          loaded ? "opacity-100" : "opacity-100"
-        )}>
+        <div className="transition-opacity duration-500">
           {/* Card */}
           {pattern === "card" && (
             <div className="flex justify-center py-2">
-              <div className={cn("transition-all duration-500", loaded ? "opacity-100" : "opacity-100")}>
-                {isLoading ? <CardSkeleton /> : <CardLoaded />}
-              </div>
+              {isLoading ? <CardSkeleton /> : <CardLoaded />}
             </div>
           )}
 
@@ -273,9 +268,7 @@ export function SkeletonLoading({
               {isLoading
                 ? [0, 1, 2, 3].map((i) => <ListItemSkeleton key={i} />)
                 : LIST_DATA.map((item) => (
-                    <div key={item.name} className={cn("transition-all duration-500", "opacity-100")}>
-                      <ListItemLoaded {...item} />
-                    </div>
+                    <ListItemLoaded key={item.name} {...item} />
                   ))
               }
             </div>
@@ -295,37 +288,25 @@ export function SkeletonLoading({
             </div>
           )}
         </div>
-
-        {/* Key insight */}
-        <div className="text-[10px] text-zinc-400 dark:text-zinc-500 bg-zinc-50 dark:bg-zinc-800/40 rounded-lg px-3 py-2 mt-3 border border-zinc-100 dark:border-zinc-800">
-          Skeletons reduce perceived load time — users see structure before data arrives.
-        </div>
       </div>
 
-      {/* Action footer */}
-      <div className="px-4 py-3 border-t border-zinc-100 dark:border-zinc-800 flex items-center gap-2 bg-zinc-50 dark:bg-zinc-900/30">
-        <span className="text-xs text-zinc-500 flex-1">
-          {isLoading ? "Showing skeleton placeholder…" : "Content loaded successfully"}
+      <div className="px-4 py-3 border-t border-zinc-100 dark:border-zinc-800 flex items-center gap-3 bg-zinc-50 dark:bg-zinc-900/30">
+        <span className="text-sm text-zinc-500 dark:text-zinc-400 flex-1">
+          {isLoading
+            ? "Showing skeleton placeholder — users see structure before data arrives."
+            : "Content loaded successfully — skeleton replaced with real data."}
         </span>
         <button
-          onClick={() => setLoaded(false)}
-          disabled={isLoading}
-          className={cn(
-            "border border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 rounded-lg px-3 py-2 text-xs font-semibold hover:opacity-80 transition-opacity cursor-pointer",
-            isLoading && "opacity-40 cursor-not-allowed"
-          )}
+          onClick={() => {
+            if (loaded) {
+              setLoaded(false);
+            } else {
+              setTimeout(() => setLoaded(true), 1000);
+            }
+          }}
+          className="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-opacity"
         >
-          Reset
-        </button>
-        <button
-          onClick={() => setLoaded(true)}
-          disabled={loaded}
-          className={cn(
-            "bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-opacity cursor-pointer",
-            loaded && "opacity-40 cursor-not-allowed"
-          )}
-        >
-          Load Content
+          {loaded ? "Reload" : "Load Content"}
         </button>
       </div>
     </div>

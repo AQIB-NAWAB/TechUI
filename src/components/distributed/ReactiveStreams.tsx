@@ -183,14 +183,23 @@ export function ReactiveStreams({ pipeline = "map" }: ReactiveStreamsProps) {
 
   return (
     <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden">
-      {/* Header */}
-      <div className="flex items-center gap-2.5 px-4 py-2.5 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/70">
-        <Waves className="size-3.5 text-blue-500 shrink-0" />
-        <span className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 flex-1">Reactive Streams</span>
+      <div className="flex items-center gap-3 px-4 h-12 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50">
+        <Waves className="size-4 text-blue-500 shrink-0" />
+        <span className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 flex-1">Reactive Streams</span>
         <span className="text-[10px] text-zinc-400 dark:text-zinc-500 bg-zinc-100 dark:bg-zinc-800 px-2 py-0.5 rounded-full font-mono">marble diagram</span>
+        <button
+          onClick={() => { resetAnim(); setAnimProgress(100); }}
+          className="p-1 rounded text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-all duration-500"
+          title="Reset"
+        >
+          <RotateCcw className="size-3.5" />
+        </button>
       </div>
 
-      {/* Tabs */}
+      <p className="text-sm text-zinc-500 dark:text-zinc-400 px-4 py-2 border-b border-zinc-100 dark:border-zinc-800">
+        Events flow through operators like map, filter, and merge — each transforms or combines the stream.
+      </p>
+
       <div className="flex border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/30 px-4 gap-1 pt-2">
         {tabs.map((tab) => (
           <button
@@ -208,8 +217,7 @@ export function ReactiveStreams({ pipeline = "map" }: ReactiveStreamsProps) {
         ))}
       </div>
 
-      {/* Diagram area */}
-      <div className="min-h-[280px] px-4 py-4 flex flex-col gap-2">
+      <div className="min-h-[240px] px-4 py-4 flex flex-col gap-2">
 
         {/* Map pipeline */}
         {activePipeline === "map" && (
@@ -361,39 +369,31 @@ export function ReactiveStreams({ pipeline = "map" }: ReactiveStreamsProps) {
           </>
         )}
 
-        {/* Insight callout */}
-        <div className="mt-auto pt-2 border-t border-zinc-100 dark:border-zinc-800 flex items-start gap-2">
+        <div className="mt-auto pt-2 border-t border-zinc-100 dark:border-zinc-800 flex items-start gap-2 min-h-[40px]">
           <span className="text-[10px] font-bold text-blue-500 shrink-0 mt-0.5">TIP</span>
-          <p className="text-[10px] text-zinc-500 dark:text-zinc-400 leading-relaxed">
+          <p className="text-[10px] text-zinc-500 dark:text-zinc-400 leading-relaxed transition-opacity duration-500">
             {"insight" in cfg ? cfg.insight : ""}
           </p>
         </div>
       </div>
 
-      {/* Controls */}
-      <div className="border-t border-zinc-100 dark:border-zinc-800 px-4 py-2.5 flex items-center gap-2 bg-zinc-50/50 dark:bg-zinc-900/30">
+      <div className="border-t border-zinc-100 dark:border-zinc-800 px-4 py-3 flex items-center gap-3 bg-zinc-50 dark:bg-zinc-900/30">
+        <span className="text-sm text-zinc-500 dark:text-zinc-400 flex-1">
+          {isAnimating ? "Watch events travel through the operator…" : "code" in cfg ? cfg.description : ""}
+        </span>
         <button
           onClick={startAnim}
           disabled={isAnimating}
           className={cn(
-            "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-500",
+            "flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-semibold transition-all duration-500 hover:opacity-90",
             isAnimating
               ? "bg-zinc-100 dark:bg-zinc-800 text-zinc-400 cursor-not-allowed"
-              : "bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 hover:opacity-90"
+              : "bg-zinc-900 dark:bg-white text-white dark:text-zinc-900"
           )}
         >
-          <Play className="size-3" />
+          <Play className="size-3.5" />
           Animate
         </button>
-        <button
-          onClick={() => { resetAnim(); setAnimProgress(100); }}
-          className="p-1.5 rounded-lg text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors"
-        >
-          <RotateCcw className="size-3.5" />
-        </button>
-        <span className="text-[10px] text-zinc-400 dark:text-zinc-500 ml-auto font-mono">
-          {"code" in cfg ? cfg.code : ""}
-        </span>
       </div>
     </div>
   );

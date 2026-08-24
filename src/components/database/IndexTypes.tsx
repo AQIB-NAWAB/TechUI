@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { z } from "zod";
 import { cn } from "@/lib/utils";
 import { Search } from "lucide-react";
@@ -36,7 +36,13 @@ const BTREE_NODES: BTreeNode[] = [
 // Path traversed to find 28: root → l1 → lr
 const SEARCH_PATH = ["root", "l1", "lr"];
 
-function BTreeTab({ column }: { column: string }) {
+function BTreeTab({
+  column,
+  onActionsChange,
+}: {
+  column: string;
+  onActionsChange: (actions: { run: () => void; label: string; status: string; disabled: boolean }) => void;
+}) {
   const [searching, setSearching] = useState(false);
   const [step, setStep] = useState(-1);
 
@@ -59,6 +65,15 @@ function BTreeTab({ column }: { column: string }) {
     setStep(-1);
     setSearching(false);
   }
+
+  useEffect(() => {
+    onActionsChange({
+      run: searching ? () => {} : step >= 0 ? reset : runSearch,
+      label: searching ? "Searching…" : step >= 0 ? "Reset" : `Search: ${column} = 28`,
+      status: step >= 0 && !searching ? `Found in ${SEARCH_PATH.length} comparisons` : "B-Tree — O(log n) lookup with range support",
+      disabled: searching,
+    });
+  }, [searching, step, column, onActionsChange]);
 
   const highlightedIds = step >= 0 ? SEARCH_PATH.slice(0, step + 1) : [];
 
@@ -109,22 +124,8 @@ function BTreeTab({ column }: { column: string }) {
         </div>
       </div>
 
-      <div className="flex items-center gap-2">
-        <button
-          onClick={searching ? undefined : (step >= 0 ? reset : runSearch)}
-          className="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-opacity"
-        >
-          {searching ? "Searching…" : step >= 0 ? "Reset" : `Search: ${column} = 28`}
-        </button>
-        {step >= 0 && !searching && (
-          <span className="text-xs text-emerald-600 dark:text-emerald-400 font-medium">
-            Found in {SEARCH_PATH.length} comparisons
-          </span>
-        )}
-      </div>
-
       {step >= 0 && (
-        <p className="text-xs text-zinc-500 dark:text-zinc-400">
+        <p className="text-xs text-zinc-500 dark:text-zinc-400 transition-opacity duration-500">
           Path: Root (28 &lt; 50 → left) → L1 (28 between 22–50 → right) → <span className="text-emerald-600 dark:text-emerald-400 font-semibold">28 found in LR leaf</span>
         </p>
       )}
@@ -144,7 +145,13 @@ const HASH_BUCKETS: { items: string[]; highlight?: boolean }[] = [
 const SEARCH_TERM = "apple";
 const SEARCH_BUCKET = 3;
 
-function HashTab({ column }: { column: string }) {
+function HashTab({
+  column,
+  onActionsChange,
+}: {
+  column: string;
+  onActionsChange: (actions: { run: () => void; label: string; status: string; disabled: boolean }) => void;
+}) {
   const [phase, setPhase] = useState<"idle" | "hashing" | "found">("idle");
   const [highlightBucket, setHighlightBucket] = useState(-1);
 
@@ -156,6 +163,15 @@ function HashTab({ column }: { column: string }) {
       setPhase("found");
     }, 1200);
   }
+
+  useEffect(() => {
+    onActionsChange({
+      run: runSearch,
+      label: phase === "idle" ? `Search: ${column} = '${SEARCH_TERM}'` : "Reset",
+      status: phase === "found" ? "O(1) exact match — jumped directly to bucket 3" : "Hash — O(1) lookup, exact match only",
+      disabled: phase === "hashing",
+    });
+  }, [phase, column, onActionsChange]);
 
   return (
     <div className="space-y-3">
@@ -214,15 +230,6 @@ function HashTab({ column }: { column: string }) {
           </div>
         ))}
       </div>
-
-      <div className="flex items-center gap-2">
-        <button
-          onClick={runSearch}
-          className="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-opacity"
-        >
-          {phase === "idle" ? `Search: ${column} = '${SEARCH_TERM}'` : "Reset"}
-        </button>
-      </div>
     </div>
   );
 }
@@ -240,7 +247,13 @@ const INVERTED_INDEX = [
 const QUERY_WORDS = ["fresh", "apple"];
 const RESULT_ROW = 4;
 
-function FullTextTab({ column }: { column: string }) {
+function FullTextTab({
+  column,
+  onActionsChange,
+}: {
+  column: string;
+  onActionsChange: (actions: { run: () => void; label: string; status: string; disabled: boolean }) => void;
+}) {
   const [phase, setPhase] = useState<"idle" | "searching" | "found">("idle");
 
   function runSearch() {
@@ -248,6 +261,15 @@ function FullTextTab({ column }: { column: string }) {
     setPhase("searching");
     setTimeout(() => setPhase("found"), 1200);
   }
+
+  useEffect(() => {
+    onActionsChange({
+      run: runSearch,
+      label: phase === "idle" ? `Search: ${column} @@ 'fresh apple'` : "Reset",
+      status: phase === "found" ? "Intersected rows → row 4 contains both words" : "Full-text — word search with inverted index",
+      disabled: phase === "searching",
+    });
+  }, [phase, column, onActionsChange]);
 
   const highlighted = phase !== "idle" ? QUERY_WORDS : [];
 
@@ -298,19 +320,10 @@ function FullTextTab({ column }: { column: string }) {
       </div>
 
       {phase === "found" && (
-        <div className="rounded-md border border-emerald-200 dark:border-emerald-700 bg-emerald-50 dark:bg-emerald-900/20 px-3 py-2 text-xs text-emerald-700 dark:text-emerald-300 font-mono">
+        <div className="rounded-md border border-emerald-200 dark:border-emerald-700 bg-emerald-50 dark:bg-emerald-900/20 px-3 py-2 text-xs text-emerald-700 dark:text-emerald-300 font-mono transition-opacity duration-500">
           Query &quot;fresh apple&quot; → intersect rows → <strong>row 4</strong> contains both words
         </div>
       )}
-
-      <div className="flex items-center gap-2">
-        <button
-          onClick={runSearch}
-          className="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-opacity"
-        >
-          {phase === "idle" ? `Search: ${column} @@ 'fresh apple'` : "Reset"}
-        </button>
-      </div>
     </div>
   );
 }
@@ -335,16 +348,23 @@ export function IndexTypes({
   column = "price",
 }: IndexTypesProps) {
   const [activeTab, setActiveTab] = useState<"btree" | "hash" | "fulltext">(indexType);
+  const [actions, setActions] = useState({
+    run: () => {},
+    label: "Run Search",
+    status: PROS_CONS.btree,
+    disabled: false,
+  });
+
+  const handleActionsChange = useCallback((next: typeof actions) => {
+    setActions(next);
+  }, []);
 
   return (
     <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden text-sm">
-      {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-100 dark:border-zinc-800">
-        <div className="flex items-center gap-2">
-          <Search className="size-4 text-zinc-600 dark:text-zinc-400" />
-          <span className="font-semibold text-zinc-800 dark:text-zinc-200">Index Types</span>
-          <span className="text-xs text-zinc-400 dark:text-zinc-500 font-mono">{tableName}.{column}</span>
-        </div>
+      <div className="flex items-center gap-3 px-4 h-12 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50">
+        <Search className="size-4 text-zinc-400 shrink-0" />
+        <span className="text-sm font-semibold text-zinc-800 dark:text-zinc-200 flex-1">Index Types</span>
+        <span className="text-xs text-zinc-400 dark:text-zinc-500 font-mono">{tableName}.{column}</span>
         <div className="flex gap-1">
           {TABS.map((tab) => (
             <button
@@ -363,18 +383,31 @@ export function IndexTypes({
         </div>
       </div>
 
-      {/* Body */}
-      <div className="min-h-[260px] p-4">
-        {activeTab === "btree"    && <BTreeTab column={column} />}
-        {activeTab === "hash"     && <HashTab column={column} />}
-        {activeTab === "fulltext" && <FullTextTab column={column} />}
+      <p className="text-sm text-zinc-500 dark:text-zinc-400 px-4 py-2 border-b border-zinc-100 dark:border-zinc-800">
+        Different index structures trade off lookup speed, range queries, and text search capabilities.
+      </p>
+
+      <div className="min-h-[220px] p-4">
+        {activeTab === "btree" && (
+          <BTreeTab key="btree" column={column} onActionsChange={handleActionsChange} />
+        )}
+        {activeTab === "hash" && (
+          <HashTab key="hash" column={column} onActionsChange={handleActionsChange} />
+        )}
+        {activeTab === "fulltext" && (
+          <FullTextTab key="fulltext" column={column} onActionsChange={handleActionsChange} />
+        )}
       </div>
 
-      {/* Footer */}
-      <div className="px-4 py-2 border-t border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/50">
-        <p className="text-[11px] text-zinc-400 dark:text-zinc-500 leading-relaxed">
-          {PROS_CONS[activeTab]}
-        </p>
+      <div className="border-t border-zinc-100 dark:border-zinc-800 px-4 py-3 flex items-center gap-3 bg-zinc-50 dark:bg-zinc-900/30">
+        <span className="text-sm text-zinc-500 dark:text-zinc-400 flex-1">{actions.status}</span>
+        <button
+          onClick={actions.run}
+          disabled={actions.disabled}
+          className="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-all duration-500 disabled:opacity-50"
+        >
+          {actions.label}
+        </button>
       </div>
     </div>
   );

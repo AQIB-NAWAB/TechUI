@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { z } from "zod";
 import { cn } from "@/lib/utils";
 import { Mail, Server, Cpu, Monitor, Radio } from "lucide-react";
@@ -15,15 +15,26 @@ export type MessageQueuePatternsProps = z.infer<typeof MessageQueuePatternsSchem
 type Pattern = "pub-sub" | "point-to-point" | "request-reply";
 type AnimPhase = "idle" | "to-broker" | "fan-out" | "done";
 
+type PatternControls = {
+  run: () => void;
+  label: string;
+  status: string;
+  disabled: boolean;
+};
+
 const TABS: { id: Pattern; label: string }[] = [
   { id: "pub-sub", label: "Pub/Sub" },
   { id: "point-to-point", label: "Point-to-Point" },
   { id: "request-reply", label: "Request/Reply" },
 ];
 
-/* ── Pub/Sub ─────────────────────────────────────────────────────────── */
-
-function PubSubPattern({ topic = "order.created" }: { topic: string }) {
+function PubSubPattern({
+  topic = "order.created",
+  onControlsChange,
+}: {
+  topic: string;
+  onControlsChange: (controls: PatternControls) => void;
+}) {
   const [phase, setPhase] = useState<AnimPhase>("idle");
   const [activeSubscribers, setActiveSubscribers] = useState<Set<number>>(new Set());
   const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
@@ -31,7 +42,7 @@ function PubSubPattern({ topic = "order.created" }: { topic: string }) {
   const clearTimers = () => { timers.current.forEach(clearTimeout); timers.current = []; };
 
   const run = useCallback(() => {
-    if (phase !== "idle") return;
+    if (phase !== "idle" && phase !== "done") return;
     clearTimers();
     setActiveSubscribers(new Set());
     setPhase("to-broker");
@@ -52,8 +63,17 @@ function PubSubPattern({ topic = "order.created" }: { topic: string }) {
     { label: "Analytics", color: "amber" },
   ];
 
+  useEffect(() => {
+    onControlsChange({
+      run,
+      label: phase === "idle" ? "Publish" : phase === "done" ? "Publish Again" : "Publishing…",
+      status: phase === "idle" ? "One message copied to every subscriber" : phase === "done" ? "Delivered to all subscribers" : "Routing message…",
+      disabled: phase !== "idle" && phase !== "done",
+    });
+  }, [phase, onControlsChange, run]);
+
   return (
-    <div className="flex flex-col min-h-[180px]">
+    <div className="flex flex-col min-h-[200px]">
       <div className="flex items-start gap-3 flex-1">
         <div className="flex flex-col items-center gap-1 shrink-0">
           <div className="rounded-lg border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 px-3 py-2 text-xs font-semibold text-zinc-700 dark:text-zinc-200 text-center min-w-[80px] flex items-center gap-1.5 justify-center">
@@ -119,32 +139,14 @@ function PubSubPattern({ topic = "order.created" }: { topic: string }) {
         </div>
       </div>
 
-      <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-3">
+      <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-3 border border-zinc-100 dark:border-zinc-800 rounded-lg p-2 bg-zinc-50 dark:bg-zinc-800/40">
         One message → many receivers. Every subscriber gets a copy.
       </p>
-
-      <div className="mt-auto pt-3 border-t border-zinc-100 dark:border-zinc-800 flex items-center gap-3">
-        <span className="text-sm text-zinc-500 dark:text-zinc-400 flex-1">
-          {phase === "idle" ? "Ready to publish" : phase === "done" ? "Delivered to all subscribers" : "Routing message…"}
-        </span>
-        <button
-          onClick={run}
-          disabled={phase !== "idle"}
-          className={cn(
-            "bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold transition-opacity shrink-0",
-            phase !== "idle" ? "opacity-40 cursor-not-allowed" : "hover:opacity-90"
-          )}
-        >
-          {phase === "idle" ? "Publish" : phase === "done" ? "Delivered ✓" : "Publishing…"}
-        </button>
-      </div>
     </div>
   );
 }
 
-/* ── Point-to-Point ──────────────────────────────────────────────────── */
-
-function PointToPointPattern() {
+function PointToPointPattern({ onControlsChange }: { onControlsChange: (controls: PatternControls) => void }) {
   const [phase, setPhase] = useState<AnimPhase>("idle");
   const [activeConsumer, setActiveConsumer] = useState<number | null>(null);
   const [nextConsumer, setNextConsumer] = useState(0);
@@ -153,7 +155,7 @@ function PointToPointPattern() {
   const clearTimers = () => { timers.current.forEach(clearTimeout); timers.current = []; };
 
   const run = useCallback(() => {
-    if (phase !== "idle") return;
+    if (phase !== "idle" && phase !== "done") return;
     clearTimers();
     const target = nextConsumer % 3;
     setActiveConsumer(null);
@@ -175,8 +177,17 @@ function PointToPointPattern() {
 
   const consumers = ["Consumer 1", "Consumer 2", "Consumer 3"];
 
+  useEffect(() => {
+    onControlsChange({
+      run,
+      label: phase === "idle" ? "Send" : phase === "done" ? "Send Again" : "Sending…",
+      status: phase === "idle" ? "One message → one consumer wins the race" : phase === "done" ? "Message consumed by one worker" : "Dispatching…",
+      disabled: phase !== "idle" && phase !== "done",
+    });
+  }, [phase, onControlsChange, run]);
+
   return (
-    <div className="flex flex-col min-h-[180px]">
+    <div className="flex flex-col min-h-[200px]">
       <div className="flex items-start gap-3 flex-1">
         <div className="flex flex-col items-center gap-1 shrink-0">
           <div className="rounded-lg border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 px-3 py-2 text-xs font-semibold text-zinc-700 dark:text-zinc-200 text-center min-w-[70px] flex items-center gap-1.5 justify-center">
@@ -239,32 +250,14 @@ function PointToPointPattern() {
         </div>
       </div>
 
-      <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-3">
+      <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-3 border border-zinc-100 dark:border-zinc-800 rounded-lg p-2 bg-zinc-50 dark:bg-zinc-800/40">
         One message → one receiver. Consumers compete — only one wins.
       </p>
-
-      <div className="mt-auto pt-3 border-t border-zinc-100 dark:border-zinc-800 flex items-center gap-3">
-        <span className="text-sm text-zinc-500 dark:text-zinc-400 flex-1">
-          {phase === "idle" ? "Ready to send" : phase === "done" ? "Message consumed" : "Dispatching…"}
-        </span>
-        <button
-          onClick={run}
-          disabled={phase !== "idle"}
-          className={cn(
-            "bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold transition-opacity shrink-0",
-            phase !== "idle" ? "opacity-40 cursor-not-allowed" : "hover:opacity-90"
-          )}
-        >
-          {phase === "idle" ? "Send" : phase === "done" ? "Consumed ✓" : "Sending…"}
-        </button>
-      </div>
     </div>
   );
 }
 
-/* ── Request/Reply ───────────────────────────────────────────────────── */
-
-function RequestReplyPattern() {
+function RequestReplyPattern({ onControlsChange }: { onControlsChange: (controls: PatternControls) => void }) {
   const [phase, setPhase] = useState<"idle" | "request" | "processing" | "reply" | "done">("idle");
   const [corrId] = useState(() => Math.random().toString(36).slice(2, 10));
   const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
@@ -272,7 +265,7 @@ function RequestReplyPattern() {
   const clearTimers = () => { timers.current.forEach(clearTimeout); timers.current = []; };
 
   const run = useCallback(() => {
-    if (phase !== "idle") return;
+    if (phase !== "idle" && phase !== "done") return;
     clearTimers();
     setPhase("request");
 
@@ -295,8 +288,17 @@ function RequestReplyPattern() {
   const showRequest = phase === "request" || phase === "processing" || phase === "reply" || phase === "done";
   const showReply   = phase === "reply" || phase === "done";
 
+  useEffect(() => {
+    onControlsChange({
+      run,
+      label: phase === "idle" ? "Send Request" : phase === "done" ? "Send Again" : "Waiting…",
+      status: phase === "idle" ? "Client sends a request and waits for an async reply" : phase === "done" ? "Reply matched by correlation ID" : "Request in flight…",
+      disabled: phase !== "idle" && phase !== "done",
+    });
+  }, [phase, onControlsChange, run]);
+
   return (
-    <div className="flex flex-col min-h-[180px]">
+    <div className="flex flex-col min-h-[200px]">
       <div className="flex items-center gap-4 flex-1">
         <div className={cn(
           "rounded-lg border px-3 py-3 text-xs font-semibold text-center min-w-[70px] transition-all duration-500",
@@ -356,37 +358,29 @@ function RequestReplyPattern() {
       </div>
 
       {showRequest && (
-        <p className="text-[10px] font-mono text-blue-600 dark:text-blue-400 mt-2">
+        <p className="text-[10px] font-mono text-blue-600 dark:text-blue-400 mt-2 border border-zinc-100 dark:border-zinc-800 rounded-md px-2 py-1 bg-zinc-50 dark:bg-zinc-800/40">
           corr-id: {corrId}
         </p>
       )}
-
-      <div className="mt-auto pt-3 border-t border-zinc-100 dark:border-zinc-800 flex items-center gap-3">
-        <span className="text-sm text-zinc-500 dark:text-zinc-400 flex-1">
-          {phase === "idle" ? "Client waits for async reply" : phase === "done" ? "Reply matched by correlation ID" : "Request in flight…"}
-        </span>
-        <button
-          onClick={run}
-          disabled={phase !== "idle"}
-          className={cn(
-            "bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold transition-opacity shrink-0",
-            phase !== "idle" ? "opacity-40 cursor-not-allowed" : "hover:opacity-90"
-          )}
-        >
-          {phase === "idle" ? "Send Request" : phase === "done" ? "Done ✓" : "Waiting…"}
-        </button>
-      </div>
     </div>
   );
 }
-
-/* ── Main component ──────────────────────────────────────────────────── */
 
 export function MessageQueuePatterns({
   pattern: initialPattern = "pub-sub",
   topic = "order.created",
 }: MessageQueuePatternsProps) {
   const [pattern, setPattern] = useState<Pattern>(initialPattern);
+  const [controls, setControls] = useState<PatternControls>({
+    run: () => {},
+    label: "Publish",
+    status: "One message copied to every subscriber",
+    disabled: false,
+  });
+
+  const handleControlsChange = useCallback((next: PatternControls) => {
+    setControls(next);
+  }, []);
 
   return (
     <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden">
@@ -416,10 +410,24 @@ export function MessageQueuePatterns({
         ))}
       </div>
 
-      <div className="p-4 min-h-[220px] flex flex-col">
-        {pattern === "pub-sub" && <PubSubPattern topic={topic} />}
-        {pattern === "point-to-point" && <PointToPointPattern />}
-        {pattern === "request-reply" && <RequestReplyPattern />}
+      <div className="p-4 min-h-[240px] flex flex-col">
+        {pattern === "pub-sub" && <PubSubPattern key="pub-sub" topic={topic} onControlsChange={handleControlsChange} />}
+        {pattern === "point-to-point" && <PointToPointPattern key="ptp" onControlsChange={handleControlsChange} />}
+        {pattern === "request-reply" && <RequestReplyPattern key="rr" onControlsChange={handleControlsChange} />}
+      </div>
+
+      <div className="border-t border-zinc-100 dark:border-zinc-800 px-4 py-3 flex items-center gap-3 bg-zinc-50 dark:bg-zinc-900/30">
+        <span className="text-sm text-zinc-500 dark:text-zinc-400 flex-1">{controls.status}</span>
+        <button
+          onClick={controls.run}
+          disabled={controls.disabled}
+          className={cn(
+            "bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold transition-all duration-500 shrink-0",
+            controls.disabled ? "opacity-40 cursor-not-allowed" : "hover:opacity-90"
+          )}
+        >
+          {controls.label}
+        </button>
       </div>
     </div>
   );

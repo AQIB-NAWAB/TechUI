@@ -123,24 +123,28 @@ export function HashTableCollision({
     : lastAction ?? `Next key: "${remaining[0]}" → bucket ${hashKey(remaining[0], bucketCount)}`;
 
   return (
-    <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 overflow-hidden">
-      <div className="flex items-center gap-3 px-4 h-12 border-b border-zinc-100 dark:border-zinc-900 bg-zinc-50 dark:bg-zinc-900/50">
+    <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden">
+      <div className="flex items-center gap-3 px-4 h-12 border-b border-zinc-100 dark:border-zinc-800">
         <Hash className="size-4 text-violet-500 shrink-0" />
         <span className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 flex-1">{title}</span>
         <span className="text-[10px] font-mono text-zinc-400 bg-zinc-100 dark:bg-zinc-800 px-2 py-0.5 rounded">
-          {currentStrategy}
+          {currentStrategy === "chaining" ? "Chaining" : "Open Addressing"}
         </span>
         {interactive && (
-          <button onClick={reset} className="p-1 rounded text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-all duration-500">
+          <button
+            onClick={reset}
+            className="p-1 rounded text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-all duration-500"
+            title="Reset"
+          >
             <RefreshCw className="size-3.5" />
           </button>
         )}
       </div>
 
-      <div className="px-4 py-2 text-sm text-zinc-500 dark:text-zinc-400 border-b border-zinc-100 dark:border-zinc-900">
+      <div className="px-4 py-2 text-sm text-zinc-500 dark:text-zinc-400 border-b border-zinc-100 dark:border-zinc-800">
         {currentStrategy === "chaining"
-          ? "Collisions store multiple keys in a linked list at the same bucket."
-          : "Collisions probe forward to the next empty slot (linear probing)."}
+          ? "When two keys land in the same bucket, chain them in a linked list."
+          : "When a bucket is full, probe forward to the next empty slot."}
       </div>
 
       <div className="p-4 min-h-[220px]">
@@ -242,7 +246,7 @@ export function HashTableCollision({
       </div>
 
       {interactive && (
-        <div className="border-t border-zinc-100 dark:border-zinc-900 px-4 py-3 flex items-center gap-3 bg-zinc-50 dark:bg-zinc-900/30">
+        <div className="border-t border-zinc-100 dark:border-zinc-800 px-4 py-3 flex items-center gap-3 bg-zinc-50 dark:bg-zinc-900/30">
           <span className="text-sm text-zinc-500 dark:text-zinc-400 flex-1">{statusText}</span>
           <button
             onClick={insertNext}

@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { z } from "zod";
 import { cn } from "@/lib/utils";
-import { Key } from "lucide-react";
+import { Key, Network } from "lucide-react";
 
 const ERColumnSchema = z.object({
   name: z.string(),
@@ -261,10 +261,16 @@ export function ERDiagram({
     }
   }
 
+  const statusText = selectedRel
+    ? `Highlighting relationship: ${selectedRel}`
+    : selectedTable
+    ? `Showing relationships for ${selectedTable}`
+    : "Click a table or foreign key to highlight its connections";
+
   return (
     <div
       ref={containerRef}
-      className="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 overflow-hidden text-sm relative"
+      className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden text-sm relative"
       onClick={handleContainerClick}
     >
       <style>{`
@@ -278,11 +284,17 @@ export function ERDiagram({
         }
       `}</style>
 
-      {title && (
-        <div className="px-4 py-3 border-b border-zinc-100 dark:border-zinc-900">
-          <span className="text-[12px] font-medium text-zinc-500 dark:text-zinc-400">{title}</span>
-        </div>
-      )}
+      <div className="flex items-center gap-3 px-4 h-12 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50">
+        <Network className="size-4 text-zinc-400 shrink-0" />
+        <span className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 flex-1">
+          {title ?? "Entity-Relationship Diagram"}
+        </span>
+        <span className="text-[10px] text-zinc-400">{tables.length} tables · {relationships.length} rels</span>
+      </div>
+
+      <div className="text-sm text-zinc-500 dark:text-zinc-400 px-4 py-2 border-b border-zinc-100 dark:border-zinc-800">
+        Tables connect through foreign keys — lines show which columns reference which primary keys.
+      </div>
 
       <div className="relative min-h-[260px]">
         {/* SVG overlay for relationship lines */}
@@ -375,8 +387,8 @@ export function ERDiagram({
 
       {/* Relationship legend */}
       {relationships.length > 0 && (
-        <div className="border-t border-zinc-100 dark:border-zinc-900 px-4 py-2.5 flex flex-wrap gap-3">
-          <span className="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider self-center">
+        <div className="border-t border-zinc-100 dark:border-zinc-800 px-4 py-2.5 flex flex-wrap gap-3 min-h-[44px]">
+          <span className="text-[10px] font-semibold text-zinc-400 uppercase tracking-widest self-center">
             Relationships
           </span>
           {relationships.map((r, i) => {
@@ -385,6 +397,7 @@ export function ERDiagram({
             return (
               <button
                 key={r.from}
+                type="button"
                 onClick={() => setSelectedRel(isActive ? null : r.from)}
                 className={cn(
                   "flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-mono transition-all duration-500",
@@ -403,6 +416,19 @@ export function ERDiagram({
           })}
         </div>
       )}
+
+      <div className="border-t border-zinc-100 dark:border-zinc-800 px-4 py-3 flex items-center gap-3 bg-zinc-50 dark:bg-zinc-900/30">
+        <span className="text-sm text-zinc-500 dark:text-zinc-400 flex-1">{statusText}</span>
+        {relationships.length > 0 && (
+          <button
+            type="button"
+            onClick={() => { setSelectedTable(null); setSelectedRel(null); }}
+            className="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-opacity shrink-0"
+          >
+            Clear Selection
+          </button>
+        )}
+      </div>
     </div>
   );
 }

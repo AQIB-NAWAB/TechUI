@@ -99,6 +99,12 @@ export function QueryOptimizer({
         </button>
       </div>
 
+      <div className="px-4 py-2 border-b border-zinc-100 dark:border-zinc-800">
+        <p className="text-sm text-zinc-500 dark:text-zinc-400">
+          The database planner picks how to find rows. An index lets it skip millions of rows and jump straight to matches.
+        </p>
+      </div>
+
       {/* Tabs */}
       <div className="flex gap-1 px-4 py-2 border-b border-zinc-100 dark:border-zinc-800">
         {(["no-index", "index"] as const).map((tab) => (
@@ -115,12 +121,6 @@ export function QueryOptimizer({
             {tab === "no-index" ? "No Index" : "With Index"}
           </button>
         ))}
-      </div>
-
-      <div className="px-4 py-2 border-b border-zinc-100 dark:border-zinc-800">
-        <p className="text-sm text-zinc-500 dark:text-zinc-400">
-          The database planner picks how to find rows. An index lets it skip millions of rows and jump straight to matches.
-        </p>
       </div>
 
       {/* Body */}

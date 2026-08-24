@@ -1,8 +1,9 @@
 "use client";
 
+import { useState } from "react";
 import { z } from "zod";
 import { cn } from "@/lib/utils";
-import { Box, Layers, FolderOpen, Network, Server } from "lucide-react";
+import { Box, Layers, FolderOpen, Network, Server, ChevronRight } from "lucide-react";
 
 const PodPhaseEnum = z.enum(["Pending", "Running", "Succeeded", "Failed", "Unknown"]);
 const ContainerStateEnum = z.enum(["waiting", "running", "terminated"]);
@@ -91,13 +92,20 @@ export function KubernetesPod({
 }: KubernetesPodProps) {
   const pc = PHASE_CFG[phase];
   const readyCount = containers.filter((c) => c.ready).length;
+  const [highlightIdx, setHighlightIdx] = useState(0);
+  const safeIdx = containers.length > 0 ? highlightIdx % containers.length : 0;
 
   return (
     <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden">
-      <div className="flex items-center gap-2 h-12 px-4 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/50">
+      <div className="flex items-center gap-3 h-12 px-4 border-b border-zinc-100 dark:border-zinc-800">
         <Layers className="size-4 text-violet-500 shrink-0" />
-        <span className="text-[10px] font-semibold text-zinc-400 uppercase tracking-widest">Kubernetes Pod</span>
-        <span className="ml-auto text-[10px] font-mono text-violet-500 dark:text-violet-400">{namespace}</span>
+        <span className="text-sm font-semibold text-zinc-800 dark:text-zinc-200 flex-1">Kubernetes Pod</span>
+        <code className="text-[10px] font-mono text-violet-500 dark:text-violet-400 truncate max-w-[120px]">{name}</code>
+        <span className="text-[10px] font-mono text-zinc-400 shrink-0">{namespace}</span>
+      </div>
+
+      <div className="text-sm text-zinc-500 dark:text-zinc-400 px-4 py-2 border-b border-zinc-100 dark:border-zinc-800">
+        The smallest deployable unit in Kubernetes — one or more containers that share network and storage.
       </div>
 
       <div className="p-4 min-h-[220px]">
@@ -136,10 +144,15 @@ export function KubernetesPod({
             </div>
             {containers.map((c, i) => {
               const sc = STATE_CFG[c.state ?? "running"];
+              const isHighlighted = i === safeIdx;
               return (
                 <div
                   key={i}
-                  className={cn("rounded-lg border border-zinc-200 dark:border-zinc-700 border-l-4 px-3 py-2.5", sc.border, sc.bg)}
+                  className={cn(
+                    "rounded-lg border border-zinc-200 dark:border-zinc-700 border-l-4 px-3 py-2.5 transition-all duration-500",
+                    sc.border, sc.bg,
+                    isHighlighted ? "ring-2 ring-violet-300 dark:ring-violet-700 scale-[1.02]" : "opacity-70"
+                  )}
                 >
                   <div className="flex items-center gap-2 mb-1.5">
                     <Box className="size-3.5 text-blue-500 shrink-0" />
@@ -188,19 +201,19 @@ export function KubernetesPod({
         </div>
       )}
 
-      <div className="border-t border-zinc-100 dark:border-zinc-800 px-4 py-3 flex items-center gap-3 text-[10px] text-zinc-400 flex-wrap">
-        <div className="flex items-center gap-1.5">
-          <Layers className="size-3" />
-          <span>{serviceAccount}</span>
-        </div>
-        {volumes && volumes.length > 0 && (
-          <div className="flex items-center gap-1.5">
-            <FolderOpen className="size-3" />
-            <span>{volumes.map((v) => `${v.name} (${v.type})`).join(", ")}</span>
-          </div>
-        )}
-        {restarts > 0 && (
-          <span className="text-amber-500 ml-auto">{restarts} pod restart{restarts !== 1 ? "s" : ""}</span>
+      <div className="border-t border-zinc-100 dark:border-zinc-800 px-4 py-3 flex items-center gap-3">
+        <span className="text-sm text-zinc-500 dark:text-zinc-400 flex-1">
+          {readyCount}/{containers.length} ready
+          {ip && <span className="ml-2 font-mono text-xs">{ip}</span>}
+        </span>
+        {containers.length > 0 && (
+          <button
+            onClick={() => setHighlightIdx((i) => (i + 1) % containers.length)}
+            className="flex items-center gap-1.5 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-opacity shrink-0"
+          >
+            <ChevronRight className="size-3.5" />
+            Next Container
+          </button>
         )}
       </div>
     </div>

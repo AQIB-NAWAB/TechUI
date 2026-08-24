@@ -108,14 +108,17 @@ export function CursorPagination({
 
   return (
     <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden">
-      {/* Header */}
-      <div className="flex items-center gap-3 px-4 py-2.5 border-b border-zinc-100 dark:border-zinc-900 bg-zinc-50 dark:bg-zinc-900/50">
-        <ChevronRight className="size-3.5 text-zinc-400 shrink-0" />
-        <span className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 flex-1">Cursor Pagination</span>
-        <button onClick={reset} className="p-1 rounded text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors">
+      <div className="flex items-center gap-3 px-4 h-12 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50">
+        <ChevronRight className="size-4 text-zinc-400 shrink-0" />
+        <span className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 flex-1">Cursor Pagination</span>
+        <button onClick={reset} className="p-1 rounded text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-all duration-500">
           <RefreshCw className="size-3.5" />
         </button>
       </div>
+
+      <p className="text-sm text-zinc-500 dark:text-zinc-400 px-4 py-2 border-b border-zinc-100 dark:border-zinc-800">
+        Fetch results in chunks — offset pages can skip or duplicate rows when data changes; cursors stay stable.
+      </p>
 
       {/* Tabs */}
       <div className="flex border-b border-zinc-100 dark:border-zinc-800">
@@ -135,7 +138,7 @@ export function CursorPagination({
         ))}
       </div>
 
-      <div className="p-4 min-h-[280px] flex flex-col gap-3">
+      <div className="p-4 min-h-[220px] flex flex-col gap-3">
         {/* API Request */}
         <div className="bg-zinc-50 dark:bg-zinc-800/60 rounded-lg px-3 py-2 font-mono text-[11px] text-zinc-500 dark:text-zinc-400 flex items-center gap-2">
           <span className="text-emerald-600 dark:text-emerald-400 font-semibold">GET</span>
@@ -223,24 +226,23 @@ export function CursorPagination({
         )}
       </div>
 
-      {/* Controls */}
-      <div className="border-t border-zinc-100 dark:border-zinc-800 px-4 py-2.5 flex items-center gap-3 bg-zinc-50 dark:bg-zinc-900/30">
-        <span className="text-[11px] text-zinc-400 flex-1">
+      <div className="border-t border-zinc-100 dark:border-zinc-800 px-4 py-3 flex items-center gap-3 bg-zinc-50 dark:bg-zinc-900/30 min-h-[52px]">
+        <span className="text-sm text-zinc-500 dark:text-zinc-400 flex-1">
           {activeTab === "offset"
-            ? page === 0 ? "Click Next Page to see what happens when items are inserted between pages." : showDuplicate ? "Charlie appears twice — offset 3 shifted because of the insert!" : "Keep paginating…"
+            ? page === 0 ? "Click Next Page to see what happens when items are inserted between pages." : showDuplicate ? "Charlie appears twice — offset shifted because of the insert!" : "Keep paginating…"
             : "Cursor stays stable regardless of inserts or deletes."}
         </span>
         <button
           onClick={handleNext}
           disabled={!canGoNext || animating}
           className={cn(
-            "flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold transition-all duration-500 shrink-0",
+            "flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-semibold transition-all duration-500 shrink-0 hover:opacity-90",
             canGoNext && !animating
-              ? "bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 hover:opacity-90"
+              ? "bg-zinc-900 dark:bg-white text-white dark:text-zinc-900"
               : "bg-zinc-100 dark:bg-zinc-800 text-zinc-400 cursor-not-allowed"
           )}
         >
-          Next Page <ChevronRight className="size-3" />
+          Next Page <ChevronRight className="size-3.5" />
         </button>
       </div>
     </div>

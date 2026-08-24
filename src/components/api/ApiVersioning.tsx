@@ -176,12 +176,21 @@ export function ApiVersioning({
           <RequestBlock strategy={activeStrategy} currentVersion={currentVersion} endpoint={endpoint} />
         </div>
 
-        {sent && (
-          <div className="rounded-lg bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 px-3 py-2 text-xs text-emerald-700 dark:text-emerald-400 transition-all duration-500">
-            <CheckCircle className="size-3.5 inline mr-1.5 -mt-0.5" />
-            200 OK — server routed to <span className="font-mono font-bold">{currentVersion}</span> handlers
-          </div>
-        )}
+        <div className={cn(
+          "rounded-lg border px-3 py-2 text-xs min-h-[36px] flex items-center transition-all duration-500",
+          sent
+            ? "bg-emerald-50 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-400 opacity-100"
+            : "bg-zinc-50 dark:bg-zinc-800/30 border-zinc-200 dark:border-zinc-700 text-zinc-400 opacity-60"
+        )}>
+          {sent ? (
+            <>
+              <CheckCircle className="size-3.5 inline mr-1.5 shrink-0" />
+              200 OK — server routed to <span className="font-mono font-bold">{currentVersion}</span> handlers
+            </>
+          ) : (
+            "Send a request to see the server pick the right version"
+          )}
+        </div>
 
         <div className="flex flex-wrap gap-2">
           {features.map((f) => (
@@ -208,7 +217,7 @@ export function ApiVersioning({
         <button
           onClick={sendRequest}
           disabled={animating}
-          className="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-50"
+          className="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-all duration-500 disabled:opacity-50"
         >
           Send Request
         </button>

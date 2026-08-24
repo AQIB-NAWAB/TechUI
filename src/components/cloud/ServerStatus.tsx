@@ -95,7 +95,8 @@ export function ServerStatus({
           {overall.label}
         </div>
 
-        <div className="rounded-lg border border-zinc-100 dark:border-zinc-800 divide-y divide-zinc-100 dark:divide-zinc-800 overflow-hidden">
+        <div className="rounded-lg border border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/30 overflow-hidden min-h-[140px]">
+          <div className="divide-y divide-zinc-100 dark:divide-zinc-800">
           {services.map((svc, i) => {
             const s = STATUS[svc.status];
             const Icon = s.Icon;
@@ -135,11 +136,12 @@ export function ServerStatus({
               </div>
             );
           })}
+          </div>
         </div>
       </div>
 
       {interactive && (
-        <div className="border-t border-zinc-100 dark:border-zinc-800 px-4 py-3 flex items-center gap-3 bg-zinc-50 dark:bg-zinc-900/30">
+        <div className="border-t border-zinc-100 dark:border-zinc-800 px-4 py-3 flex items-center gap-3 bg-zinc-50 dark:bg-zinc-900/30 min-h-[52px]">
           <span className="text-sm text-zinc-500 dark:text-zinc-400 flex-1">
             {healthyCount}/{services.length} services operational
           </span>

@@ -98,7 +98,7 @@ export function NetworkLatency({ hops = [] }: NetworkLatencyProps) {
 
   return (
     <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden">
-      <div className="flex items-center gap-3 px-4 h-12 border-b border-zinc-100 dark:border-zinc-800">
+      <div className="flex items-center gap-3 px-4 h-12 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50">
         <Activity className="size-4 text-zinc-400 shrink-0" />
         <span className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 flex-1">Network Latency</span>
         {done && (
@@ -112,7 +112,7 @@ export function NetworkLatency({ hops = [] }: NetworkLatencyProps) {
         Trace how long each hop adds to your request — find the bottleneck.
       </p>
 
-      <div className="min-h-[280px] px-4 py-3 flex flex-col">
+      <div className="min-h-[220px] px-4 py-3 flex flex-col">
         <div className="flex items-center justify-center gap-0 flex-wrap py-2">
           {hops.map((hop, i) => {
             const mIdx = measurableHops.findIndex((m) => m === hop);
@@ -248,7 +248,7 @@ export function NetworkLatency({ hops = [] }: NetworkLatencyProps) {
       </div>
 
       <div className={cn(
-        "border-t px-4 py-3 flex items-center gap-3 transition-all duration-500",
+        "border-t px-4 py-3 flex items-center gap-3 bg-zinc-50 dark:bg-zinc-900/30 transition-all duration-500",
         done ? "border-amber-100 dark:border-amber-900/30" : "border-zinc-100 dark:border-zinc-800"
       )}>
         <span className="text-sm text-zinc-500 dark:text-zinc-400 flex-1">

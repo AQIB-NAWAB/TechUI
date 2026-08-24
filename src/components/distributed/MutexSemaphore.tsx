@@ -56,7 +56,18 @@ function buildInitialThreads(count: number): ThreadInfo[] {
   }));
 }
 
-function MutexTab({ threads: threadCount }: { threads: number }) {
+function MutexTab({
+  threads: threadCount,
+  onControlsChange,
+}: {
+  threads: number;
+  onControlsChange: (controls: {
+    primaryLabel: string;
+    primaryAction: () => void;
+    status: string;
+    secondary: { label: string; action: () => void; disabled?: boolean }[];
+  }) => void;
+}) {
   const [threads, setThreads] = useState<ThreadInfo[]>(() => buildInitialThreads(threadCount));
   const [lockHolder, setLockHolder] = useState<number | null>(null);
   const [deadlock, setDeadlock] = useState(false);
@@ -150,8 +161,53 @@ function MutexTab({ threads: threadCount }: { threads: number }) {
     { id: 2, holds: "Lock B", wants: "Lock A" },
   ];
 
+  useEffect(() => {
+    onControlsChange({
+      primaryLabel: "Acquire Lock",
+      primaryAction: acquire,
+      status: deadlock
+        ? "Deadlock — both threads waiting forever"
+        : lockHolder !== null
+          ? `Thread ${lockHolder} holds the lock`
+          : "No thread holds the lock — click Acquire",
+      secondary: [
+        { label: "Release", action: release, disabled: lockHolder === null },
+        { label: autoRunning ? "Stop" : "Auto-Run", action: startAutoRun },
+        { label: "Deadlock", action: showDeadlock },
+        { label: "Reset", action: reset },
+      ],
+    });
+  }, [deadlock, lockHolder, autoRunning, onControlsChange]);
+
   return (
     <div className="space-y-3">
+      <div className="flex flex-wrap gap-1.5">
+        <button
+          onClick={release}
+          disabled={lockHolder === null}
+          className="px-2.5 py-1 rounded-md text-[10px] font-semibold border border-zinc-200 dark:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all duration-500 text-zinc-600 dark:text-zinc-400 disabled:opacity-40"
+        >
+          Release
+        </button>
+        <button
+          onClick={startAutoRun}
+          className="px-2.5 py-1 rounded-md text-[10px] font-semibold border border-zinc-200 dark:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all duration-500 text-zinc-600 dark:text-zinc-400"
+        >
+          {autoRunning ? "Stop" : "Auto-Run"}
+        </button>
+        <button
+          onClick={showDeadlock}
+          className="px-2.5 py-1 rounded-md text-[10px] font-semibold border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/20 transition-all duration-500"
+        >
+          Deadlock
+        </button>
+        <button
+          onClick={reset}
+          className="px-2.5 py-1 rounded-md text-[10px] font-semibold border border-zinc-200 dark:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all duration-500 text-zinc-600 dark:text-zinc-400"
+        >
+          Reset
+        </button>
+      </div>
       {deadlock ? (
         <div className="space-y-2">
           <div className="text-xs font-semibold text-red-600 dark:text-red-400 flex items-center gap-1.5">
@@ -198,54 +254,24 @@ function MutexTab({ threads: threadCount }: { threads: number }) {
           ))}
         </div>
       )}
-
-      <div className="flex flex-wrap gap-2 pt-1">
-        <button
-          onClick={acquire}
-          className="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-opacity"
-        >
-          Acquire Lock
-        </button>
-        <button
-          onClick={release}
-          disabled={lockHolder === null}
-          className="bg-zinc-200 dark:bg-zinc-700 text-zinc-700 dark:text-zinc-200 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-40"
-        >
-          Release Lock
-        </button>
-        <button
-          onClick={startAutoRun}
-          className={cn(
-            "rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-opacity",
-            autoRunning
-              ? "bg-amber-500 text-white"
-              : "bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300"
-          )}
-        >
-          {autoRunning ? "Stop" : "Auto-Run"}
-        </button>
-        <button
-          onClick={showDeadlock}
-          className="bg-red-600 text-white rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-opacity"
-        >
-          Deadlock
-        </button>
-        <button
-          onClick={reset}
-          className="text-xs text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 px-2 transition-colors"
-        >
-          Reset
-        </button>
-      </div>
-
-      <p className="text-[10px] text-zinc-400 border-t border-zinc-100 dark:border-zinc-800 pt-2 mt-1">
-        Only <span className="font-semibold text-zinc-600 dark:text-zinc-300">ONE</span> thread can hold the mutex at a time — all others block.
-      </p>
     </div>
   );
 }
 
-function SemaphoreTab({ maxPermits, threads: threadCount }: { maxPermits: number; threads: number }) {
+function SemaphoreTab({
+  maxPermits,
+  threads: threadCount,
+  onControlsChange,
+}: {
+  maxPermits: number;
+  threads: number;
+  onControlsChange: (controls: {
+    primaryLabel: string;
+    primaryAction: () => void;
+    status: string;
+    secondary: { label: string; action: () => void; disabled?: boolean }[];
+  }) => void;
+}) {
   const [threads, setThreads] = useState<ThreadInfo[]>(() => buildInitialThreads(threadCount));
   const [permits, setPermits] = useState(maxPermits);
   const autoRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -320,9 +346,43 @@ function SemaphoreTab({ maxPermits, threads: threadCount }: { maxPermits: number
   const activeCount = threads.filter((t) => t.state === "active").length;
   const availablePermits = maxPermits - activeCount;
 
+  useEffect(() => {
+    onControlsChange({
+      primaryLabel: "Acquire",
+      primaryAction: acquire,
+      status: `${availablePermits}/${maxPermits} permits available · ${activeCount} active`,
+      secondary: [
+        { label: "Release", action: release, disabled: activeCount === 0 },
+        { label: autoRunning ? "Stop" : "Auto-Run", action: startAutoRun },
+        { label: "Reset", action: reset },
+      ],
+    });
+  }, [availablePermits, maxPermits, activeCount, autoRunning, onControlsChange]);
+
   return (
     <div className="space-y-3">
-      <div className="flex items-center gap-2 text-xs">
+      <div className="flex flex-wrap gap-1.5">
+        <button
+          onClick={release}
+          disabled={activeCount === 0}
+          className="px-2.5 py-1 rounded-md text-[10px] font-semibold border border-zinc-200 dark:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all duration-500 text-zinc-600 dark:text-zinc-400 disabled:opacity-40"
+        >
+          Release
+        </button>
+        <button
+          onClick={startAutoRun}
+          className="px-2.5 py-1 rounded-md text-[10px] font-semibold border border-zinc-200 dark:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all duration-500 text-zinc-600 dark:text-zinc-400"
+        >
+          {autoRunning ? "Stop" : "Auto-Run"}
+        </button>
+        <button
+          onClick={reset}
+          className="px-2.5 py-1 rounded-md text-[10px] font-semibold border border-zinc-200 dark:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all duration-500 text-zinc-600 dark:text-zinc-400"
+        >
+          Reset
+        </button>
+      </div>
+      <div className="flex items-center gap-2 text-xs border border-zinc-100 dark:border-zinc-800 rounded-lg p-2 bg-zinc-50 dark:bg-zinc-800/40">
         <span className="text-zinc-500 dark:text-zinc-400">Available permits:</span>
         <span className="font-bold text-blue-600 dark:text-blue-400">{availablePermits}/{maxPermits}</span>
         <div className="flex gap-1 ml-1">
@@ -366,46 +426,16 @@ function SemaphoreTab({ maxPermits, threads: threadCount }: { maxPermits: number
           );
         })}
       </div>
-
-      <div className="flex flex-wrap gap-2 pt-1">
-        <button
-          onClick={acquire}
-          className="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-opacity"
-        >
-          Acquire
-        </button>
-        <button
-          onClick={release}
-          disabled={activeCount === 0}
-          className="bg-zinc-200 dark:bg-zinc-700 text-zinc-700 dark:text-zinc-200 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-40"
-        >
-          Release
-        </button>
-        <button
-          onClick={startAutoRun}
-          className={cn(
-            "rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-opacity",
-            autoRunning
-              ? "bg-amber-500 text-white"
-              : "bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300"
-          )}
-        >
-          {autoRunning ? "Stop" : "Auto-Run"}
-        </button>
-        <button
-          onClick={reset}
-          className="text-xs text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 px-2 transition-colors"
-        >
-          Reset
-        </button>
-      </div>
-
-      <p className="text-[10px] text-zinc-400 border-t border-zinc-100 dark:border-zinc-800 pt-2 mt-1">
-        Up to <span className="font-semibold text-zinc-600 dark:text-zinc-300">{maxPermits}</span> threads can be active simultaneously — others wait for a permit.
-      </p>
     </div>
   );
 }
+
+type TabControls = {
+  primaryLabel: string;
+  primaryAction: () => void;
+  status: string;
+  secondary: { label: string; action: () => void; disabled?: boolean }[];
+};
 
 export function MutexSemaphore({
   type = "mutex",
@@ -413,19 +443,35 @@ export function MutexSemaphore({
   threads = 5,
 }: MutexSemaphoreProps) {
   const [tab, setTab] = useState<"mutex" | "semaphore">(type);
+  const [controls, setControls] = useState<TabControls>({
+    primaryLabel: "Acquire Lock",
+    primaryAction: () => {},
+    status: "Click Acquire to grant the lock to a thread",
+    secondary: [],
+  });
+
+  const handleControlsChange = useCallback((next: TabControls) => {
+    setControls(next);
+  }, []);
 
   return (
     <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden">
       {/* Header */}
-      <div className="flex items-center gap-2.5 px-4 py-2.5 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/60">
-        <Lock className="size-3.5 text-zinc-400 shrink-0" />
-        <span className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 flex-1">
+      <div className="flex items-center gap-3 px-4 h-12 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50">
+        <Lock className="size-4 text-zinc-400 shrink-0" />
+        <span className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 flex-1">
           {tab === "mutex" ? "Mutex" : "Semaphore"}
         </span>
         <span className="text-[10px] text-zinc-400">
           {tab === "mutex" ? "exclusive lock — 1 thread max" : `counting lock — ${maxPermits} permits`}
         </span>
       </div>
+
+      <p className="text-sm text-zinc-500 dark:text-zinc-400 px-4 py-2 border-b border-zinc-100 dark:border-zinc-800">
+        {tab === "mutex"
+          ? "Only one thread can access a shared resource at a time — all others wait."
+          : `Up to ${maxPermits} threads can run concurrently — others wait for a permit.`}
+      </p>
 
       {/* Tabs */}
       <div className="flex border-b border-zinc-100 dark:border-zinc-800">
@@ -445,13 +491,22 @@ export function MutexSemaphore({
         ))}
       </div>
 
-      {/* Content */}
-      <div className="min-h-[300px] p-4">
+      <div className="min-h-[220px] p-4">
         {tab === "mutex" ? (
-          <MutexTab threads={threads} />
+          <MutexTab key="mutex" threads={threads} onControlsChange={handleControlsChange} />
         ) : (
-          <SemaphoreTab maxPermits={maxPermits} threads={threads} />
+          <SemaphoreTab key="semaphore" maxPermits={maxPermits} threads={threads} onControlsChange={handleControlsChange} />
         )}
+      </div>
+
+      <div className="border-t border-zinc-100 dark:border-zinc-800 px-4 py-3 flex items-center gap-2 bg-zinc-50 dark:bg-zinc-900/30">
+        <span className="text-sm text-zinc-500 dark:text-zinc-400 flex-1 min-w-[140px]">{controls.status}</span>
+        <button
+          onClick={controls.primaryAction}
+          className="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-all duration-500"
+        >
+          {controls.primaryLabel}
+        </button>
       </div>
     </div>
   );

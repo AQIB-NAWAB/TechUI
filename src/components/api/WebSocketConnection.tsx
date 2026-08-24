@@ -150,6 +150,10 @@ export function WebSocketConnection({
         </div>
       </div>
 
+      <div className="text-sm text-zinc-500 dark:text-zinc-400 px-4 py-2 border-b border-zinc-100 dark:border-zinc-800">
+        Keeps a live connection open so the server and client can send messages instantly.
+      </div>
+
       {/* Pre-connect state */}
       {connState === "closed" && (
         <div className="px-4 py-6 min-h-[200px] flex flex-col items-center justify-center gap-4 text-center">

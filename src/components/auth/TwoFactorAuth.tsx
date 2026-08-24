@@ -413,11 +413,17 @@ export function TwoFactorAuth({
         </div>
       </div>
 
+      <div className="text-sm text-zinc-500 dark:text-zinc-400 px-4 py-2 border-b border-zinc-100 dark:border-zinc-800">
+        Adds a second check beyond your password — like a code from your phone — before letting you in.
+      </div>
+
       {/* Body — fixed height */}
-      <div className="min-h-[280px] p-4">
-        {activeMethod === "totp" && <TotpTab issuer={issuer} />}
-        {activeMethod === "sms"  && <SmsTab username={username} />}
-        {activeMethod === "email" && <EmailTab username={username} />}
+      <div className="min-h-[320px] p-4">
+        <div className="min-h-[280px]">
+          {activeMethod === "totp" && <TotpTab issuer={issuer} />}
+          {activeMethod === "sms"  && <SmsTab username={username} />}
+          {activeMethod === "email" && <EmailTab username={username} />}
+        </div>
       </div>
 
       {/* Footer */}

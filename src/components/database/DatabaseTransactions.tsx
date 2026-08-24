@@ -90,7 +90,6 @@ export function DatabaseTransactions({
   const intervalRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const steps = STEPS[scenario];
-  const activeSteps = currentStep >= 0 ? steps.slice(0, currentStep + 1) : [];
 
   // Derived balances from executed steps
   let aliceBalance = 1000;
@@ -153,6 +152,12 @@ export function DatabaseTransactions({
     : scenario === "rollback"
     ? { label: "Isolation: partial changes never visible", color: "text-blue-600 dark:text-blue-400", bg: "bg-blue-50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-800" }
     : { label: "Danger: money lost! This is why we need transactions.", color: "text-red-600 dark:text-red-400", bg: "bg-red-50 dark:bg-red-950/20 border-red-200 dark:border-red-800" };
+
+  const statusText = running
+    ? `Running step ${currentStep + 1} of ${steps.length}…`
+    : currentStep >= steps.length - 1
+    ? finalOutcome.label
+    : "Run the transaction to see how all-or-nothing commits work";
 
   return (
     <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden">
@@ -241,24 +246,11 @@ export function DatabaseTransactions({
               );
             })}
           </div>
-          <button
-            onClick={startRun}
-            disabled={running}
-            className={cn(
-              "flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-500",
-              running
-                ? "bg-zinc-200 dark:bg-zinc-800 text-zinc-400 cursor-not-allowed"
-                : "bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 hover:opacity-90"
-            )}
-          >
-            <Play className="size-3.5" />
-            {running ? "Running…" : "Run"}
-          </button>
         </div>
 
         {/* Balance Panel */}
         <div className="flex flex-col gap-2">
-          <div className="text-[10px] font-semibold text-zinc-400 uppercase tracking-wide">Account Balances</div>
+          <div className="text-[10px] font-semibold uppercase tracking-widest text-zinc-400">Account Balances</div>
           <div className="rounded-lg border border-zinc-100 dark:border-zinc-800 flex-1 p-3 space-y-3 min-h-[200px]">
             {/* Alice */}
             <div className="space-y-1">
@@ -328,7 +320,6 @@ export function DatabaseTransactions({
               </div>
             </div>
 
-            {/* Total / outcome */}
             <div className="pt-1 border-t border-zinc-100 dark:border-zinc-800">
               <div className="text-[10px] text-zinc-400">
                 Total in system:&nbsp;
@@ -347,7 +338,6 @@ export function DatabaseTransactions({
               </div>
             </div>
 
-            {/* Outcome message — fixed height slot */}
             <div className="min-h-[44px] flex items-center">
               {currentStep === steps.length - 1 && (
                 <div className={cn("w-full rounded-lg border px-3 py-2 text-xs font-semibold flex items-center gap-2 transition-all duration-500", finalOutcome.bg)}>
@@ -365,7 +355,24 @@ export function DatabaseTransactions({
         </div>
       </div>
 
-      {/* ACID legend */}
+      <div className="border-t border-zinc-100 dark:border-zinc-800 px-4 py-3 flex items-center gap-3 bg-zinc-50 dark:bg-zinc-900/30">
+        <span className={cn("text-sm flex-1 transition-all duration-500", currentStep >= steps.length - 1 ? finalOutcome.color : "text-zinc-500 dark:text-zinc-400")}>
+          {statusText}
+        </span>
+        <button
+          type="button"
+          onClick={currentStep >= steps.length - 1 && !running ? reset : startRun}
+          disabled={running}
+          className={cn(
+            "flex items-center gap-2 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-opacity shrink-0",
+            running && "opacity-50 cursor-not-allowed"
+          )}
+        >
+          <Play className="size-3.5" />
+          {running ? "Running…" : currentStep >= steps.length - 1 ? "Reset" : "Run Transaction"}
+        </button>
+      </div>
+
       <div className="border-t border-zinc-100 dark:border-zinc-800 px-4 py-2 bg-zinc-50 dark:bg-zinc-900/30">
         <div className="flex gap-4 text-[10px] text-zinc-500 dark:text-zinc-400">
           <span><span className="font-bold text-zinc-700 dark:text-zinc-300">A</span>=Atomic</span>

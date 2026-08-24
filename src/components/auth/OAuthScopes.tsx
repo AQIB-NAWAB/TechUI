@@ -51,11 +51,6 @@ export function OAuthScopes({
     setSuccess(false);
   }
 
-  function grantAll() {
-    setScopes(prev => prev.map(s => ({ ...s, granted: true })));
-    setSuccess(false);
-  }
-
   function denyAll() {
     setScopes(prev => prev.map(s => ({ ...s, granted: false })));
     setSuccess(false);
@@ -77,16 +72,18 @@ export function OAuthScopes({
         <span className="text-sm font-semibold text-zinc-800 dark:text-zinc-200 flex-1">OAuth Scopes</span>
       </div>
 
+      <div className="text-sm text-zinc-500 dark:text-zinc-400 px-4 py-2 border-b border-zinc-100 dark:border-zinc-800">
+        Shows which permissions an app is asking for so you can grant only what it needs.
+      </div>
+
       {/* Body */}
-      <div className="px-4 py-4 min-h-[280px] flex flex-col gap-3">
-        {/* Consent heading */}
+      <div className="px-4 py-4 min-h-[300px] flex flex-col gap-3">
         <p className="text-sm text-zinc-500 dark:text-zinc-400">
           <span className="font-bold text-zinc-900 dark:text-zinc-100">{appName}</span> wants access to your{" "}
           <span className="font-bold text-zinc-900 dark:text-zinc-100">{provider}</span> account
         </p>
 
-        {/* Scope rows */}
-        <div className="flex flex-col gap-1.5">
+        <div className="flex flex-col gap-1.5 flex-1">
           {scopes.map((scope, i) => {
             const cfg = SENSITIVITY_CFG[scope.sensitivity];
             return (
@@ -129,48 +126,36 @@ export function OAuthScopes({
           })}
         </div>
 
-        {/* Buttons */}
-        <div className="flex gap-2 flex-wrap">
-          <button
-            onClick={denyAll}
-            className="border border-zinc-200 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 rounded-lg px-3 py-1.5 text-xs font-semibold hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all duration-500"
-          >
-            Deny All
-          </button>
-          <button
-            onClick={grantSelected}
-            disabled={!anyGranted}
-            className={cn(
-              "rounded-lg px-3 py-1.5 text-xs font-semibold transition-all duration-500",
-              success
-                ? "bg-emerald-500 text-white"
-                : "bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 hover:opacity-90 disabled:opacity-40"
-            )}
-          >
-            {success ? "Access Granted ✓" : "Grant Selected"}
-          </button>
-          <button
-            onClick={grantAll}
-            className="border border-zinc-200 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 rounded-lg px-3 py-1.5 text-xs font-semibold hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all duration-500"
-          >
-            Grant All
-          </button>
+        <div className="rounded-lg bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 px-3 py-2 min-h-[44px]">
+          <p className="text-[10px] text-zinc-400 uppercase tracking-wide font-semibold mb-1">Token scope string</p>
+          <p className={cn("font-mono text-xs break-all transition-all duration-500", anyGranted ? "text-zinc-700 dark:text-zinc-300" : "text-zinc-400")}>
+            {anyGranted ? tokenScope : "Select scopes above to preview"}
+          </p>
         </div>
-
-        {/* Token preview */}
-        {anyGranted && (
-          <div className="rounded-lg bg-zinc-50 dark:bg-zinc-800/50 px-3 py-2 transition-all duration-500">
-            <p className="text-[10px] text-zinc-400 dark:text-zinc-500 mb-1 uppercase tracking-wide font-semibold">Token scope string</p>
-            <p className="font-mono text-xs text-zinc-700 dark:text-zinc-300 break-all">{tokenScope}</p>
-          </div>
-        )}
       </div>
 
-      {/* Footer insight */}
-      <div className="border-t border-zinc-100 dark:border-zinc-800 px-4 py-3 bg-zinc-50 dark:bg-zinc-800/30">
-        <p className="text-xs text-zinc-500 dark:text-zinc-400">
-          <span className="font-semibold text-zinc-700 dark:text-zinc-300">Principle of least privilege:</span> only grant what&apos;s needed. Apps can request any scope — YOU decide what to grant. You can revoke access any time.
-        </p>
+      <div className="border-t border-zinc-100 dark:border-zinc-800 px-4 py-3 flex items-center gap-3">
+        <button
+          onClick={denyAll}
+          className="text-xs font-semibold text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 transition-all duration-500"
+        >
+          Deny all
+        </button>
+        <span className="text-sm text-zinc-500 dark:text-zinc-400 flex-1 text-center">
+          {success ? `${grantedScopes.length} scope(s) granted` : "Only grant what the app needs"}
+        </span>
+        <button
+          onClick={grantSelected}
+          disabled={!anyGranted}
+          className={cn(
+            "rounded-lg px-4 py-2 text-sm font-semibold transition-all duration-500 shrink-0",
+            success
+              ? "bg-emerald-500 text-white"
+              : "bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 hover:opacity-90 disabled:opacity-40"
+          )}
+        >
+          {success ? "Access Granted ✓" : "Grant Selected"}
+        </button>
       </div>
     </div>
   );
