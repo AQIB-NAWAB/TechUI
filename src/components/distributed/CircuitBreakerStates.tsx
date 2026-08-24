@@ -104,12 +104,18 @@ export function CircuitBreakerStates({
     "half-open": `${successThreshold} successes → closes  |  any failure → opens again`,
   };
 
+  function cycleState() {
+    setSelected((s) => {
+      const idx = states.indexOf(s);
+      return states[(idx + 1) % states.length]!;
+    });
+  }
+
   return (
     <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden">
-      {/* Header */}
-      <div className="flex items-center gap-2.5 px-4 py-2.5 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/60">
-        <Zap className="size-3.5 text-zinc-400 shrink-0" />
-        <span className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 flex-1">Circuit Breaker States</span>
+      <div className="flex items-center gap-3 px-4 h-12 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50">
+        <Zap className="size-4 text-zinc-400 shrink-0" />
+        <span className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 flex-1">Circuit Breaker States</span>
         <span
           className={cn(
             "text-[11px] font-semibold px-2 py-0.5 rounded-full",
@@ -120,7 +126,11 @@ export function CircuitBreakerStates({
         </span>
       </div>
 
-      <div className="flex flex-col md:flex-row gap-0 min-h-[320px]">
+      <p className="text-sm text-zinc-500 dark:text-zinc-400 px-4 py-2 border-b border-zinc-100 dark:border-zinc-800">
+        A safety switch that stops sending traffic to a failing service — closed passes requests, open blocks them, half-open tests recovery.
+      </p>
+
+      <div className="flex flex-col md:flex-row gap-0 min-h-[280px]">
         {/* State diagram column */}
         <div className="flex-1 px-5 py-4 flex flex-col items-start gap-0">
           {states.map((state, i) => {
@@ -220,11 +230,16 @@ export function CircuitBreakerStates({
         </div>
       </div>
 
-      {/* Footer hint */}
-      <div className="border-t border-zinc-100 dark:border-zinc-800 px-4 py-2 bg-zinc-50/50 dark:bg-zinc-900/30">
-        <p className="text-[10px] text-zinc-400">
-          Click any state box to see what it means and when it transitions
-        </p>
+      <div className="border-t border-zinc-100 dark:border-zinc-800 px-4 py-3 flex items-center gap-3 bg-zinc-50 dark:bg-zinc-900/30">
+        <span className="text-sm text-zinc-500 dark:text-zinc-400 flex-1">
+          {details.statusLabel} — {details.statusDesc}
+        </span>
+        <button
+          onClick={cycleState}
+          className="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-all duration-500"
+        >
+          Next State
+        </button>
       </div>
     </div>
   );

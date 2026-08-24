@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { z } from "zod";
-import { Copy, Check } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { GitCompareArrows, Copy, Check } from "lucide-react";
 
 export const CodeDiffSchema = z.object({
   title: z.string().optional(),
@@ -49,63 +50,9 @@ function CopyButton({ text }: { text: string }) {
     setTimeout(() => setCopied(false), 2000);
   }
   return (
-    <button
-      onClick={handleCopy}
-      className="p-1 rounded hover:bg-white/10 transition-colors text-zinc-400 hover:text-zinc-200"
-      title="Copy code"
-    >
-      {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+    <button onClick={handleCopy} className="p-1 rounded hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-all duration-500 text-zinc-400">
+      {copied ? <Check className="size-3.5 text-emerald-500" /> : <Copy className="size-3.5" />}
     </button>
-  );
-}
-
-function CodePanel({
-  label,
-  lines,
-  code,
-  language,
-  labelColor,
-  borderColor,
-  headerBg,
-}: {
-  label: string;
-  lines: DiffLine[];
-  code: string;
-  language: string;
-  labelColor: string;
-  borderColor: string;
-  headerBg: string;
-}) {
-  return (
-    <div className={`flex-1 rounded-xl border-l-4 ${borderColor} border border-zinc-200 dark:border-zinc-700 overflow-hidden min-w-0`}>
-      <div className={`${headerBg} px-3 py-2 flex items-center justify-between border-b border-zinc-200 dark:border-zinc-700`}>
-        <span className={`text-xs font-semibold ${labelColor}`}>{label}</span>
-        <div className="flex items-center gap-2">
-          <span className="text-[10px] font-mono text-zinc-400">{language}</span>
-          <CopyButton text={code} />
-        </div>
-      </div>
-      <div className="overflow-x-auto">
-        <pre className="font-mono text-xs leading-6 p-4">
-          {lines.map((line, i) => (
-            <div
-              key={i}
-              className={[
-                "px-1 -mx-1 rounded",
-                line.type === "removed" ? "bg-red-100 dark:bg-red-950 text-red-800 dark:text-red-300" : "",
-                line.type === "added" ? "bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300" : "",
-                line.type === "context" ? "text-zinc-700 dark:text-zinc-300" : "",
-              ].join(" ")}
-            >
-              <span className="select-none text-zinc-400 dark:text-zinc-600 w-4 inline-block mr-2">
-                {line.type === "removed" ? "-" : line.type === "added" ? "+" : " "}
-              </span>
-              {line.text || " "}
-            </div>
-          ))}
-        </pre>
-      </div>
-    </div>
   );
 }
 
@@ -118,38 +65,78 @@ export function CodeDiff({
   afterLabel = "After",
   description,
 }: CodeDiffProps) {
+  const [highlighted, setHighlighted] = useState(false);
   const { beforeLines, afterLines } = computeLineDiff(before, after);
+  const changeCount = beforeLines.filter((l) => l.type === "removed").length + afterLines.filter((l) => l.type === "added").length;
 
   return (
     <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden">
-      {(title || description) && (
-        <div className="px-4 py-3 border-b border-zinc-100 dark:border-zinc-800">
-          {title && <h3 className="text-sm font-bold text-zinc-900 dark:text-zinc-100">{title}</h3>}
-          {description && (
-            <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">{description}</p>
-          )}
-        </div>
+      <div className="flex items-center gap-3 px-4 h-12 border-b border-zinc-100 dark:border-zinc-800">
+        <GitCompareArrows className="size-4 text-zinc-400 shrink-0" />
+        <span className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 flex-1">{title ?? "Code Diff"}</span>
+        <span className="text-[10px] font-mono text-zinc-400 border border-zinc-200 dark:border-zinc-700 px-2 py-0.5 rounded">{language}</span>
+      </div>
+
+      {description && (
+        <p className="text-sm text-zinc-500 dark:text-zinc-400 px-4 py-2 border-b border-zinc-100 dark:border-zinc-800">{description}</p>
       )}
 
-      <div className="p-4 flex gap-3 flex-col sm:flex-row">
-        <CodePanel
-          label={beforeLabel ?? "Before"}
-          lines={beforeLines}
-          code={before}
-          language={language}
-          labelColor="text-red-600 dark:text-red-400"
-          borderColor="border-l-red-400"
-          headerBg="bg-red-50 dark:bg-red-950/50"
-        />
-        <CodePanel
-          label={afterLabel ?? "After"}
-          lines={afterLines}
-          code={after}
-          language={language}
-          labelColor="text-emerald-600 dark:text-emerald-400"
-          borderColor="border-l-emerald-400"
-          headerBg="bg-emerald-50 dark:bg-emerald-950/50"
-        />
+      <div className="min-h-[220px] p-4 flex gap-3 flex-col sm:flex-row">
+        <div className="flex-1 rounded-lg border-l-4 border-l-red-400 border border-zinc-200 dark:border-zinc-700 overflow-hidden min-w-0">
+          <div className="bg-red-50 dark:bg-red-950/50 px-3 py-2 flex items-center justify-between border-b border-zinc-200 dark:border-zinc-700">
+            <span className="text-xs font-semibold text-red-600 dark:text-red-400">{beforeLabel}</span>
+            <CopyButton text={before} />
+          </div>
+          <pre className="font-mono text-xs leading-6 p-3 min-h-[160px]">
+            {beforeLines.map((line, i) => (
+              <div
+                key={i}
+                className={cn(
+                  "px-1 -mx-1 rounded transition-all duration-500",
+                  highlighted && line.type === "removed" ? "bg-red-100 dark:bg-red-950 text-red-800 dark:text-red-300" : "text-zinc-700 dark:text-zinc-300",
+                  !highlighted && line.type === "removed" ? "bg-red-50 dark:bg-red-950/50 text-red-700" : ""
+                )}
+              >
+                <span className="select-none text-zinc-400 w-4 inline-block mr-2">{line.type === "removed" ? "−" : " "}</span>
+                {line.text || "\u00a0"}
+              </div>
+            ))}
+          </pre>
+        </div>
+
+        <div className="flex-1 rounded-lg border-l-4 border-l-emerald-400 border border-zinc-200 dark:border-zinc-700 overflow-hidden min-w-0">
+          <div className="bg-emerald-50 dark:bg-emerald-950/50 px-3 py-2 flex items-center justify-between border-b border-zinc-200 dark:border-zinc-700">
+            <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">{afterLabel}</span>
+            <CopyButton text={after} />
+          </div>
+          <pre className="font-mono text-xs leading-6 p-3 min-h-[160px]">
+            {afterLines.map((line, i) => (
+              <div
+                key={i}
+                className={cn(
+                  "px-1 -mx-1 rounded transition-all duration-500",
+                  highlighted && line.type === "added" ? "bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300" : "text-zinc-700 dark:text-zinc-300",
+                  !highlighted && line.type === "added" ? "bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700" : ""
+                )}
+              >
+                <span className="select-none text-zinc-400 w-4 inline-block mr-2">{line.type === "added" ? "+" : " "}</span>
+                {line.text || "\u00a0"}
+              </div>
+            ))}
+          </pre>
+        </div>
+      </div>
+
+      <div className="px-4 py-3 border-t border-zinc-100 dark:border-zinc-800 flex items-center gap-3">
+        <span className="text-sm text-zinc-500 dark:text-zinc-400 flex-1">
+          {highlighted ? `${changeCount} line${changeCount !== 1 ? "s" : ""} changed` : "Red = removed, green = added"}
+        </span>
+        <button
+          onClick={() => setHighlighted((h) => !h)}
+          className="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-opacity shrink-0"
+        >
+          {highlighted ? "Show All" : "Highlight Changes"}
+        </button>
       </div>
     </div>
   );

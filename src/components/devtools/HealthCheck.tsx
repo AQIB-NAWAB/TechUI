@@ -3,7 +3,7 @@
 import { useState, useCallback } from "react";
 import { z } from "zod";
 import { cn } from "@/lib/utils";
-import { Activity, CheckCircle2, AlertCircle, XCircle, Loader2 } from "lucide-react";
+import { Activity, CheckCircle, AlertCircle, XCircle, Loader2 } from "lucide-react";
 
 export const HealthCheckSchema = z.object({
   service: z.string().default("FreshMarket API"),
@@ -53,15 +53,9 @@ function StatusIcon({ status, checking }: { status: EndpointStatus; checking: bo
   if (checking) {
     return <Loader2 className="size-4 text-blue-500 animate-spin shrink-0" />;
   }
-  if (status === "healthy") {
-    return <CheckCircle2 className="size-4 text-emerald-500 shrink-0" />;
-  }
-  if (status === "degraded") {
-    return <AlertCircle className="size-4 text-amber-500 shrink-0" />;
-  }
-  if (status === "down") {
-    return <XCircle className="size-4 text-red-500 shrink-0" />;
-  }
+  if (status === "healthy") return <CheckCircle className="size-4 text-emerald-500 shrink-0" />;
+  if (status === "degraded") return <AlertCircle className="size-4 text-amber-500 shrink-0" />;
+  if (status === "down") return <XCircle className="size-4 text-red-500 shrink-0" />;
   return <div className="size-4 rounded-full border-2 border-zinc-300 dark:border-zinc-600 shrink-0" />;
 }
 
@@ -98,22 +92,18 @@ export function HealthCheck({
     if (running) return;
     setRunning(true);
 
-    // Reset all to pending
     setStates((prev) =>
       prev.map((s) => ({ ...s, status: "pending" as EndpointStatus, checking: false, responseMs: undefined }))
     );
 
-    // Reveal each one sequentially
     endpoints.forEach((ep, idx) => {
-      // Start checking
       setTimeout(() => {
         setActiveIdx(idx);
         setStates((prev) =>
           prev.map((s, i) => (i === idx ? { ...s, checking: true } : s))
         );
-      }, idx * 700);
+      }, idx * 1200);
 
-      // Show result
       setTimeout(() => {
         setActiveIdx(null);
         setStates((prev) =>
@@ -131,7 +121,7 @@ export function HealthCheck({
         if (idx === endpoints.length - 1) {
           setRunning(false);
         }
-      }, idx * 700 + 600);
+      }, idx * 1200 + 800);
     });
   }, [running, endpoints]);
 
@@ -141,92 +131,83 @@ export function HealthCheck({
 
   return (
     <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden">
-      {/* Header */}
-      <div className="flex items-center gap-2 px-4 py-2.5 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/60">
-        <Activity className="size-3.5 text-zinc-400 shrink-0" />
-        <span className="text-xs font-bold text-zinc-700 dark:text-zinc-200 flex-1">
+      <div className="flex items-center gap-3 px-4 h-12 border-b border-zinc-100 dark:border-zinc-800">
+        <Activity className="size-4 text-zinc-400 shrink-0" />
+        <span className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 flex-1">
           Health Check
         </span>
-        <span className="text-[11px] text-zinc-500 dark:text-zinc-400 font-medium mr-2">
+        <span className="text-[10px] font-mono text-zinc-400 bg-zinc-100 dark:bg-zinc-800 px-2 py-0.5 rounded">
           {service}
         </span>
-        <button
-          onClick={runChecks}
-          disabled={running}
-          className={cn(
-            "bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-3 py-1.5 text-xs font-semibold hover:opacity-90 transition-opacity",
-            running && "opacity-50 cursor-not-allowed"
-          )}
-        >
-          {running ? "Checking…" : "Run Checks"}
-        </button>
       </div>
 
-      {/* Endpoint list */}
-      <div className="min-h-[260px] px-4 py-3 space-y-1.5">
-        {states.map((ep, idx) => (
-          <div
-            key={ep.name}
-            className={cn(
-              "flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-500",
-              activeIdx === idx
-                ? "bg-blue-50 dark:bg-blue-950/30"
-                : "hover:bg-zinc-50 dark:hover:bg-zinc-800/50"
-            )}
-          >
-            <StatusIcon status={ep.status} checking={ep.checking} />
+      <p className="text-sm text-zinc-500 dark:text-zinc-400 px-4 py-2 border-b border-zinc-100 dark:border-zinc-800">
+        Ping each dependency to see if your app and its services are up and responding fast enough.
+      </p>
 
-            <div className="flex-1 min-w-0 flex items-center gap-2">
-              <span className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 truncate">
-                {ep.name}
-              </span>
-              <span className="text-[10px] font-mono text-zinc-400 truncate hidden sm:inline">
-                {ep.path}
-              </span>
-            </div>
-
-            {/* Response time badge */}
-            <span
+      <div className="min-h-[260px] px-4 py-3">
+        <div className="border border-zinc-100 dark:border-zinc-800 rounded-lg divide-y divide-zinc-100 dark:divide-zinc-800">
+          {states.map((ep, idx) => (
+            <div
+              key={ep.name}
               className={cn(
-                "text-[10px] font-mono font-bold px-1.5 py-0.5 rounded shrink-0 transition-all duration-500",
-                ep.checking || ep.status === "pending"
-                  ? "bg-zinc-100 dark:bg-zinc-800 text-zinc-400"
-                  : getTimeBadgeColor(ep.responseMs, ep.expectedMs)
+                "flex items-center gap-3 px-3 py-2 transition-all duration-500",
+                activeIdx === idx
+                  ? "bg-blue-50 dark:bg-blue-950/30"
+                  : "hover:bg-zinc-50 dark:hover:bg-zinc-800/50"
               )}
             >
-              {ep.checking || ep.status === "pending"
-                ? "---"
-                : ep.responseMs !== undefined
-                ? `${ep.responseMs}ms`
-                : "---"}
-            </span>
+              <StatusIcon status={ep.status} checking={ep.checking} />
 
-            {/* Status dot + label */}
-            <div className="flex items-center gap-1 shrink-0">
+              <div className="flex-1 min-w-0 flex items-center gap-2">
+                <span className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 truncate">
+                  {ep.name}
+                </span>
+                <span className="text-[10px] font-mono text-zinc-400 truncate hidden sm:inline">
+                  {ep.path}
+                </span>
+              </div>
+
               <span
                 className={cn(
-                  "size-2 rounded-full transition-all duration-500",
-                  ep.checking ? "bg-blue-500 animate-pulse" : statusDotColor(ep.status)
+                  "text-[10px] font-mono font-bold px-1.5 py-0.5 rounded shrink-0 transition-all duration-500",
+                  ep.checking || ep.status === "pending"
+                    ? "bg-zinc-100 dark:bg-zinc-800 text-zinc-400"
+                    : getTimeBadgeColor(ep.responseMs, ep.expectedMs)
                 )}
-              />
-              {ep.status === "degraded" && !ep.checking && (
-                <span className="text-[10px] text-amber-600 dark:text-amber-400 font-semibold">
-                  slow
-                </span>
-              )}
-              {ep.status === "down" && !ep.checking && (
-                <span className="text-[10px] text-red-600 dark:text-red-400 font-semibold">
-                  down
-                </span>
-              )}
+              >
+                {ep.checking || ep.status === "pending"
+                  ? "---"
+                  : ep.responseMs !== undefined
+                  ? `${ep.responseMs}ms`
+                  : "---"}
+              </span>
+
+              <div className="flex items-center gap-1 shrink-0 w-12 justify-end">
+                <span
+                  className={cn(
+                    "size-2 rounded-full transition-all duration-500",
+                    ep.checking ? "bg-blue-500 animate-pulse" : statusDotColor(ep.status)
+                  )}
+                />
+                {ep.status === "degraded" && !ep.checking && (
+                  <span className="text-[10px] text-amber-600 dark:text-amber-400 font-semibold">
+                    slow
+                  </span>
+                )}
+                {ep.status === "down" && !ep.checking && (
+                  <span className="text-[10px] text-red-600 dark:text-red-400 font-semibold">
+                    down
+                  </span>
+                )}
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
 
-      {/* Summary bar */}
-      <div className="px-4 py-2 border-t border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/40 flex items-center justify-between gap-4">
-        <div className="flex items-center gap-3 text-[10px]">
+      <div className="px-4 py-3 border-t border-zinc-100 dark:border-zinc-800 flex items-center justify-between gap-4">
+        <div className="flex items-center gap-3 text-sm text-zinc-500 dark:text-zinc-400 flex-wrap">
           {healthyCount > 0 && (
             <span className="text-emerald-600 dark:text-emerald-400 font-semibold">
               {healthyCount} healthy
@@ -243,24 +224,20 @@ export function HealthCheck({
             </span>
           )}
           {healthyCount === 0 && degradedCount === 0 && downCount === 0 && (
-            <span className="text-zinc-400">Pending checks…</span>
+            <span>Pending checks…</span>
           )}
+          <span className="text-[10px] text-zinc-400">· every {intervalSeconds}s</span>
         </div>
-        <div className="flex items-center gap-2">
-          <span className="text-[10px] text-zinc-400">
-            Next check in {intervalSeconds}s
-          </span>
-          <button
-            onClick={runChecks}
-            disabled={running}
-            className={cn(
-              "text-[10px] font-semibold px-2.5 py-1 rounded-md bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 hover:opacity-90 transition-opacity",
-              running && "opacity-50 cursor-not-allowed"
-            )}
-          >
-            Run Checks
-          </button>
-        </div>
+        <button
+          onClick={runChecks}
+          disabled={running}
+          className={cn(
+            "bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-opacity shrink-0",
+            running && "opacity-50 cursor-not-allowed"
+          )}
+        >
+          {running ? "Checking…" : "Run Checks"}
+        </button>
       </div>
     </div>
   );

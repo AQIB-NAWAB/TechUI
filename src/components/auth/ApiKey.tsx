@@ -64,9 +64,9 @@ export function ApiKey({
   const statusCfg = STATUS_CFG[status];
 
   return (
-    <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 overflow-hidden">
+    <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden">
       {/* Header */}
-      <div className="px-4 py-3 border-b border-zinc-100 dark:border-zinc-900 flex items-center gap-2">
+      <div className="h-12 px-4 flex items-center gap-2 border-b border-zinc-100 dark:border-zinc-800">
         <Key className="size-4 text-zinc-400 shrink-0" />
         <span className="text-sm font-semibold text-zinc-800 dark:text-zinc-200 flex-1">{name}</span>
         <div className="flex items-center gap-1.5">
@@ -84,7 +84,7 @@ export function ApiKey({
           {revealedValue && (
             <button
               onClick={() => setRevealed((v) => !v)}
-              className="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors shrink-0"
+              className="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-all duration-500 shrink-0"
               title={revealed ? "Hide key" : "Reveal key"}
             >
               {revealed ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
@@ -92,7 +92,7 @@ export function ApiKey({
           )}
           <button
             onClick={copy}
-            className="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-all duration-300 shrink-0"
+            className="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-all duration-500 shrink-0"
             title="Copy key"
           >
             {copied ? <Check className="size-4 text-emerald-500" /> : <Copy className="size-4" />}

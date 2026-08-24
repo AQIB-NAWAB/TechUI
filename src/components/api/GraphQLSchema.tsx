@@ -145,7 +145,7 @@ export function GraphQLSchema({ types = [] }: GraphQLSchemaProps) {
               key={t.name}
               onClick={() => setSelectedIdx(i)}
               className={cn(
-                "text-xs font-semibold px-3 py-1 rounded-full border transition-all duration-300",
+                "text-xs font-semibold px-3 py-1 rounded-full border transition-all duration-500",
                 isActive
                   ? cn(ks.pill, "shadow-sm scale-105")
                   : "border-zinc-200 dark:border-zinc-700 text-zinc-500 dark:text-zinc-400 hover:border-zinc-300 dark:hover:border-zinc-600 hover:text-zinc-700 dark:hover:text-zinc-300",

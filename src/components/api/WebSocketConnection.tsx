@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { z } from "zod";
 import { cn } from "@/lib/utils";
-import { Zap, Send, ChevronDown, ChevronRight } from "lucide-react";
+import { Zap, Send, ChevronDown, ChevronRight, Monitor, Server } from "lucide-react";
 
 const WSMessageSchema = z.object({
   direction: z.enum(["client", "server"]),
@@ -41,14 +41,17 @@ const AUTO_SEQUENCE: { direction: "client" | "server"; data: string; delayMs: nu
 ];
 
 const SERVER_RESPONSES: { match: string; reply: string }[] = [
-  { match: "ping",       reply: '{"event":"pong","ts":' + Date.now() + '}' },
+  { match: "ping",       reply: '{"event":"pong"}' },
   { match: "subscribe",  reply: '{"event":"subscribed","status":"ok"}' },
-  { match: "send",       reply: '{"event":"delivered","messageId":"msg_' + Math.floor(Math.random() * 1000) + '"}' },
+  { match: "send",       reply: '{"event":"delivered","messageId":"msg_482"}' },
   { match: "hello",      reply: '{"event":"echo","data":"Hello! I am the server."}' },
 ];
 
 function getServerReply(input: string): string {
   const lower = input.toLowerCase();
+  if (lower === "hello from client" || lower === "hello") {
+    return "Pong!";
+  }
   for (const { match, reply } of SERVER_RESPONSES) {
     if (lower.includes(match)) return reply;
   }
@@ -56,15 +59,16 @@ function getServerReply(input: string): string {
 }
 
 const PRESET_MESSAGES = [
+  "Hello from client",
   '{"action":"ping"}',
   '{"action":"subscribe","channel":"prices"}',
-  '{"action":"send","to":"user_2","text":"Hello!"}',
 ];
 
 export function WebSocketConnection({
   url = "wss://api.example.com/ws",
   protocol,
   messages: initMessages,
+  showHandshake = true,
   interactive = true,
 }: WebSocketConnectionProps) {
   const [connState, setConnState] = useState<ConnState>("closed");
@@ -112,14 +116,14 @@ export function WebSocketConnection({
       addMessage("server", "Connection closed.", "close");
       setConnState("closed");
       setMessages([]);
-    }, 500);
+    }, 1000);
   }
 
   function sendMessage() {
     if (!input.trim() || connState !== "connected") return;
     addMessage("client", input.trim());
     const reply = getServerReply(input.trim());
-    setTimeout(() => addMessage("server", reply), 400);
+    setTimeout(() => addMessage("server", reply), 1000);
   }
 
   const statusDot = connState === "connected"
@@ -135,7 +139,10 @@ export function WebSocketConnection({
       {/* Header */}
       <div className="flex items-center gap-3 px-4 h-12 border-b border-zinc-100 dark:border-zinc-800">
         <Zap className="size-4 text-violet-500 shrink-0" />
-        <code className="text-[12px] font-mono text-zinc-500 dark:text-zinc-400 flex-1 truncate">{url}</code>
+        <div className="flex-1 min-w-0">
+          <span className="text-sm font-semibold text-zinc-800 dark:text-zinc-200 block">WebSocket Connection</span>
+          <code className="text-[11px] font-mono text-zinc-500 dark:text-zinc-400 truncate block">{url}</code>
+        </div>
         {protocol && <span className="text-[11px] text-zinc-400 font-mono shrink-0">{protocol}</span>}
         <div className="flex items-center gap-1.5 shrink-0">
           <span className={cn("size-2 rounded-full transition-all duration-500", statusDot)} />
@@ -180,8 +187,12 @@ export function WebSocketConnection({
         <>
           {/* Participant labels */}
           <div className="flex items-center justify-between px-4 py-2 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-800/20">
-            <span className="text-[10px] font-semibold text-zinc-400 uppercase tracking-widest">Client</span>
-            <span className="text-[10px] font-semibold text-zinc-400 uppercase tracking-widest">Server</span>
+            <span className="flex items-center gap-1.5 text-[10px] font-semibold text-zinc-400 uppercase tracking-widest">
+              <Monitor className="size-3" /> Client
+            </span>
+            <span className="flex items-center gap-1.5 text-[10px] font-semibold text-zinc-400 uppercase tracking-widest">
+              Server <Server className="size-3" />
+            </span>
           </div>
 
           {/* Message log */}
@@ -192,14 +203,14 @@ export function WebSocketConnection({
             {messages.length === 0 && (
               <p className="text-xs text-zinc-400 text-center py-6">Connecting…</p>
             )}
-            {messages.map((msg) => {
+            {messages.slice(-8).map((msg) => {
               const isClient = msg.direction === "client";
               const isClose = msg.type === "close";
               return (
                 <div
                   key={msg.id}
                   className={cn(
-                    "flex gap-2 transition-all duration-300",
+                    "flex gap-2 transition-all duration-500",
                     isClient ? "justify-end" : "justify-start",
                     msg.visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"
                   )}
@@ -240,7 +251,7 @@ export function WebSocketConnection({
               </button>
               <button
                 onClick={disconnect}
-                className="shrink-0 px-2 py-1.5 rounded-lg border border-zinc-200 dark:border-zinc-700 text-zinc-500 text-xs hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors"
+                className="shrink-0 px-2 py-1.5 rounded-lg border border-zinc-200 dark:border-zinc-700 text-zinc-500 text-xs hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all duration-500"
               >
                 Disconnect
               </button>
@@ -248,10 +259,11 @@ export function WebSocketConnection({
           )}
 
           {/* Collapsible upgrade details */}
+          {showHandshake && (
           <div className="border-t border-zinc-100 dark:border-zinc-800">
             <button
               onClick={() => setShowUpgrade((v) => !v)}
-              className="w-full flex items-center gap-2 px-4 py-2 text-left hover:bg-zinc-50 dark:hover:bg-zinc-800/30 transition-colors"
+              className="w-full flex items-center gap-2 px-4 py-2 text-left hover:bg-zinc-50 dark:hover:bg-zinc-800/30 transition-all duration-500"
             >
               {showUpgrade ? <ChevronDown className="size-3 text-zinc-400" /> : <ChevronRight className="size-3 text-zinc-400" />}
               <span className="text-[10px] font-semibold text-zinc-400">How WebSockets connect</span>
@@ -262,6 +274,7 @@ export function WebSocketConnection({
               </div>
             )}
           </div>
+          )}
         </>
       )}
     </div>

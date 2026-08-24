@@ -70,7 +70,7 @@ export function DatabaseIndex({
         setScanIndex(currentRow);
         setRowCount(Math.round((currentRow + 1) * speedFactor));
         currentRow++;
-        timerRef.current = setTimeout(stepScan, 300);
+        timerRef.current = setTimeout(stepScan, 1000);
       } else {
         setScanIndex(VISIBLE_ROWS - 1);
         setRowCount(rowsToScan);
@@ -82,7 +82,7 @@ export function DatabaseIndex({
       if (currentTree < clampedNodes.length) {
         setTreeStep(currentTree);
         currentTree++;
-        timerRef.current = setTimeout(stepTree, 600);
+        timerRef.current = setTimeout(stepTree, 1000);
       } else {
         maybeFinish();
       }
@@ -124,15 +124,21 @@ export function DatabaseIndex({
         <span className="text-[10px] font-mono bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 px-2 py-0.5 rounded">B-Tree</span>
       </div>
 
+      <div className="px-4 py-2 border-b border-zinc-100 dark:border-zinc-800">
+        <p className="text-sm text-zinc-500 dark:text-zinc-400">
+          Without an index the database reads every row. With a B-tree index it jumps directly to the match.
+        </p>
+      </div>
+
       <div className="px-4 py-2 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/20">
         <code className="text-xs text-zinc-500 dark:text-zinc-400 font-mono">
           SELECT * FROM {tableName} WHERE {indexColumn} = {searchValue}
         </code>
       </div>
 
-      <div className="min-h-[260px] flex">
-        <div className="flex-1 px-3 py-3 border-r border-zinc-100 dark:border-zinc-800">
-          <div className="text-[10px] font-bold uppercase tracking-wide text-zinc-400 mb-0.5">Without Index</div>
+      <div className="min-h-[280px] flex">
+        <div className="flex-1 px-3 py-3 border-r border-zinc-100 dark:border-zinc-800 border border-zinc-100 dark:border-zinc-800 rounded-none">
+          <div className="text-[10px] font-semibold uppercase tracking-widest text-zinc-400 mb-0.5">Without Index</div>
           <div className="text-[10px] text-red-500 dark:text-red-400 mb-2">Sequential Scan</div>
           <div className="space-y-0.5">
             {rows.map((row, idx) => {
@@ -169,8 +175,8 @@ export function DatabaseIndex({
           </div>
         </div>
 
-        <div className="flex-1 px-3 py-3">
-          <div className="text-[10px] font-bold uppercase tracking-wide text-zinc-400 mb-0.5">With Index</div>
+        <div className="flex-1 px-3 py-3 border border-zinc-100 dark:border-zinc-800">
+          <div className="text-[10px] font-semibold uppercase tracking-widest text-zinc-400 mb-0.5">With Index</div>
           <div className="text-[10px] text-emerald-600 dark:text-emerald-400 mb-3">B-Tree Lookup</div>
 
           <div className="flex flex-col items-center gap-0">
@@ -194,12 +200,15 @@ export function DatabaseIndex({
               </div>
             ))}
 
-            {phase === "done" && (
-              <div className="flex items-center gap-1.5 mt-2 text-[10px] font-semibold text-emerald-600 dark:text-emerald-400 transition-all duration-500">
-                <CheckCircle2 className="size-3.5" />
-                FOUND {indexColumn}={searchValue}
-              </div>
-            )}
+            {/* Fixed height slot for FOUND message */}
+            <div className="min-h-[28px] flex items-center mt-2">
+              {phase === "done" && (
+                <div className="flex items-center gap-1.5 text-[10px] font-semibold text-emerald-600 dark:text-emerald-400 transition-all duration-500">
+                  <CheckCircle2 className="size-3.5" />
+                  FOUND {indexColumn}={searchValue}
+                </div>
+              )}
+            </div>
             <div className={cn(
               "mt-1.5 text-[10px] font-mono transition-all duration-500",
               treeStep >= 0 ? "text-zinc-500" : "text-zinc-300 dark:text-zinc-700"

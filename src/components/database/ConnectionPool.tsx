@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { z } from "zod";
 import { cn } from "@/lib/utils";
-import { Database, Server, Clock } from "lucide-react";
+import { Database, Server, Clock, Monitor, ArrowRight } from "lucide-react";
 
 export const ConnectionPoolSchema = z.object({
   poolSize: z.number().int().min(1).max(10).optional().default(5),
@@ -37,6 +37,7 @@ export function ConnectionPool({
   const [totalHandled, setTotalHandled] = useState(0);
   const [totalWaitMs, setTotalWaitMs] = useState(0);
   const [flash, setFlash] = useState<"ok" | "queued" | null>(null);
+  const [packetAnim, setPacketAnim] = useState(false);
 
   const releaseConn = useStableCallback((slot: number, waitMs: number) => {
     setTimeout(() => {
@@ -55,20 +56,22 @@ export function ConnectionPool({
   }, []);
 
   const sendRequest = useStableCallback(() => {
+    setPacketAnim(true);
+    setTimeout(() => setPacketAnim(false), 1000);
     setConns((prev) => {
       const freeSlot = acquireSlot(prev);
       if (freeSlot !== -1) {
         const next = [...prev];
         next[freeSlot] = "busy";
         setFlash("ok");
-        setTimeout(() => setFlash(null), 600);
+        setTimeout(() => setFlash(null), 1000);
         releaseConn(freeSlot, 0);
         return next;
       } else {
         const item: QueueItem = { id: ++_reqId, since: Date.now() };
         setQueue((q) => [...q, item].slice(0, 4));
         setFlash("queued");
-        setTimeout(() => setFlash(null), 600);
+        setTimeout(() => setFlash(null), 1000);
         return prev;
       }
     });
@@ -110,6 +113,20 @@ export function ConnectionPool({
       </div>
 
       <div className="min-h-[260px] px-4 py-4">
+        {/* Animated flow: App → Pool → DB */}
+        <div className="flex items-center justify-center gap-2 mb-4 py-2 border border-zinc-100 dark:border-zinc-800 rounded-lg bg-zinc-50 dark:bg-zinc-800/40">
+          <Monitor className={cn("size-4 transition-all duration-500", packetAnim ? "text-blue-500" : "text-zinc-400")} />
+          <div className="relative flex-1 h-1 max-w-[60px] bg-zinc-200 dark:bg-zinc-700 rounded-full overflow-hidden">
+            {packetAnim && <div className="absolute inset-y-0 w-2 bg-blue-500 rounded-full animate-[travel_1s_ease-in-out_forwards]" />}
+          </div>
+          <span className="text-[9px] font-semibold text-zinc-500">Pool</span>
+          <ArrowRight className={cn("size-3 transition-all duration-500", packetAnim ? "text-emerald-500" : "text-zinc-300")} />
+          <div className="relative flex-1 h-1 max-w-[60px] bg-zinc-200 dark:bg-zinc-700 rounded-full overflow-hidden">
+            {packetAnim && <div className="absolute inset-y-0 w-2 bg-emerald-500 rounded-full animate-[travel_1s_ease-in-out_0.3s_forwards]" style={{ animationDelay: "0.3s" }} />}
+          </div>
+          <Database className={cn("size-4 transition-all duration-500", packetAnim ? "text-emerald-500" : "text-zinc-400")} />
+        </div>
+
         <div className="grid grid-cols-3 gap-3 h-full">
           <div>
             <div className="text-[10px] font-bold uppercase tracking-wide text-zinc-400 mb-2">App Instances</div>
@@ -199,6 +216,12 @@ export function ConnectionPool({
           </div>
         </div>
       </div>
+      <style>{`
+        @keyframes travel {
+          from { left: 0; opacity: 1; }
+          to { left: calc(100% - 8px); opacity: 0.3; }
+        }
+      `}</style>
 
       {interactive && (
         <div className={cn(

@@ -66,7 +66,7 @@ export function RateLimiter({
       setTokens((t) => +(t - 1).toFixed(2));
     } else {
       setShake(true);
-      setTimeout(() => setShake(false), 400);
+      setTimeout(() => setShake(false), 500);
     }
   }
 
@@ -102,18 +102,18 @@ export function RateLimiter({
         flash === "blocked" ? "border-red-300 dark:border-red-800" : "border-zinc-200 dark:border-zinc-800"
       )}>
         {/* Header */}
-        <div className="flex items-center gap-3 px-4 py-2.5 border-b border-zinc-100 dark:border-zinc-900 bg-zinc-50 dark:bg-zinc-900/50">
-          <Zap className="size-3.5 text-zinc-400 shrink-0" />
-          <span className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 flex-1">{name}</span>
+        <div className="flex items-center gap-3 px-4 h-12 border-b border-zinc-100 dark:border-zinc-900 bg-zinc-50 dark:bg-zinc-900/50">
+          <Zap className="size-4 text-zinc-400 shrink-0" />
+          <span className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 flex-1">{name}</span>
           <span className="text-[10px] font-mono text-zinc-400 bg-zinc-100 dark:bg-zinc-800 px-2 py-0.5 rounded">{algorithm}</span>
           {interactive && (
-            <button onClick={reset} className="p-1 rounded text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors">
+            <button onClick={reset} className="p-1 rounded text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-all duration-500">
               <RefreshCw className="size-3.5" />
             </button>
           )}
         </div>
 
-        <div className="p-4 flex gap-5 items-start">
+        <div className="p-4 min-h-[220px] flex gap-5 items-start">
           {/* Token bucket visual */}
           <div className="flex flex-col items-center gap-2 shrink-0 relative">
             <span className="text-[10px] font-semibold text-zinc-400 uppercase tracking-wide">Tokens</span>
@@ -130,7 +130,10 @@ export function RateLimiter({
             ))}
 
             <div
-              className="relative w-14 h-20 rounded-b-xl border-2 border-t-0 border-zinc-200 dark:border-zinc-700 overflow-hidden bg-zinc-50 dark:bg-zinc-900"
+              className={cn(
+                "relative w-14 h-20 rounded-b-xl border-2 border-t-0 border-zinc-200 dark:border-zinc-700 overflow-hidden bg-zinc-50 dark:bg-zinc-900 transition-all duration-500",
+                refillIndicators.length > 0 && "ring-2 ring-emerald-400 ring-offset-1 dark:ring-offset-zinc-950"
+              )}
               style={shake ? { animation: "shake 0.4s ease-in-out" } : undefined}
             >
               <div
@@ -201,8 +204,8 @@ export function RateLimiter({
 
         {/* Controls */}
         {interactive && (
-          <div className="border-t border-zinc-100 dark:border-zinc-900 px-4 py-2.5 flex items-center gap-3 bg-zinc-50 dark:bg-zinc-900/30">
-            <span className="text-[10px] text-zinc-400 flex-1">
+          <div className="border-t border-zinc-100 dark:border-zinc-900 px-4 py-3 flex items-center gap-3 bg-zinc-50 dark:bg-zinc-900/30">
+            <span className="text-sm text-zinc-500 dark:text-zinc-400 flex-1">
               {flash === "blocked"
                 ? "Rate limited! Bucket is empty — wait for tokens to refill."
                 : "Click to consume a token. Tokens refill automatically each second."}
@@ -210,10 +213,10 @@ export function RateLimiter({
             <button
               onClick={makeRequest}
               className={cn(
-                "px-3 py-1.5 rounded-md text-white text-xs font-semibold transition-all duration-500 shrink-0",
+                "px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-500 shrink-0 hover:opacity-90",
                 flash === "blocked"
-                  ? "bg-red-500 hover:bg-red-600"
-                  : "bg-zinc-800 dark:bg-zinc-700 hover:bg-zinc-700 dark:hover:bg-zinc-600"
+                  ? "bg-red-500 text-white"
+                  : "bg-zinc-900 dark:bg-white text-white dark:text-zinc-900"
               )}
             >
               Make Request

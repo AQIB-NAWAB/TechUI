@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { z } from "zod";
 import { cn } from "@/lib/utils";
-import { Filter } from "lucide-react";
+import { Filter, CheckCircle, XCircle, AlertCircle } from "lucide-react";
 
 export const BloomFilterSchema = z.object({
   size: z.number().default(16),
@@ -118,12 +118,12 @@ export function BloomFilter({
           next.add(bit);
           return next;
         });
-      }, idx * 600);
+      }, idx * 1000);
     });
 
     animTimerRef.current = setTimeout(() => {
       setAnimatingStep(bits.length);
-    }, bits.length * 600);
+    }, bits.length * 1000);
   }
 
   function addItem() {
@@ -146,21 +146,22 @@ export function BloomFilter({
 
   return (
     <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden">
-      {/* Header */}
-      <div className="flex items-center gap-3 px-4 h-12 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50">
+      <div className="flex items-center gap-3 px-4 h-12 border-b border-zinc-100 dark:border-zinc-800">
         <Filter className="size-4 text-violet-500 shrink-0" />
         <span className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 flex-1">Bloom Filter</span>
-        <span className="text-xs text-zinc-500 dark:text-zinc-400 font-mono">
-          {size}-bit · {effectiveHashCount} hash func{effectiveHashCount !== 1 ? "s" : ""}
+        <span className="text-xs text-zinc-500 dark:text-zinc-400 font-mono border border-zinc-200 dark:border-zinc-700 px-2 py-0.5 rounded">
+          {size}-bit · {effectiveHashCount} hashes
         </span>
       </div>
 
-      {/* Interactive area */}
-      <div className="min-h-[300px] px-4 pt-4 pb-3 flex flex-col gap-4">
+      <p className="text-sm text-zinc-500 dark:text-zinc-400 px-4 py-2 border-b border-zinc-100 dark:border-zinc-800">
+        Probabilistic set — never false negatives, but can have false positives.
+      </p>
 
-        {/* Bit array */}
-        <div>
-          <div className="text-[10px] font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Bit array</div>
+      <div className="min-h-[220px] px-4 pt-4 pb-3 flex flex-col gap-4">
+
+        <div className="border border-zinc-100 dark:border-zinc-800 rounded-lg p-3 bg-zinc-50 dark:bg-zinc-800/40">
+          <div className="text-[10px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500 mb-2">Bit array</div>
           <div className="flex flex-wrap gap-1">
             {bitArray.map((bit, idx) => {
               const isHighlighted = highlightedBits.has(idx);
@@ -183,7 +184,7 @@ export function BloomFilter({
                     {bit ? "1" : "0"}
                   </div>
                   <span className={cn(
-                    "text-[8px] font-mono tabular-nums transition-all duration-300",
+                    "text-[8px] font-mono tabular-nums transition-all duration-500",
                     isCheckBit ? "text-violet-500 dark:text-violet-400 font-bold" : "text-zinc-300 dark:text-zinc-600"
                   )}>
                     {idx}
@@ -224,7 +225,7 @@ export function BloomFilter({
             <div className="flex flex-wrap gap-2 mb-2">
               {checkResult.bits.map((bit, idx) => (
                 <span key={idx} className={cn(
-                  "text-[11px] font-mono transition-all duration-300",
+                  "text-[11px] font-mono transition-all duration-500",
                   idx < animatingStep
                     ? bitArray[bit]
                       ? "text-emerald-600 dark:text-emerald-400"
@@ -240,42 +241,25 @@ export function BloomFilter({
             </div>
             {animatingStep >= checkResult.bits.length && (
               <div className={cn(
-                "font-bold text-sm transition-all duration-500",
+                "font-bold text-sm transition-all duration-500 flex items-center gap-1.5",
                 checkResult.falsePositive
                   ? "text-amber-600 dark:text-amber-400"
                   : checkResult.inSet
                   ? "text-emerald-700 dark:text-emerald-400"
                   : "text-red-600 dark:text-red-400"
               )}>
-                {checkResult.falsePositive
-                  ? "⚠ FALSE POSITIVE — all bits set, but item was never inserted!"
-                  : checkResult.inSet
-                  ? "✓ PROBABLY in set"
-                  : "✗ DEFINITELY NOT in set — at least one bit is 0"}
+                {checkResult.falsePositive ? (
+                  <><AlertCircle className="size-4" /> FALSE POSITIVE — all bits set, but item was never inserted!</>
+                ) : checkResult.inSet ? (
+                  <><CheckCircle className="size-4" /> PROBABLY in set</>
+                ) : (
+                  <><XCircle className="size-4" /> DEFINITELY NOT in set — at least one bit is 0</>
+                )}
               </div>
             )}
           </div>
         )}
 
-        {/* Check buttons */}
-        <div className="flex flex-wrap gap-2">
-          {CHECK_ITEMS.map((item) => (
-            <button
-              key={item}
-              onClick={() => runCheck(item)}
-              className={cn(
-                "px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all duration-200",
-                checkResult?.item === item
-                  ? "bg-violet-100 dark:bg-violet-900/40 border-violet-400 dark:border-violet-600 text-violet-700 dark:text-violet-300"
-                  : "bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-700"
-              )}
-            >
-              Check &quot;{item}&quot;
-            </button>
-          ))}
-        </div>
-
-        {/* Add item */}
         <div className="flex gap-2">
           <input
             type="text"
@@ -283,22 +267,41 @@ export function BloomFilter({
             onChange={(e) => setNewItemInput(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && addItem()}
             placeholder='Add item (e.g. "dave")'
-            className="flex-1 text-xs font-mono px-3 py-1.5 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-violet-400 transition-all"
+            className="flex-1 text-xs font-mono px-3 py-1.5 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-violet-400 transition-all duration-500"
           />
           <button
             onClick={addItem}
             disabled={!newItemInput.trim()}
-            className="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-xs font-semibold hover:opacity-90 transition-opacity disabled:opacity-30"
+            className="px-3 py-1.5 rounded-lg text-xs font-semibold border border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all duration-500 disabled:opacity-30"
           >
-            Add
+            Insert
           </button>
         </div>
+      </div>
 
-        {/* Key insight */}
-        <div className="text-[10px] text-zinc-400 dark:text-zinc-500 bg-zinc-50 dark:bg-zinc-800/40 rounded-lg px-3 py-2">
-          Bloom filters <strong className="text-zinc-600 dark:text-zinc-300">never have false negatives</strong>, but can have{" "}
-          <strong className="text-amber-600 dark:text-amber-400">false positives</strong>. Used in DBs to skip unnecessary disk reads.
+      <div className="px-4 py-3 border-t border-zinc-100 dark:border-zinc-800 flex items-center gap-3">
+        <div className="flex gap-1.5 flex-1 flex-wrap">
+          {CHECK_ITEMS.map((item) => (
+            <button
+              key={item}
+              onClick={() => runCheck(item)}
+              className={cn(
+                "px-2 py-0.5 rounded-md text-[10px] font-mono border transition-all duration-500",
+                checkResult?.item === item
+                  ? "bg-violet-100 dark:bg-violet-900/40 border-violet-400 text-violet-700 dark:text-violet-300"
+                  : "border-zinc-200 dark:border-zinc-700 text-zinc-500 hover:bg-zinc-50 dark:hover:bg-zinc-800"
+              )}
+            >
+              {item}
+            </button>
+          ))}
         </div>
+        <button
+          onClick={() => runCheck(checkResult?.item ?? CHECK_ITEMS[0]!)}
+          className="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-opacity shrink-0"
+        >
+          Check Item
+        </button>
       </div>
     </div>
   );

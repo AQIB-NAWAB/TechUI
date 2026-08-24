@@ -125,7 +125,7 @@ export function BlobStorage({
             key={p}
             onClick={() => { setProvider(p); setPresignedVisible(false); }}
             className={cn(
-              "px-2.5 py-1 rounded-lg border text-[11px] font-semibold transition-all duration-300 cursor-pointer uppercase",
+              "px-2.5 py-1 rounded-lg border text-[11px] font-semibold transition-all duration-500 cursor-pointer uppercase",
               provider === p
                 ? "bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 border-zinc-900 dark:border-white"
                 : "border-zinc-200 dark:border-zinc-700 text-zinc-500 dark:text-zinc-400 hover:border-zinc-400"
@@ -136,22 +136,29 @@ export function BlobStorage({
         ))}
       </div>
 
+      {/* Description */}
+      <div className="px-4 py-2 border-b border-zinc-100 dark:border-zinc-800">
+        <p className="text-sm text-zinc-500 dark:text-zinc-400">
+          Store files in the cloud. Public objects have a permanent URL; private objects need a time-limited presigned link.
+        </p>
+      </div>
+
       {/* Object list */}
-      <div className="min-h-[280px] px-4 pb-4 space-y-1">
+      <div className="min-h-[280px] px-4 pb-4 pt-3 space-y-1">
         {objects.map((obj) => {
           const IconComp = TYPE_ICONS[obj.type] ?? FileText;
           const iconColor = TYPE_COLORS[obj.type] ?? "text-zinc-400";
           const isSelected = selectedKey === obj.key;
 
           return (
-            <div key={obj.key} className="rounded-lg overflow-hidden border border-transparent transition-all duration-300">
+            <div key={obj.key} className="rounded-lg overflow-hidden border border-transparent transition-all duration-500">
               <button
                 onClick={() => {
                   setSelectedKey(isSelected ? null : obj.key);
                   setPresignedVisible(false);
                 }}
                 className={cn(
-                  "w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-left transition-all duration-300 cursor-pointer",
+                  "w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-left transition-all duration-500 cursor-pointer",
                   isSelected
                     ? "bg-zinc-100 dark:bg-zinc-800 ring-1 ring-zinc-300 dark:ring-zinc-600"
                     : "hover:bg-zinc-50 dark:hover:bg-zinc-800/40"
@@ -172,9 +179,13 @@ export function BlobStorage({
                 {isSelected ? <ChevronDown className="size-3.5 text-zinc-400 shrink-0" /> : <ChevronRight className="size-3.5 text-zinc-400 shrink-0" />}
               </button>
 
-              {/* Expanded detail */}
+              {/* Expanded detail — always reserve space when selected */}
+              <div className={cn(
+                "overflow-hidden transition-all duration-500",
+                isSelected ? "max-h-[140px] opacity-100" : "max-h-0 opacity-0"
+              )}>
               {isSelected && selectedObj && (
-                <div className="px-3 pb-3 pt-1 space-y-2 bg-zinc-50 dark:bg-zinc-800/60 rounded-b-lg transition-all duration-500">
+                <div className="px-3 pb-3 pt-1 space-y-2 bg-zinc-50 dark:bg-zinc-800/60 rounded-b-lg border-t border-zinc-100 dark:border-zinc-800">
                   {selectedObj.public ? (
                     <div>
                       <div className="text-[10px] font-bold uppercase tracking-wide text-zinc-400 mb-1">Public URL</div>
@@ -200,7 +211,7 @@ export function BlobStorage({
                             key={e}
                             onClick={() => { setExpiry(e); setPresignedVisible(false); }}
                             className={cn(
-                              "px-2 py-0.5 rounded border text-[10px] font-mono transition-all duration-300 cursor-pointer",
+                              "px-2 py-0.5 rounded border text-[10px] font-mono transition-all duration-500 cursor-pointer",
                               expiry === e
                                 ? "bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 border-zinc-900 dark:border-white"
                                 : "border-zinc-200 dark:border-zinc-700 text-zinc-500 hover:border-zinc-400"
@@ -236,6 +247,7 @@ export function BlobStorage({
                   )}
                 </div>
               )}
+              </div>
             </div>
           );
         })}

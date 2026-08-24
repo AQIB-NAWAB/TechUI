@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { z } from "zod";
 import { cn } from "@/lib/utils";
-import { Shield, Zap, Globe, Monitor, Server, Database, RotateCcw } from "lucide-react";
+import { Shield, Zap, Globe, Monitor, Server, Database, RotateCcw, ChevronDown } from "lucide-react";
 
 const RouteSchema = z.object({
   path: z.string(),
@@ -104,6 +104,14 @@ export function ApiGateway({
   const outcomeCfg = outcome ? OUTCOME_CFG[outcome] : null;
 
   return (
+    <>
+      <style>{`
+        @keyframes gwTravel {
+          from { left: 0; opacity: 1; }
+          to { left: calc(100% - 8px); opacity: 0.9; }
+        }
+        .gw-travel-dot { animation: gwTravel 0.8s ease-in-out forwards; }
+      `}</style>
     <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden">
       {/* Header */}
       <div className="flex items-center gap-3 px-4 h-12 border-b border-zinc-100 dark:border-zinc-800">
@@ -111,14 +119,14 @@ export function ApiGateway({
         <span className="text-sm font-semibold text-zinc-800 dark:text-zinc-200 flex-1">{name}</span>
         <code className="text-[11px] font-mono text-zinc-400 bg-zinc-100 dark:bg-zinc-800 px-2 py-0.5 rounded">{host}</code>
         {(simState !== "idle" || outcome) && (
-          <button onClick={reset} className="p-1 rounded text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors">
+          <button onClick={reset} className="p-1 rounded text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-all duration-500">
             <RotateCcw className="size-3.5" />
           </button>
         )}
       </div>
 
       {/* Traffic flow visual */}
-      <div className="px-4 py-4 min-h-[200px] flex items-center gap-3">
+      <div className="px-4 py-4 min-h-[220px] flex items-center gap-3">
         {/* Client */}
         <div className="flex flex-col items-center gap-1.5 shrink-0">
           <div className={cn(
@@ -134,7 +142,7 @@ export function ApiGateway({
         <div className="flex-1 relative h-1 flex items-center">
           <div className="w-full h-px bg-zinc-200 dark:bg-zinc-700" />
           {simState === "traveling-to-gateway" && (
-            <div className="absolute left-0 w-2 h-2 rounded-full bg-blue-500 animate-[ping_0.6s_ease-in-out]" />
+            <div className="absolute top-1/2 -translate-y-1/2 left-0 w-2 h-2 rounded-full bg-blue-500 gw-travel-dot" />
           )}
           <div className="absolute right-0 w-0 h-0 border-t-4 border-b-4 border-l-4 border-transparent border-l-zinc-300 dark:border-l-zinc-600" />
         </div>
@@ -164,7 +172,7 @@ export function ApiGateway({
         <div className="flex-1 relative h-1 flex items-center">
           <div className="w-full h-px bg-zinc-200 dark:bg-zinc-700" />
           {simState === "traveling-to-service" && (
-            <div className="absolute left-0 w-2 h-2 rounded-full bg-emerald-500 animate-[ping_0.6s_ease-in-out]" />
+            <div className="absolute top-1/2 -translate-y-1/2 left-0 w-2 h-2 rounded-full bg-emerald-500 gw-travel-dot" />
           )}
           <div className="absolute right-0 w-0 h-0 border-t-4 border-b-4 border-l-4 border-transparent border-l-zinc-300 dark:border-l-zinc-600" />
         </div>
@@ -216,14 +224,27 @@ export function ApiGateway({
       </div>
 
       {/* Footer */}
-      <div className="border-t border-zinc-100 dark:border-zinc-800 px-4 py-2.5 flex items-center gap-3">
+      <div className="border-t border-zinc-100 dark:border-zinc-800 px-4 py-3 flex items-center gap-3">
+        <div className="relative shrink-0">
+          <select
+            value={selectedIdx}
+            onChange={(e) => { setSelectedIdx(Number(e.target.value)); setOutcome(null); setSimState("idle"); }}
+            disabled={!interactive || simState !== "idle"}
+            className="appearance-none pl-3 pr-8 py-2 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-xs font-mono text-zinc-700 dark:text-zinc-300 disabled:opacity-50 transition-all duration-500"
+          >
+            {routes.map((route, i) => (
+              <option key={i} value={i}>{route.method} {route.path}</option>
+            ))}
+          </select>
+          <ChevronDown className="size-3.5 text-zinc-400 absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" />
+        </div>
         {outcomeCfg ? (
           <span className={cn("text-xs font-bold font-mono px-2 py-0.5 rounded border transition-all duration-500", outcomeCfg.color)}>
             {outcomeCfg.label}
           </span>
         ) : (
-          <span className="text-xs text-zinc-400">
-            {simState === "idle" ? "Click a service to select route, then Send Request" : "Simulating…"}
+          <span className="text-xs text-zinc-400 flex-1">
+            {simState === "idle" ? "Select a route, then send a request through the gateway" : "Simulating…"}
           </span>
         )}
         {interactive && (
@@ -242,5 +263,6 @@ export function ApiGateway({
         )}
       </div>
     </div>
+    </>
   );
 }

@@ -2,7 +2,7 @@
 
 import { z } from "zod";
 import { cn } from "@/lib/utils";
-import { CheckCircle2, XCircle, Minus, Star } from "lucide-react";
+import { CheckCircle, XCircle, Minus, Star, Table2 } from "lucide-react";
 
 const CellValueEnum = z.union([
   z.boolean(),
@@ -34,13 +34,37 @@ export const ComparisonTableSchema = z.object({
 
 export type ComparisonTableProps = z.infer<typeof ComparisonTableSchema>;
 
+function isPartialValue(value: z.infer<typeof CellValueEnum>): boolean {
+  if (typeof value === "string") {
+    const lower = value.toLowerCase();
+    return lower.includes("partial") || lower.includes("limited") || lower.includes("sometimes");
+  }
+  return false;
+}
 
 function CellValue({ value }: { value: z.infer<typeof CellValueEnum> }) {
-  if (value === true) return <CheckCircle2 className="size-4 text-emerald-500 mx-auto" />;
-  if (value === false) return <XCircle className="size-4 text-red-400 dark:text-red-500 mx-auto" />;
-  if (value === null) return <Minus className="size-4 text-zinc-300 dark:text-zinc-700 mx-auto" />;
+  if (value === true) {
+    return (
+      <span className="inline-flex items-center justify-center gap-1 text-emerald-600 dark:text-emerald-400 font-semibold">
+        <CheckCircle className="size-4 shrink-0" />
+      </span>
+    );
+  }
+  if (value === false) {
+    return (
+      <span className="inline-flex items-center justify-center">
+        <XCircle className="size-4 text-zinc-300 dark:text-zinc-600" />
+      </span>
+    );
+  }
+  if (value === null) {
+    return <Minus className="size-4 text-zinc-300 dark:text-zinc-600 mx-auto" />;
+  }
   if (typeof value === "number") {
-    return <span className="text-xs font-mono text-zinc-600 dark:text-zinc-400">{value}</span>;
+    return <span className="text-xs font-mono font-semibold text-zinc-600 dark:text-zinc-400">{value}</span>;
+  }
+  if (isPartialValue(value)) {
+    return <span className="text-xs text-amber-500 font-medium text-center leading-tight">{value}</span>;
   }
   return <span className="text-xs text-zinc-600 dark:text-zinc-400 text-center leading-tight">{value}</span>;
 }
@@ -49,39 +73,39 @@ export function ComparisonTable({ title, options, criteria }: ComparisonTablePro
   const groups = [...new Set(criteria.map((c) => c.group ?? ""))];
 
   return (
-    <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 overflow-hidden">
+    <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden">
       {title && (
-        <div className="px-4 py-2.5 border-b border-zinc-100 dark:border-zinc-900 bg-zinc-50 dark:bg-zinc-900/50">
-          <span className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">{title}</span>
+        <div className="flex items-center gap-3 px-4 h-12 border-b border-zinc-100 dark:border-zinc-800">
+          <Table2 className="size-4 text-zinc-400 shrink-0" />
+          <span className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">{title}</span>
         </div>
       )}
 
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto min-h-[200px]">
         <table className="w-full">
-          {/* Option headers */}
           <thead>
-            <tr>
-              <th className="px-4 py-3 text-left text-[10px] font-semibold text-zinc-400 uppercase tracking-wide w-36" />
+            <tr className="bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900">
+              <th className="px-4 py-3 text-left text-[10px] font-bold uppercase tracking-widest w-36 bg-zinc-900 dark:bg-zinc-100">
+                Feature
+              </th>
               {options.map((opt) => (
                 <th
                   key={opt.id}
                   className={cn(
-                    "px-4 py-3 text-center border-t-2",
-                    opt.recommended
-                      ? "border-blue-500 text-zinc-800 dark:text-zinc-200 bg-blue-50/40 dark:bg-blue-950/10"
-                      : "border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400"
+                    "px-4 py-3 text-center font-bold",
+                    opt.recommended && "ring-2 ring-inset ring-blue-200 dark:ring-blue-800"
                   )}
                 >
                   <div className="flex flex-col items-center gap-1">
                     {opt.recommended && (
-                      <div className="flex items-center gap-1 text-[9px] font-bold uppercase tracking-wide text-blue-600 dark:text-blue-400">
+                      <div className="flex items-center gap-1 text-[9px] font-bold uppercase tracking-wide text-blue-300 dark:text-blue-700">
                         <Star className="size-2.5 fill-current" />
-                        Recommended
+                        Best pick
                       </div>
                     )}
-                    <span className="text-xs font-bold">{opt.label}</span>
+                    <span className="text-xs">{opt.label}</span>
                     {opt.sublabel && (
-                      <span className="text-[10px] font-normal text-zinc-400">{opt.sublabel}</span>
+                      <span className="text-[10px] font-normal opacity-70">{opt.sublabel}</span>
                     )}
                   </div>
                 </th>
@@ -96,7 +120,10 @@ export function ComparisonTable({ title, options, criteria }: ComparisonTablePro
                 <>
                   {group && (
                     <tr key={`group-${group}`}>
-                      <td colSpan={options.length + 1} className="px-4 py-2 text-[10px] font-semibold text-zinc-400 uppercase tracking-wide bg-zinc-50 dark:bg-zinc-900/50 border-t border-zinc-100 dark:border-zinc-900">
+                      <td
+                        colSpan={options.length + 1}
+                        className="px-4 py-2 text-[10px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500 bg-zinc-100 dark:bg-zinc-800 border-t border-zinc-200 dark:border-zinc-700"
+                      >
                         {group}
                       </td>
                     </tr>
@@ -105,8 +132,8 @@ export function ComparisonTable({ title, options, criteria }: ComparisonTablePro
                     <tr
                       key={c.label}
                       className={cn(
-                        "border-t border-zinc-50 dark:border-zinc-900",
-                        ci % 2 === 0 ? "" : "bg-zinc-50/30 dark:bg-zinc-900/20"
+                        "border-t border-zinc-100 dark:border-zinc-800 transition-all duration-500",
+                        ci % 2 === 0 ? "bg-white dark:bg-zinc-900" : "bg-zinc-50 dark:bg-zinc-800/40"
                       )}
                     >
                       <td className="px-4 py-2.5">
@@ -122,7 +149,7 @@ export function ComparisonTable({ title, options, criteria }: ComparisonTablePro
                             key={opt.id}
                             className={cn(
                               "px-4 py-2.5 text-center",
-                              opt.recommended && "bg-blue-50/30 dark:bg-blue-950/10"
+                              opt.recommended && "ring-2 ring-inset ring-blue-200 dark:ring-blue-800"
                             )}
                           >
                             <CellValue value={value} />

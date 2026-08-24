@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { z } from "zod";
 import { cn } from "@/lib/utils";
-import { Globe } from "lucide-react";
+import { Globe, Monitor, ArrowRight } from "lucide-react";
 
 export const MultiRegionSchema = z.object({
   strategy: z.enum(["active-active", "active-passive"]).default("active-active"),
@@ -137,12 +137,18 @@ export function MultiRegion({
   return (
     <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden">
       {/* Header */}
-      <div className="flex items-center gap-2.5 px-4 py-2.5 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/60">
-        <Globe className="size-3.5 text-zinc-400 shrink-0" />
-        <span className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 flex-1">Multi-Region</span>
-        <span className="text-[10px] text-zinc-400">
+      <div className="flex items-center gap-2.5 px-4 h-12 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/60">
+        <Globe className="size-4 text-zinc-400 shrink-0" />
+        <span className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 flex-1">Multi-Region</span>
+        <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400">
           {tab === "active-active" ? "Active-Active" : "Active-Passive"}
         </span>
+      </div>
+
+      <div className="px-4 py-2 border-b border-zinc-100 dark:border-zinc-800">
+        <p className="text-sm text-zinc-500 dark:text-zinc-400">
+          Deploy in multiple regions so users worldwide get low latency. GeoDNS routes each request to the nearest healthy region.
+        </p>
       </div>
 
       {/* Tabs */}
@@ -152,7 +158,7 @@ export function MultiRegion({
             key={t}
             onClick={() => { setTab(t); setFailoverState("normal"); setRtt(null); }}
             className={cn(
-              "px-4 py-2 text-xs font-semibold transition-all duration-200 capitalize",
+              "px-4 py-2 text-xs font-semibold transition-all duration-500 capitalize",
               tab === t
                 ? "border-b-2 border-zinc-900 dark:border-white text-zinc-900 dark:text-white"
                 : "text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
@@ -163,9 +169,10 @@ export function MultiRegion({
         ))}
       </div>
 
-      <div className="min-h-[300px] p-4 space-y-4">
+      <div className="min-h-[320px] p-4 space-y-3 flex flex-col">
         {/* User location */}
-        <div className="flex items-center gap-2 text-xs">
+        <div className="flex items-center gap-2 text-xs border border-zinc-100 dark:border-zinc-800 rounded-lg px-3 py-2 bg-zinc-50 dark:bg-zinc-800/40">
+          <Monitor className="size-3.5 text-zinc-400 shrink-0" />
           <span className="text-zinc-500 dark:text-zinc-400">You are in:</span>
           <select
             value={userLocation}
@@ -178,17 +185,34 @@ export function MultiRegion({
           </select>
         </div>
 
-        {/* Failover indicator */}
-        {tab === "active-passive" && failoverState === "failing" && (
-          <div className="flex items-center gap-2 px-3 py-1.5 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 rounded-lg text-xs text-red-600 dark:text-red-400">
-            <span className="size-2 bg-red-500 rounded-full animate-ping" />
-            Primary region failing — triggering failover...
-          </div>
-        )}
-        {tab === "active-passive" && failoverState === "failed" && (
-          <div className="flex items-center gap-2 px-3 py-1.5 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 rounded-lg text-xs text-amber-600 dark:text-amber-400">
-            <span className="size-2 bg-emerald-500 rounded-full" />
-            Failover complete — secondary is now primary
+        {/* Failover indicator — fixed height slot */}
+        <div className="min-h-[36px] flex items-center">
+          {tab === "active-passive" && failoverState === "failing" && (
+            <div className="w-full flex items-center gap-2 px-3 py-1.5 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 rounded-lg text-xs text-red-600 dark:text-red-400 transition-all duration-500">
+              <span className="size-2 bg-red-500 rounded-full animate-pulse" />
+              Primary region failing — triggering failover...
+            </div>
+          )}
+          {tab === "active-passive" && failoverState === "failed" && (
+            <div className="w-full flex items-center gap-2 px-3 py-1.5 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 rounded-lg text-xs text-amber-600 dark:text-amber-400 transition-all duration-500">
+              <span className="size-2 bg-emerald-500 rounded-full" />
+              Failover complete — secondary is now primary
+            </div>
+          )}
+        </div>
+
+        {/* Request flow animation */}
+        {nearestRegion && (
+          <div className="flex items-center justify-center gap-2 py-2 border border-zinc-100 dark:border-zinc-800 rounded-lg bg-zinc-50 dark:bg-zinc-800/40">
+            <Monitor className={cn("size-4 transition-all duration-500", requestAnim ? "text-blue-500" : "text-zinc-400")} />
+            <div className="relative flex-1 h-1 max-w-[100px] bg-zinc-200 dark:bg-zinc-700 rounded-full overflow-hidden">
+              {requestAnim && (
+                <div className="absolute inset-y-0 w-2 bg-emerald-500 rounded-full animate-[travel_1s_ease-in-out_forwards]" />
+              )}
+            </div>
+            <span className="text-base leading-none">{nearestRegion.flag}</span>
+            <ArrowRight className={cn("size-3 transition-all duration-500", requestAnim ? "text-emerald-500" : "text-zinc-300")} />
+            <span className="text-[10px] font-semibold text-zinc-600 dark:text-zinc-300">{nearestRegion.name}</span>
           </div>
         )}
 
@@ -225,7 +249,7 @@ export function MultiRegion({
         </div>
 
         {/* Nearest + routing */}
-        <div className="text-xs text-zinc-500 dark:text-zinc-400 space-y-0.5">
+        <div className="text-xs text-zinc-500 dark:text-zinc-400 space-y-0.5 min-h-[48px]">
           {nearestRegion && (
             <div>
               Nearest: <span className="font-semibold text-zinc-700 dark:text-zinc-300">
@@ -234,53 +258,55 @@ export function MultiRegion({
             </div>
           )}
           <div>Routed by: <span className="font-semibold text-zinc-600 dark:text-zinc-300">GeoDNS</span></div>
-          {rtt && (
-            <div className="text-emerald-600 dark:text-emerald-400 font-semibold">
-              Round-trip: {rtt}ms
-            </div>
-          )}
-        </div>
-
-        {/* Controls */}
-        <div className="flex flex-wrap gap-2">
-          <button
-            onClick={sendRequest}
-            disabled={requestAnim}
-            className={cn(
-              "bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-opacity",
-              requestAnim && "opacity-60"
-            )}
-          >
-            {requestAnim ? "Sending..." : "Send Request"}
-          </button>
-          {tab === "active-passive" && (
-            <button
-              onClick={triggerFailover}
-              className={cn(
-                "rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-opacity",
-                failoverState === "normal"
-                  ? "bg-red-600 text-white"
-                  : "bg-zinc-200 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-300"
-              )}
-            >
-              {failoverState === "normal" ? "Simulate Failover" : "Reset"}
-            </button>
-          )}
+          <div className={cn("font-semibold transition-all duration-500", rtt ? "text-emerald-600 dark:text-emerald-400" : "text-transparent")}>
+            Round-trip: {rtt ?? 0}ms
+          </div>
         </div>
 
         {/* Replication row */}
         {replicationRegions.length > 1 && (
-          <div className="text-[10px] text-zinc-400 border-t border-zinc-100 dark:border-zinc-800 pt-2">
+          <div className="text-[10px] text-zinc-400 border-t border-zinc-100 dark:border-zinc-800 pt-2 mt-auto">
             Replication: {replicationRegions.map((r) => `${r.flag} ${r.name}`).join(" ↔ ")}
             <span className="ml-1 text-zinc-300 dark:text-zinc-600">(writes replicate async, ~50ms lag)</span>
           </div>
         )}
-
-        {/* Key insight */}
-        <p className="text-[10px] text-zinc-400">
-          <span className="font-semibold text-zinc-500 dark:text-zinc-400">Key insight:</span> Multi-region reduces latency for global users and enables high availability.
-        </p>
       </div>
+
+      {/* Footer */}
+      <div className="px-4 py-3 border-t border-zinc-100 dark:border-zinc-800 flex items-center gap-2 flex-wrap bg-zinc-50 dark:bg-zinc-900/30">
+        <span className="text-xs text-zinc-500 flex-1">
+          {requestAnim ? "Sending request to nearest region…" : rtt ? `Response received in ${rtt}ms` : "Send a request to see GeoDNS routing"}
+        </span>
+        <button
+          onClick={sendRequest}
+          disabled={requestAnim}
+          className={cn(
+            "bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-opacity",
+            requestAnim && "opacity-60"
+          )}
+        >
+          {requestAnim ? "Sending…" : "Send Request"}
+        </button>
+        {tab === "active-passive" && (
+          <button
+            onClick={triggerFailover}
+            className={cn(
+              "rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-opacity",
+              failoverState === "normal"
+                ? "bg-red-600 text-white"
+                : "bg-zinc-200 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-300"
+            )}
+          >
+            {failoverState === "normal" ? "Simulate Failover" : "Reset"}
+          </button>
+        )}
+      </div>
+      <style>{`
+        @keyframes travel {
+          from { left: 0; opacity: 1; }
+          to { left: calc(100% - 8px); opacity: 0.3; }
+        }
+      `}</style>
     </div>
   );
 }

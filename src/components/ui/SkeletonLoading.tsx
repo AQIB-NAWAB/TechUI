@@ -230,14 +230,18 @@ export function SkeletonLoading({
         </span>
       </div>
 
+      <div className="text-sm text-zinc-500 dark:text-zinc-400 px-4 py-2 border-b border-zinc-100 dark:border-zinc-800">
+        Placeholder shapes show page structure while data loads — users perceive faster apps.
+      </div>
+
       {/* Pattern tabs */}
-      <div className="px-4 pt-3 pb-2 flex gap-1.5">
+      <div className="px-4 pt-3 pb-2 flex gap-1.5 border-b border-zinc-100 dark:border-zinc-800">
         {PATTERNS.map((p) => (
           <button
             key={p}
             onClick={() => { setPattern(p); setLoaded(false); }}
             className={cn(
-              "px-2.5 py-1 rounded-lg border text-[11px] font-semibold transition-all duration-300 cursor-pointer",
+              "px-2.5 py-1 rounded-lg border text-[11px] font-semibold transition-all duration-500 cursor-pointer",
               pattern === p
                 ? "bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 border-zinc-900 dark:border-white"
                 : "border-zinc-200 dark:border-zinc-700 text-zinc-500 dark:text-zinc-400 hover:border-zinc-400"
@@ -249,7 +253,7 @@ export function SkeletonLoading({
       </div>
 
       {/* Content area */}
-      <div className="min-h-[280px] px-4 pb-4">
+      <div className="min-h-[220px] px-4 py-4 flex flex-col justify-center">
         <div className={cn(
           "transition-all duration-500",
           loaded ? "opacity-100" : "opacity-100"
@@ -293,8 +297,8 @@ export function SkeletonLoading({
         </div>
 
         {/* Key insight */}
-        <div className="text-[10px] text-zinc-400 dark:text-zinc-500 bg-zinc-50 dark:bg-zinc-800/40 rounded-lg px-3 py-2 mt-3">
-          Skeletons reduce perceived load time — users see structure before data arrives, making the app feel faster.
+        <div className="text-[10px] text-zinc-400 dark:text-zinc-500 bg-zinc-50 dark:bg-zinc-800/40 rounded-lg px-3 py-2 mt-3 border border-zinc-100 dark:border-zinc-800">
+          Skeletons reduce perceived load time — users see structure before data arrives.
         </div>
       </div>
 

@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { z } from "zod";
 import { cn } from "@/lib/utils";
-import { Search } from "lucide-react";
+import { Search, ChevronLeft, RotateCcw, CheckCircle2 } from "lucide-react";
 
 export const BinarySearchSchema = z.object({
   array: z.array(z.number()).default([3, 7, 12, 18, 24, 31, 39, 45, 52, 60, 71, 83, 95]),
@@ -38,12 +38,6 @@ function buildSteps(array: number[], target: number): SearchStep[] {
       steps.push({ left, right, mid, midValue, comparison: "search-left" });
       right = mid - 1;
     }
-  }
-
-  // If target was not found, add a sentinel step with an empty range
-  if (steps.length === 0 || steps[steps.length - 1].comparison !== "found") {
-    // Already exhausted — we mark not-found via the last step's range being inverted
-    // (left > right when loop exits). The last step in the array already has that context.
   }
 
   return steps;
@@ -87,7 +81,7 @@ export function BinarySearch({
           }
           return prev + 1;
         });
-      }, 900);
+      }, 1200);
     } else {
       if (intervalRef.current) clearInterval(intervalRef.current);
     }
@@ -115,21 +109,25 @@ export function BinarySearch({
     return `${step.midValue} > ${target} — search left half`;
   };
 
+  const footerStatus = currentStep
+    ? `Step ${stepIndex + 1}/${totalSteps}: ${comparisonLabel(currentStep)}`
+    : "Press Auto-play to search the sorted array";
+
   return (
     <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden">
-      {/* Header */}
-      <div className="flex items-center gap-3 px-4 h-12 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50">
+      <div className="flex items-center gap-3 px-4 h-12 border-b border-zinc-100 dark:border-zinc-800">
         <Search className="size-4 text-zinc-400 shrink-0" />
         <span className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 flex-1">Binary Search</span>
-        <span className="text-xs font-mono text-zinc-500 dark:text-zinc-400">
+        <span className="text-xs font-mono text-zinc-500 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-700 px-2 py-0.5 rounded">
           target: <span className="text-blue-600 dark:text-blue-400 font-bold">{target}</span>
         </span>
       </div>
 
-      {/* Interactive area — fixed height */}
-      <div className="min-h-[280px] px-4 pt-4 pb-2 flex flex-col gap-3">
+      <p className="text-sm text-zinc-500 dark:text-zinc-400 px-4 py-2 border-b border-zinc-100 dark:border-zinc-800">
+        Halve the search space each step — O(log n) instead of scanning every element.
+      </p>
 
-        {/* Array row */}
+      <div className="min-h-[220px] px-4 pt-4 pb-2 flex flex-col gap-3">
         <div>
           <div className="flex flex-wrap gap-1 mb-2">
             {array.map((val, idx) => {
@@ -156,23 +154,21 @@ export function BinarySearch({
                   >
                     {val}
                   </div>
-                  {isMid && (
-                    <div
-                      className={cn(
-                        "mt-0.5 text-[9px] font-bold tracking-wide",
-                        isFound ? "text-emerald-600 dark:text-emerald-400" : "text-blue-600 dark:text-blue-400"
-                      )}
-                    >
+                  {isMid ? (
+                    <div className={cn(
+                      "mt-0.5 text-[9px] font-bold tracking-wide",
+                      isFound ? "text-emerald-600 dark:text-emerald-400" : "text-blue-600 dark:text-blue-400"
+                    )}>
                       mid
                     </div>
+                  ) : (
+                    <div className="mt-0.5 text-[9px] text-transparent">mid</div>
                   )}
-                  {!isMid && <div className="mt-0.5 text-[9px] text-transparent">mid</div>}
                 </div>
               );
             })}
           </div>
 
-          {/* Range brackets */}
           {currentStep && (
             <div className="text-[11px] font-mono text-zinc-500 dark:text-zinc-400">
               Range:{" "}
@@ -185,84 +181,66 @@ export function BinarySearch({
           )}
         </div>
 
-        {/* Comparison message */}
         <div
           className={cn(
-            "rounded-lg px-3 py-2 text-sm font-semibold transition-all duration-500",
-            !currentStep || stepIndex === 0 && !playing
-              ? "bg-zinc-50 dark:bg-zinc-800/60 text-zinc-500 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-700"
+            "rounded-lg px-3 py-2 text-sm font-semibold transition-all duration-500 border min-h-[44px] flex items-center gap-2",
+            !currentStep
+              ? "bg-zinc-50 dark:bg-zinc-800/60 text-zinc-500 dark:text-zinc-400 border-zinc-200 dark:border-zinc-700"
               : currentStep.comparison === "found"
-              ? "bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700"
-              : "bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800"
+              ? "bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 border-emerald-300 dark:border-emerald-700"
+              : "bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800"
           )}
         >
+          {currentStep?.comparison === "found" && <CheckCircle2 className="size-4 shrink-0" />}
           {currentStep ? (
             <>
-              Step {stepIndex + 1}: {comparisonLabel(currentStep)}
-              {currentStep.comparison === "found" && (
-                <span className="ml-2 text-emerald-600 dark:text-emerald-400">✓</span>
-              )}
+              {comparisonLabel(currentStep)}
               {notFound && isDone && currentStep.comparison !== "found" && (
-                <span className="ml-2 text-red-500"> — Not found in array</span>
+                <span className="text-red-500"> — Not found</span>
               )}
             </>
           ) : (
-            "Press Play or Step → to start"
+            "Ready to search"
           )}
         </div>
 
-        {/* Comparison counters */}
         <div className="flex items-center gap-4 text-xs">
           <div className="flex items-center gap-1.5">
             <div className="w-2 h-2 rounded-full bg-blue-500" />
-            <span className="text-zinc-500 dark:text-zinc-400">Binary search:</span>
+            <span className="text-zinc-500 dark:text-zinc-400">Binary:</span>
             <span className="font-bold text-blue-600 dark:text-blue-400 font-mono">{stepIndex + 1} step{stepIndex !== 0 ? "s" : ""}</span>
           </div>
           <div className="flex items-center gap-1.5">
             <div className="w-2 h-2 rounded-full bg-zinc-400" />
-            <span className="text-zinc-500 dark:text-zinc-400">Linear search:</span>
+            <span className="text-zinc-500 dark:text-zinc-400">Linear:</span>
             <span className="font-bold text-zinc-600 dark:text-zinc-300 font-mono">{linearCount} step{linearCount !== 1 ? "s" : ""}</span>
           </div>
         </div>
+      </div>
 
-        {/* Controls */}
-        <div className="flex items-center gap-2 mt-auto pb-1">
-          <button
-            onClick={() => setStepIndex((p) => Math.max(0, p - 1))}
-            disabled={stepIndex === 0}
-            className="px-3 py-1.5 text-xs font-semibold rounded-lg border border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 disabled:opacity-30 transition-all duration-200 cursor-pointer disabled:cursor-not-allowed"
-          >
-            ← Step
-          </button>
-          <button
-            onClick={() => setStepIndex((p) => Math.min(totalSteps - 1, p + 1))}
-            disabled={isDone}
-            className="px-3 py-1.5 text-xs font-semibold rounded-lg border border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 disabled:opacity-30 transition-all duration-200 cursor-pointer disabled:cursor-not-allowed"
-          >
-            Step →
-          </button>
-          <button
-            onClick={handlePlayPause}
-            className="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-1.5 text-xs font-semibold hover:opacity-90 transition-opacity cursor-pointer"
-          >
-            {playing ? "Pause" : isDone ? "Replay" : "▶ Auto-play"}
-          </button>
-          <button
-            onClick={handleReset}
-            className="px-3 py-1.5 text-xs font-semibold rounded-lg border border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all duration-200 cursor-pointer"
-          >
-            Reset
-          </button>
-        </div>
-
-        {/* Key insight */}
-        <div className="text-[10px] text-zinc-400 dark:text-zinc-500 bg-zinc-50 dark:bg-zinc-800/40 rounded-lg px-3 py-2">
-          Binary search eliminates half the array each step →{" "}
-          <strong className="text-zinc-600 dark:text-zinc-300">O(log n)</strong> ={" "}
-          <strong className="text-blue-500">{totalSteps} step{totalSteps !== 1 ? "s" : ""}</strong>{" "}
-          vs linear&apos;s <strong className="text-zinc-500">{linearCount} step{linearCount !== 1 ? "s" : ""}</strong>{" "}
-          for {array.length} elements
-        </div>
+      <div className="px-4 py-3 border-t border-zinc-100 dark:border-zinc-800 flex items-center gap-2">
+        <button
+          onClick={() => setStepIndex((p) => Math.max(0, p - 1))}
+          disabled={stepIndex === 0}
+          className="p-2 rounded-lg border border-zinc-200 dark:border-zinc-700 text-zinc-500 hover:bg-zinc-50 dark:hover:bg-zinc-800 disabled:opacity-30 transition-all duration-500"
+          title="Step back"
+        >
+          <ChevronLeft className="size-4" />
+        </button>
+        <button
+          onClick={handleReset}
+          className="p-2 rounded-lg border border-zinc-200 dark:border-zinc-700 text-zinc-500 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all duration-500"
+          title="Reset"
+        >
+          <RotateCcw className="size-3.5" />
+        </button>
+        <span className="text-sm text-zinc-500 dark:text-zinc-400 flex-1 truncate">{footerStatus}</span>
+        <button
+          onClick={handlePlayPause}
+          className="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-opacity shrink-0"
+        >
+          {playing ? "Pause" : isDone ? "Replay" : "Auto-play"}
+        </button>
       </div>
     </div>
   );

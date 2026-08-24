@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { z } from "zod";
 import { cn } from "@/lib/utils";
-import { Copy, Check } from "lucide-react";
+import { Copy, Check, Code2 } from "lucide-react";
 
 export const CodeBlockSchema = z.object({
   code: z.string().default('const greet = (name: string): string => {\n  return `Hello, ${name}!`;\n};\n\nconsole.log(greet("World"));'),
@@ -193,33 +193,23 @@ export function CodeBlock({
   }
 
   return (
-    <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-950 overflow-hidden font-mono">
-      {/* Header bar */}
-      <div className="flex items-center gap-2 px-4 py-2.5 border-b border-zinc-800 bg-zinc-900/80">
-        <div className="flex gap-1.5 shrink-0">
-          <span className="size-2.5 rounded-full bg-zinc-700" />
-          <span className="size-2.5 rounded-full bg-zinc-700" />
-          <span className="size-2.5 rounded-full bg-zinc-700" />
-        </div>
-        {title && (
-          <span className="text-xs text-zinc-400 truncate ml-2 flex-1">{title}</span>
-        )}
-        <span className="text-[10px] text-zinc-500 ml-auto shrink-0">
+    <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden">
+      <div className="flex items-center gap-3 px-4 h-12 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50">
+        <Code2 className="size-4 text-zinc-400 shrink-0" />
+        <span className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 flex-1">
+          {title ?? "Code Block"}
+        </span>
+        <span className="text-[10px] font-mono text-zinc-400 bg-zinc-100 dark:bg-zinc-800 px-2 py-0.5 rounded">
           {LANG_LABELS[language] ?? language}
         </span>
-        {copyable && (
-          <button
-            onClick={copy}
-            className="p-1 rounded text-zinc-500 hover:text-zinc-300 transition-colors shrink-0"
-          >
-            {copied ? <Check className="size-3.5 text-emerald-400" /> : <Copy className="size-3.5" />}
-          </button>
-        )}
       </div>
 
-      {/* Code */}
+      <p className="text-sm text-zinc-500 dark:text-zinc-400 px-4 py-2 border-b border-zinc-100 dark:border-zinc-800">
+        Syntax-highlighted code you can read and copy — colors show keywords, strings, and types.
+      </p>
+
       <div
-        className="overflow-auto text-xs leading-6"
+        className="min-h-[220px] overflow-auto bg-zinc-950 font-mono text-xs leading-6"
         style={maxHeight ? { maxHeight } : undefined}
       >
         <table className="w-full border-collapse">
@@ -261,6 +251,21 @@ export function CodeBlock({
           </tbody>
         </table>
       </div>
+
+      {copyable && (
+        <div className="border-t border-zinc-100 dark:border-zinc-800 px-4 py-3 flex items-center gap-3 bg-zinc-50 dark:bg-zinc-900/30">
+          <span className="text-sm text-zinc-500 dark:text-zinc-400 flex-1">
+            {copied ? "Copied to clipboard!" : `${lines.length} lines · click to copy the full snippet`}
+          </span>
+          <button
+            onClick={copy}
+            className="flex items-center gap-1.5 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-opacity"
+          >
+            {copied ? <Check className="size-3.5" /> : <Copy className="size-3.5" />}
+            {copied ? "Copied" : "Copy Code"}
+          </button>
+        </div>
+      )}
     </div>
   );
 }

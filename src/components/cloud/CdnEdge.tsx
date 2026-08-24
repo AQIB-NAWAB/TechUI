@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { z } from "zod";
 import { cn } from "@/lib/utils";
-import { Globe, Home, CheckCircle2, XCircle } from "lucide-react";
+import { Globe, Home, CheckCircle2, XCircle, Monitor, ArrowRight } from "lucide-react";
 
 const RegionSchema = z.object({
   id: z.string(),
@@ -78,9 +78,9 @@ export function CdnEdge({
         timerRef.current = setTimeout(() => {
           setAnimPhase("done");
           setResult({ hit: false, edgeMs: selectedRegion.latencyMs, originMs: selectedRegion.originLatencyMs });
-        }, 900);
+        }, 1200);
       }
-    }, 700);
+    }, 1000);
   }
 
   function forceMiss() {
@@ -124,7 +124,39 @@ export function CdnEdge({
         </p>
       </div>
 
-      <div className="min-h-[260px] px-4 py-4 space-y-4">
+      <div className="min-h-[280px] px-4 py-4 flex flex-col justify-center space-y-4">
+        {/* Request flow: Client → Edge → Origin */}
+        <div className="flex items-center justify-center gap-2 py-2 border border-zinc-100 dark:border-zinc-800 rounded-lg bg-zinc-50 dark:bg-zinc-800/40">
+          <div className="flex flex-col items-center gap-1 px-2">
+            <Monitor className={cn("size-4 transition-all duration-500", animPhase !== "idle" ? "text-blue-500" : "text-zinc-400")} />
+            <span className="text-[9px] font-semibold text-zinc-500">You</span>
+          </div>
+          <div className="relative flex-1 h-1 max-w-[80px] bg-zinc-200 dark:bg-zinc-700 rounded-full overflow-hidden">
+            {(animPhase === "edge" || animPhase === "origin" || animPhase === "done") && (
+              <div className="absolute inset-y-0 w-2 bg-blue-500 rounded-full animate-[travel_1s_ease-in-out_forwards]" />
+            )}
+          </div>
+          <div className="flex flex-col items-center gap-1 px-2">
+            <Globe className={cn(
+              "size-4 transition-all duration-500",
+              animPhase === "edge" || (animPhase === "done" && result?.hit) ? "text-emerald-500" : animPhase !== "idle" ? "text-blue-500" : "text-zinc-400"
+            )} />
+            <span className="text-[9px] font-semibold text-zinc-500">Edge</span>
+          </div>
+          {(animPhase === "origin" || (animPhase === "done" && result && !result.hit)) && (
+            <>
+              <ArrowRight className="size-3 text-amber-400 shrink-0" />
+              <div className="relative flex-1 h-1 max-w-[60px] bg-zinc-200 dark:bg-zinc-700 rounded-full overflow-hidden">
+                <div className="absolute inset-y-0 w-2 bg-amber-500 rounded-full animate-[travel_1s_ease-in-out_forwards]" />
+              </div>
+              <div className="flex flex-col items-center gap-1 px-2">
+                <Home className="size-4 text-amber-500" />
+                <span className="text-[9px] font-semibold text-zinc-500">Origin</span>
+              </div>
+            </>
+          )}
+        </div>
+
         <div className="flex items-start gap-2 flex-wrap">
           {regions.map((region) => {
             const isSelected = region.id === selectedRegionId;
@@ -173,23 +205,28 @@ export function CdnEdge({
           </div>
         )}
 
-        {result && (
-          <div className={cn(
-            "rounded-lg px-3 py-2 text-xs font-semibold transition-all duration-500",
-            result.hit
-              ? "bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800"
-              : "bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800"
-          )}>
-            {result.hit ? (
-              <span>Cache HIT — served from edge in {result.edgeMs}ms · Origin would take ~{selectedRegion.originLatencyMs}ms</span>
-            ) : (
-              <span>Cache MISS → Origin fetch: {result.edgeMs}ms edge + {result.originMs}ms origin = {result.edgeMs + result.originMs}ms total</span>
-            )}
-          </div>
-        )}
+        {/* Result banner — fixed height slot */}
+        <div className="min-h-[52px] flex items-center">
+          {result ? (
+            <div className={cn(
+              "w-full rounded-lg px-3 py-2 text-xs font-semibold transition-all duration-500",
+              result.hit
+                ? "bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800"
+                : "bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800"
+            )}>
+              {result.hit ? (
+                <span>Cache HIT — served from edge in {result.edgeMs}ms · Origin would take ~{selectedRegion.originLatencyMs}ms</span>
+              ) : (
+                <span>Cache MISS → Origin fetch: {result.edgeMs}ms edge + {result.originMs}ms origin = {result.edgeMs + result.originMs}ms total</span>
+              )}
+            </div>
+          ) : (
+            <p className="text-[10px] text-zinc-400">Select a region and asset, then send a request to see cache hit or miss.</p>
+          )}
+        </div>
 
-        <div>
-          <div className="text-[10px] font-bold uppercase tracking-wide text-zinc-400 mb-1.5">Cache Status</div>
+        <div className="border border-zinc-100 dark:border-zinc-800 rounded-lg p-3 bg-zinc-50 dark:bg-zinc-800/50">
+          <div className="text-[10px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500 mb-1.5">Cache Status</div>
           <div className="flex flex-wrap gap-1.5">
             {assets.map((asset, idx) => (
               <button
@@ -249,6 +286,12 @@ export function CdnEdge({
           </button>
         </div>
       )}
+      <style>{`
+        @keyframes travel {
+          from { left: 0; opacity: 1; }
+          to { left: calc(100% - 8px); opacity: 0.3; }
+        }
+      `}</style>
     </div>
   );
 }

@@ -63,22 +63,29 @@ export function TreeShaking({
 }: TreeShakingProps) {
   const [activeBundler, setActiveBundler] = useState(bundler);
   const [showAll, setShowAll] = useState(true);
-  const [showImport, setShowImport] = useState(false);
+  const [shaking, setShaking] = useState(false);
 
   const totalKb = modules.flatMap((m) => m.exports).reduce((sum, e) => sum + e.sizeKb, 0);
   const usedKb = modules.flatMap((m) => m.exports).filter((e) => e.used).reduce((sum, e) => sum + e.sizeKb, 0);
   const savedPct = Math.round(((totalKb - usedKb) / totalKb) * 100);
 
+  function shakeBundle() {
+    setShaking(true);
+    setTimeout(() => setShaking(false), 1000);
+  }
+
   return (
     <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden">
-      {/* Header */}
-      <div className="flex items-center gap-3 px-4 py-2.5 border-b border-zinc-100 dark:border-zinc-900 bg-zinc-50 dark:bg-zinc-900/50">
-        <Scissors className="size-3.5 text-zinc-400 shrink-0" />
-        <span className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 flex-1">Tree Shaking</span>
-        <span className="text-[10px] font-mono text-zinc-500 dark:text-zinc-400">Entry: {entryPoint}</span>
+      <div className="flex items-center gap-3 px-4 h-12 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50">
+        <Scissors className="size-4 text-zinc-400 shrink-0" />
+        <span className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 flex-1">Tree Shaking</span>
+        <span className="text-[10px] font-mono text-zinc-400">{entryPoint}</span>
       </div>
 
-      {/* Bundler tabs */}
+      <p className="text-sm text-zinc-500 dark:text-zinc-400 px-4 py-2 border-b border-zinc-100 dark:border-zinc-800">
+        Bundlers remove unused code — only the functions you import end up in the final bundle.
+      </p>
+
       <div className="flex border-b border-zinc-100 dark:border-zinc-800">
         {(["webpack", "rollup", "esbuild"] as const).map((b) => (
           <button
@@ -96,54 +103,31 @@ export function TreeShaking({
         ))}
       </div>
 
-      <div className="p-4 min-h-[300px] flex flex-col gap-3">
-        {/* Bundler badge */}
+      <div className="min-h-[220px] p-4 flex flex-col gap-3">
         <div className="flex items-center justify-between">
           <span className={cn("text-[10px] font-bold px-2 py-0.5 rounded", BUNDLER_COLORS[activeBundler])}>
             {BUNDLER_LABELS[activeBundler]}
           </span>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setShowImport((v) => !v)}
-              className="text-[10px] text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 underline transition-colors"
-            >
-              {showImport ? "Hide import" : "Show import"}
-            </button>
-            <button
-              onClick={() => setShowAll((v) => !v)}
-              className="text-[10px] text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 underline transition-colors"
-            >
-              {showAll ? "Used only" : "Show all"}
-            </button>
-          </div>
+          <button
+            onClick={() => setShowAll((v) => !v)}
+            className="text-[10px] text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 underline transition-all duration-500"
+          >
+            {showAll ? "Used only" : "Show all"}
+          </button>
         </div>
 
-        {/* Import statement */}
-        {showImport && (
-          <div className="bg-zinc-50 dark:bg-zinc-800/60 rounded-lg px-3 py-2 text-[11px] font-mono transition-all duration-500">
-            <div className="text-emerald-600 dark:text-emerald-400 mb-1">
-              {/* Named import = tree-shakeable */}
-              <span className="text-blue-500">import</span>
-              {" { "}
-              {modules.flatMap((m) => m.exports.filter((e) => e.used).map((e) => e.name)).join(", ")}
-              {" } "}
-              <span className="text-blue-500">from</span>
-              {` '${modules[0]?.name ?? "lib"}'`}
-              <span className="ml-2 text-emerald-600 dark:text-emerald-400 text-[10px] not-italic font-sans">✓ tree-shakeable</span>
-            </div>
-            <div className="text-red-500 dark:text-red-400 text-[10px] mt-1 border-t border-zinc-200 dark:border-zinc-700 pt-1">
-              <span className="opacity-50">// vs.</span>{" "}
-              <span className="text-blue-500">import</span>
-              {` _ from '${modules[0]?.name?.replace("-es", "") ?? "lib"}'`}
-              <span className="ml-2 text-red-500 text-[10px] font-sans">✗ bundles everything</span>
-            </div>
-          </div>
-        )}
+        <div className="bg-zinc-50 dark:bg-zinc-800/60 rounded-lg border border-zinc-100 dark:border-zinc-800 px-3 py-2 text-[11px] font-mono">
+          <span className="text-blue-500">import</span>
+          {" { "}
+          {modules.flatMap((m) => m.exports.filter((e) => e.used).map((e) => e.name)).join(", ")}
+          {" } "}
+          <span className="text-blue-500">from</span>
+          {` '${modules[0]?.name ?? "lib"}'`}
+        </div>
 
-        {/* Module exports list */}
-        <div className="flex flex-col gap-3">
+        <div className={cn("flex flex-col gap-3 transition-all duration-500", shaking && "opacity-80")}>
           {modules.map((mod) => (
-            <div key={mod.name}>
+            <div key={mod.name} className="border border-zinc-100 dark:border-zinc-800 rounded-lg p-2">
               <div className="text-[10px] text-zinc-500 dark:text-zinc-400 font-semibold mb-1.5 font-mono">
                 {mod.name}
               </div>
@@ -167,20 +151,11 @@ export function TreeShaking({
                       )}
                       <span className={cn(
                         "text-xs font-mono flex-1",
-                        exp.used
-                          ? "text-blue-700 dark:text-blue-300 font-semibold"
-                          : "text-zinc-400 line-through"
+                        exp.used ? "text-blue-700 dark:text-blue-300 font-semibold" : "text-zinc-400 line-through"
                       )}>
                         {exp.name}
                       </span>
                       <span className="text-[10px] font-mono text-zinc-400">{exp.sizeKb}KB</span>
-                      {exp.used ? (
-                        <span className="text-[10px] font-bold text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900/40 px-1.5 py-0.5 rounded">
-                          INCLUDED
-                        </span>
-                      ) : (
-                        <span className="text-[10px] text-zinc-400 italic">shaken out</span>
-                      )}
                     </div>
                   ))}
               </div>
@@ -188,42 +163,37 @@ export function TreeShaking({
           ))}
         </div>
 
-        {/* Bundle size comparison */}
-        <div className="mt-auto">
-          <div className="text-[10px] text-zinc-400 font-semibold uppercase tracking-wide mb-2">Bundle size</div>
-          <div className="flex flex-col gap-1.5">
-            <div>
-              <div className="flex justify-between text-[10px] mb-1">
-                <span className="text-red-500 dark:text-red-400">Without tree-shaking</span>
-                <span className="font-mono font-bold text-red-600 dark:text-red-400">{totalKb.toFixed(1)}KB</span>
-              </div>
-              <div className="h-4 rounded-md bg-red-100 dark:bg-red-900/20 overflow-hidden">
-                <div className="h-full bg-red-400 dark:bg-red-600 rounded-md w-full transition-all duration-500" />
-              </div>
-            </div>
-            <div>
-              <div className="flex justify-between text-[10px] mb-1">
-                <span className="text-emerald-600 dark:text-emerald-400">With tree-shaking ({activeBundler})</span>
-                <span className="font-mono font-bold text-emerald-600 dark:text-emerald-400">{usedKb.toFixed(1)}KB</span>
-              </div>
-              <div className="h-4 rounded-md bg-emerald-100 dark:bg-emerald-900/20 overflow-hidden">
-                <div
-                  className="h-full bg-emerald-500 rounded-md transition-all duration-500"
-                  style={{ width: `${(usedKb / totalKb) * 100}%` }}
-                />
-              </div>
-            </div>
+        <div className="mt-auto space-y-1.5">
+          <div className="flex justify-between text-[10px]">
+            <span className="text-red-500 dark:text-red-400">Without shaking</span>
+            <span className="font-mono font-bold text-red-600 dark:text-red-400">{totalKb.toFixed(1)}KB</span>
           </div>
-          <div className="mt-2 text-center text-xs font-bold text-emerald-600 dark:text-emerald-400">
-            {savedPct}% smaller — {(totalKb - usedKb).toFixed(1)}KB eliminated
+          <div className="h-3 rounded-md bg-red-100 dark:bg-red-900/20 overflow-hidden border border-zinc-100 dark:border-zinc-800">
+            <div className="h-full bg-red-400 dark:bg-red-600 rounded-md w-full transition-all duration-500" />
+          </div>
+          <div className="flex justify-between text-[10px]">
+            <span className="text-emerald-600 dark:text-emerald-400">With shaking</span>
+            <span className="font-mono font-bold text-emerald-600 dark:text-emerald-400">{usedKb.toFixed(1)}KB</span>
+          </div>
+          <div className="h-3 rounded-md bg-emerald-100 dark:bg-emerald-900/20 overflow-hidden border border-zinc-100 dark:border-zinc-800">
+            <div
+              className="h-full bg-emerald-500 rounded-md transition-all duration-500"
+              style={{ width: `${(usedKb / totalKb) * 100}%` }}
+            />
           </div>
         </div>
+      </div>
 
-        {/* Key insight */}
-        <div className="bg-zinc-50 dark:bg-zinc-800/60 rounded-lg px-3 py-2 text-[11px] text-zinc-500 dark:text-zinc-400 border border-zinc-100 dark:border-zinc-700">
-          <span className="font-semibold text-zinc-700 dark:text-zinc-300">Key insight: </span>
-          Named imports + ES modules = tree-shakeable. Default imports bundle everything.
-        </div>
+      <div className="border-t border-zinc-100 dark:border-zinc-800 px-4 py-3 flex items-center gap-3 bg-zinc-50 dark:bg-zinc-900/30">
+        <span className="text-sm text-zinc-500 dark:text-zinc-400 flex-1">
+          {savedPct}% smaller — {(totalKb - usedKb).toFixed(1)}KB of unused code removed
+        </span>
+        <button
+          onClick={shakeBundle}
+          className="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-opacity"
+        >
+          Shake Bundle
+        </button>
       </div>
     </div>
   );

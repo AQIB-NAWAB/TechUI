@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { z } from "zod";
 import { cn } from "@/lib/utils";
-import { Layers, Heart, HardDrive, ArrowRight, Play, ChevronDown, ChevronUp } from "lucide-react";
+import { Box, Heart, HardDrive, ArrowRight, Play, ChevronDown, ChevronUp } from "lucide-react";
 
 const ServiceSchema = z.object({
   name: z.string(),
@@ -126,35 +126,17 @@ export function DockerCompose({
 
   return (
     <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden">
-      {/* Header */}
-      <div className="flex items-center gap-2 px-4 py-2.5 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/60">
-        <Layers className="size-3.5 text-blue-500 shrink-0" />
-        <span className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 flex-1">Docker Compose</span>
+      <div className="flex items-center gap-3 px-4 h-12 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50">
+        <Box className="size-4 text-zinc-400 shrink-0" />
+        <span className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 flex-1">Docker Compose</span>
         <span className="text-[10px] font-mono text-zinc-400">{projectName}</span>
-        <button
-          onClick={handleReset}
-          disabled={isPlaying}
-          className="text-[10px] text-zinc-400 hover:text-zinc-600 transition-colors px-2 py-0.5 rounded border border-zinc-200 dark:border-zinc-700"
-        >
-          Reset
-        </button>
-        <button
-          onClick={handlePlay}
-          disabled={isPlaying}
-          className={cn(
-            "flex items-center gap-1 px-3 py-1 rounded-lg text-[11px] font-semibold transition-all duration-300",
-            isPlaying
-              ? "bg-zinc-200 dark:bg-zinc-800 text-zinc-400 cursor-not-allowed"
-              : "bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 hover:opacity-90"
-          )}
-        >
-          <Play className="size-3" />
-          {isPlaying ? "Starting…" : "docker compose up"}
-        </button>
       </div>
 
-      {/* Startup order */}
-      <div className="px-4 pt-3 pb-1">
+      <p className="text-sm text-zinc-500 dark:text-zinc-400 px-4 py-2 border-b border-zinc-100 dark:border-zinc-800">
+        Run multiple containers together — services start in order based on their dependencies.
+      </p>
+
+      <div className="px-4 pt-3 pb-1 border-b border-zinc-100 dark:border-zinc-800">
         <div className="flex items-center gap-1.5 flex-wrap text-[10px]">
           <span className="text-zinc-400 font-medium">Startup order:</span>
           {groups.map((group, gi) => (
@@ -168,8 +150,7 @@ export function DockerCompose({
         </div>
       </div>
 
-      {/* Services grid */}
-      <div className="min-h-[300px] p-4">
+      <div className="min-h-[220px] p-4">
         <div className="grid grid-cols-2 gap-3">
           {services.map((svc) => {
             const colors = COLOR_MAP[svc.color ?? "blue"]!;
@@ -284,6 +265,19 @@ export function DockerCompose({
             Click a service card to see its ports, volumes &amp; dependencies
           </p>
         )}
+      </div>
+
+      <div className="border-t border-zinc-100 dark:border-zinc-800 px-4 py-3 flex items-center gap-3 bg-zinc-50 dark:bg-zinc-900/30">
+        <span className="text-sm text-zinc-500 dark:text-zinc-400 flex-1">
+          {isPlaying ? "Starting services in dependency order…" : "Launch all services with one command"}
+        </span>
+        <button
+          onClick={isPlaying ? handleReset : handlePlay}
+          className="flex items-center gap-1.5 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-opacity"
+        >
+          <Play className="size-3.5" />
+          {isPlaying ? "Reset" : "Compose Up"}
+        </button>
       </div>
     </div>
   );

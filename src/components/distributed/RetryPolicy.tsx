@@ -140,8 +140,8 @@ export function RetryPolicy({
 
         const delay = delays[current] ?? baseDelayMs;
         elapsed += delay;
-        setTimeout(doStep, 800);
-      }, 700);
+        setTimeout(doStep, 1200);
+      }, 1200);
     }
 
     doStep();
@@ -279,22 +279,25 @@ export function RetryPolicy({
       </div>
 
       {/* Result + simulate button */}
-      <div className="border-t border-zinc-100 dark:border-zinc-900 px-4 py-2.5 flex items-center gap-3 bg-zinc-50 dark:bg-zinc-900/30">
-        {totalTime !== null && (
-          <div className={cn(
-            "flex items-center gap-2 px-3 py-1.5 rounded-lg text-[11px] font-semibold flex-1",
-            succeeded
+      <div className="border-t border-zinc-100 dark:border-zinc-900 px-4 py-2.5 flex items-center gap-3 bg-zinc-50 dark:bg-zinc-900/30 min-h-[52px]">
+        <div className={cn(
+          "flex items-center gap-2 px-3 py-1.5 rounded-lg text-[11px] font-semibold flex-1 transition-all duration-500",
+          totalTime !== null
+            ? succeeded
               ? "bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800"
               : "bg-red-50 dark:bg-red-950/30 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-800"
-          )}>
-            {succeeded ? <CheckCircle2 className="size-3.5 shrink-0" /> : <AlertTriangle className="size-3.5 shrink-0" />}
-            {succeeded
-              ? `✓ Succeeded on attempt ${successAttempt} (${formatMs(Math.round(totalTime))} total)`
-              : `✗ Exhausted all ${maxAttempts} attempts`
-            }
-          </div>
-        )}
-        {!totalTime && <div className="flex-1" />}
+            : "opacity-0 border border-transparent"
+        )}>
+          {totalTime !== null && (
+            <>
+              {succeeded ? <CheckCircle2 className="size-3.5 shrink-0" /> : <AlertTriangle className="size-3.5 shrink-0" />}
+              {succeeded
+                ? `✓ Succeeded on attempt ${successAttempt} (${formatMs(Math.round(totalTime))} total)`
+                : `✗ Exhausted all ${maxAttempts} attempts`
+              }
+            </>
+          )}
+        </div>
         {interactive && (
           <button
             onClick={simulate}

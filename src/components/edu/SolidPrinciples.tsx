@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { z } from "zod";
 import { cn } from "@/lib/utils";
-import { CheckSquare } from "lucide-react";
+import { CheckSquare, ArrowRightLeft } from "lucide-react";
 
 export const SolidPrinciplesSchema = z.object({
   principle: z.enum(["S", "O", "L", "I", "D"]).default("S"),
@@ -33,7 +33,7 @@ const PRINCIPLES: PrincipleData[] = [
     name: "Single Responsibility",
     summary: "A class should have only one reason to change.",
     bad: {
-      title: 'UserService does EVERYTHING',
+      title: "UserService does EVERYTHING",
       lines: [
         { text: "class UserService {" },
         { text: "  getUser()      // data access", highlight: true },
@@ -170,50 +170,49 @@ export function SolidPrinciples({ principle: initialPrinciple = "S" }: SolidPrin
 
   return (
     <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden">
-      {/* Header */}
-      <div className="flex items-center gap-3 px-4 h-12 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50">
+      <div className="flex items-center gap-3 px-4 h-12 border-b border-zinc-100 dark:border-zinc-800">
         <CheckSquare className="size-4 text-zinc-400 shrink-0" />
         <span className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 flex-1">SOLID Principles</span>
-        <span className="text-[10px] text-zinc-400 font-mono">{data.name}</span>
+        <span className="text-[10px] font-mono text-zinc-400 border border-zinc-200 dark:border-zinc-700 px-2 py-0.5 rounded">
+          {data.letter} — {data.name}
+        </span>
       </div>
 
-      {/* Principle tabs */}
-      <div className="px-4 pt-3 pb-2 flex gap-2">
-        {(["S", "O", "L", "I", "D"] as PrincipleKey[]).map((letter) => (
-          <button
-            key={letter}
-            onClick={() => handleTab(letter)}
-            className={cn(
-              "w-9 h-9 rounded-lg border text-sm font-bold transition-all duration-300 cursor-pointer",
-              active === letter
-                ? "bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 border-zinc-900 dark:border-white"
-                : "border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 hover:border-zinc-400 dark:hover:border-zinc-500 hover:bg-zinc-50 dark:hover:bg-zinc-800/40"
-            )}
-          >
-            {letter}
-          </button>
-        ))}
-      </div>
+      <p className="text-sm text-zinc-500 dark:text-zinc-400 px-4 py-2 border-b border-zinc-100 dark:border-zinc-800">
+        Five rules for writing code that is easy to change, test, and extend.
+      </p>
 
-      {/* Principle summary */}
-      <div className="px-4 pb-3">
+      <div className="min-h-[220px] px-4 pt-3 pb-2 flex flex-col gap-3">
+        <div className="flex gap-2">
+          {(["S", "O", "L", "I", "D"] as PrincipleKey[]).map((letter) => (
+            <button
+              key={letter}
+              onClick={() => handleTab(letter)}
+              className={cn(
+                "w-9 h-9 rounded-lg border text-sm font-bold transition-all duration-500 cursor-pointer",
+                active === letter
+                  ? "bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 border-zinc-900 dark:border-white"
+                  : "border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 hover:border-zinc-400 dark:hover:border-zinc-500 hover:bg-zinc-50 dark:hover:bg-zinc-800/40"
+              )}
+            >
+              {letter}
+            </button>
+          ))}
+        </div>
+
         <p className="text-xs text-zinc-500 dark:text-zinc-400 italic">{data.summary}</p>
-      </div>
 
-      {/* BAD / GOOD two-column layout */}
-      <div className="min-h-[300px] px-4 pb-4">
-        <div className="grid grid-cols-2 gap-3 mb-3">
-          {/* BAD */}
+        <div className="grid grid-cols-2 gap-3 flex-1">
           <div
             className={cn(
-              "rounded-lg border-2 p-3 transition-all duration-500",
+              "rounded-lg border p-3 transition-all duration-500 bg-zinc-50 dark:bg-zinc-800/50",
               showGood
                 ? "border-zinc-200 dark:border-zinc-700 opacity-50"
-                : "border-red-400 dark:border-red-500"
+                : "border-red-300 dark:border-red-700"
             )}
           >
             <div className="flex items-center gap-1.5 mb-2">
-              <span className="text-[10px] font-bold uppercase tracking-wide text-red-500 dark:text-red-400">BAD</span>
+              <span className="text-[10px] font-semibold uppercase tracking-widest text-red-500 dark:text-red-400">Bad</span>
               <span className="text-[10px] text-zinc-400 truncate">{data.bad.title}</span>
             </div>
             <div className="font-mono text-[10px] leading-relaxed space-y-0.5">
@@ -221,29 +220,28 @@ export function SolidPrinciples({ principle: initialPrinciple = "S" }: SolidPrin
                 <div
                   key={i}
                   className={cn(
-                    "px-1 rounded transition-all duration-300",
+                    "px-1 rounded transition-all duration-500",
                     line.highlight
                       ? "text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/40"
                       : "text-zinc-600 dark:text-zinc-400"
                   )}
                 >
-                  {line.text || " "}
+                  {line.text || "\u00a0"}
                 </div>
               ))}
             </div>
           </div>
 
-          {/* GOOD */}
           <div
             className={cn(
-              "rounded-lg border-2 p-3 transition-all duration-500",
+              "rounded-lg border p-3 transition-all duration-500 bg-zinc-50 dark:bg-zinc-800/50",
               showGood
-                ? "border-emerald-400 dark:border-emerald-500"
+                ? "border-emerald-300 dark:border-emerald-700"
                 : "border-zinc-200 dark:border-zinc-700 opacity-50"
             )}
           >
             <div className="flex items-center gap-1.5 mb-2">
-              <span className="text-[10px] font-bold uppercase tracking-wide text-emerald-500 dark:text-emerald-400">GOOD</span>
+              <span className="text-[10px] font-semibold uppercase tracking-widest text-emerald-500 dark:text-emerald-400">Good</span>
               <span className="text-[10px] text-zinc-400 truncate">{data.good.title}</span>
             </div>
             <div className="font-mono text-[10px] leading-relaxed space-y-0.5">
@@ -251,31 +249,31 @@ export function SolidPrinciples({ principle: initialPrinciple = "S" }: SolidPrin
                 <div
                   key={i}
                   className={cn(
-                    "px-1 rounded transition-all duration-300",
+                    "px-1 rounded transition-all duration-500",
                     line.highlight
                       ? "text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40"
                       : "text-zinc-600 dark:text-zinc-400"
                   )}
                 >
-                  {line.text || " "}
+                  {line.text || "\u00a0"}
                 </div>
               ))}
             </div>
           </div>
         </div>
+      </div>
 
-        {/* Transform button */}
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => setShowGood((v) => !v)}
-            className="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-opacity"
-          >
-            {showGood ? "Show BAD example" : "Show GOOD example"}
-          </button>
-          <span className="text-[10px] text-zinc-400">
-            {showGood ? "Green = the fix applied" : "Red = the violation highlighted"}
-          </span>
-        </div>
+      <div className="px-4 py-3 border-t border-zinc-100 dark:border-zinc-800 flex items-center gap-3">
+        <ArrowRightLeft className="size-4 text-zinc-400 shrink-0" />
+        <span className="text-sm text-zinc-500 dark:text-zinc-400 flex-1">
+          {showGood ? "Green = the fix applied" : "Red = the violation highlighted"}
+        </span>
+        <button
+          onClick={() => setShowGood((v) => !v)}
+          className="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-opacity shrink-0"
+        >
+          {showGood ? "Show Bad" : "Show Good"}
+        </button>
       </div>
     </div>
   );

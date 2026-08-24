@@ -94,11 +94,11 @@ export function EventBus({
           setActiveTopic(null);
           setActivePublisher(null);
           setActiveSubscriberIds(new Set());
-        }, 600);
+        }, 800);
         animTimers.current.push(t4);
       }, 1000);
       animTimers.current.push(t3);
-    }, 700);
+    }, 800);
 
     animTimers.current.push(t1, t2);
   }, [phase, publishers, subscribers]);
@@ -117,7 +117,21 @@ export function EventBus({
       </div>
 
       {/* 3-column layout */}
-      <div className="grid grid-cols-[1fr_auto_1fr] divide-x divide-zinc-100 dark:divide-zinc-900 min-h-[160px]">
+      <div className="relative grid grid-cols-[1fr_auto_1fr] divide-x divide-zinc-100 dark:divide-zinc-900 min-h-[200px]">
+        {/* Traveling dot overlay */}
+        {phase !== "idle" && (
+          <div className="absolute top-0 left-0 right-0 h-1 z-20 pointer-events-none mx-4 mt-16">
+            <div
+              className={cn(
+                "size-2.5 rounded-full bg-blue-500 shadow-sm transition-all ease-in-out",
+                phase === "pub-to-topic" && "duration-[700ms] translate-x-[25%] opacity-100",
+                phase === "topic-to-subs" && "duration-[700ms] translate-x-[75%] opacity-100",
+                phase === "done" && "duration-500 translate-x-[90%] opacity-0"
+              )}
+              style={{ transform: phase === "pub-to-topic" ? "translateX(10%)" : undefined }}
+            />
+          </div>
+        )}
 
         {/* Publishers */}
         <div>
@@ -149,7 +163,7 @@ export function EventBus({
                           activeTopic === evt
                             ? "border-blue-400 dark:border-blue-600 bg-blue-50 dark:bg-blue-950/30 text-blue-600 dark:text-blue-400"
                             : "border-zinc-200 dark:border-zinc-700 text-zinc-500 dark:text-zinc-400 hover:border-zinc-400 dark:hover:border-zinc-500",
-                          isPulsing && "scale-110"
+                          isPulsing && "scale-110 duration-500"
                         )}
                       >
                         {evt}
@@ -275,11 +289,11 @@ export function EventBus({
           </div>
         </div>
       ) : (
-        interactive && (
-          <div className="border-t border-zinc-100 dark:border-zinc-900 px-4 py-2.5 text-[10px] text-zinc-400">
-            Click an event badge on a publisher to see it travel through the bus to subscribers
-          </div>
-        )
+        <div className="border-t border-zinc-100 dark:border-zinc-900 px-4 py-2.5 text-[10px] text-zinc-400 min-h-[36px]">
+          {interactive
+            ? "Click an event badge on a publisher to see it travel through the bus to subscribers"
+            : "\u00a0"}
+        </div>
       )}
     </div>
   );

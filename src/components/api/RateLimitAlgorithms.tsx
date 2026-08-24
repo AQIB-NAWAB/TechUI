@@ -375,7 +375,7 @@ export function RateLimitAlgorithms({
               key={t.id}
               onClick={() => setTab(t.id)}
               className={cn(
-                "px-2.5 py-1 rounded-md text-[10px] font-semibold transition-all duration-300",
+                "px-2.5 py-1 rounded-md text-[10px] font-semibold transition-all duration-500",
                 tab === t.id
                   ? "bg-zinc-900 dark:bg-white text-white dark:text-zinc-900"
                   : "text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800"

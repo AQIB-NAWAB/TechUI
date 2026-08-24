@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { z } from "zod";
 import { cn } from "@/lib/utils";
-import { Activity } from "lucide-react";
+import { Activity, Server, Cpu, Mail, ArrowRight } from "lucide-react";
 
 export const BackpressureSchema = z.object({
   producerRate: z.number().default(5),
@@ -136,35 +136,36 @@ export function Backpressure({
 
   return (
     <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden">
-      {/* Header */}
-      <div className="flex items-center gap-3 px-4 h-12 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50">
+      <div className="flex items-center gap-3 px-4 h-12 border-b border-zinc-100 dark:border-zinc-800">
         <Activity className="size-4 text-zinc-400 shrink-0" />
         <span className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 flex-1">Backpressure</span>
-        <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400">
+        <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-700">
           {STRATEGY_INFO[strategy].label}
         </span>
       </div>
 
-      {/* Interactive area */}
-      <div className="min-h-[300px] px-4 pt-4 pb-3 flex flex-col gap-4">
+      <p className="text-sm text-zinc-500 dark:text-zinc-400 px-4 py-2 border-b border-zinc-100 dark:border-zinc-800">
+        Slow down fast producers so slow consumers don&apos;t get overwhelmed.
+      </p>
+
+      <div className="min-h-[220px] px-4 pt-4 pb-3 flex flex-col gap-4">
 
         {/* Flow visualization */}
         <div className="flex items-center gap-3">
           {/* Producer */}
           <div className="flex flex-col items-center gap-1 shrink-0">
             <div className={cn(
-              "px-3 py-2 rounded-lg border text-xs font-semibold transition-all duration-500",
+              "px-3 py-2 rounded-lg border text-xs font-semibold transition-all duration-500 flex items-center gap-1.5",
               running ? "bg-blue-50 dark:bg-blue-950/30 border-blue-300 dark:border-blue-800 text-blue-700 dark:text-blue-300" : "bg-zinc-50 dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 text-zinc-500"
             )}>
+              <Server className="size-3.5" />
               Producer
             </div>
             <span className="text-[9px] text-zinc-400">{producerRate}/s</span>
           </div>
 
-          {/* Arrow */}
-          <div className="text-zinc-300 dark:text-zinc-600 text-sm">→</div>
+          <ArrowRight className="size-4 text-zinc-300 dark:text-zinc-600 shrink-0" />
 
-          {/* Queue */}
           <div className="flex-1 flex flex-col gap-1">
             <div className={cn("rounded-lg border overflow-hidden transition-all duration-500", queueBg)}>
               <div className="h-8 relative bg-zinc-50 dark:bg-zinc-800/50">
@@ -172,9 +173,10 @@ export function Backpressure({
                   className={cn("absolute left-0 top-0 h-full transition-all duration-500", queueColor, "opacity-80")}
                   style={{ width: `${fillPct}%` }}
                 />
-                <div className="absolute inset-0 flex items-center justify-center">
+                <div className="absolute inset-0 flex items-center justify-center gap-1">
+                  <Mail className="size-3 text-zinc-500 z-10 relative" />
                   <span className="text-[10px] font-bold text-zinc-600 dark:text-zinc-300 z-10 relative">
-                    Queue {queue.length}/{queueCapacity}
+                    {queue.length}/{queueCapacity}
                   </span>
                 </div>
               </div>
@@ -186,15 +188,14 @@ export function Backpressure({
             )}
           </div>
 
-          {/* Arrow */}
-          <div className="text-zinc-300 dark:text-zinc-600 text-sm">→</div>
+          <ArrowRight className="size-4 text-zinc-300 dark:text-zinc-600 shrink-0" />
 
-          {/* Consumer */}
           <div className="flex flex-col items-center gap-1 shrink-0">
             <div className={cn(
-              "px-3 py-2 rounded-lg border text-xs font-semibold transition-all duration-500",
+              "px-3 py-2 rounded-lg border text-xs font-semibold transition-all duration-500 flex items-center gap-1.5",
               running ? "bg-emerald-50 dark:bg-emerald-950/30 border-emerald-300 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300" : "bg-zinc-50 dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 text-zinc-500"
             )}>
+              <Cpu className="size-3.5" />
               Consumer
             </div>
             <span className="text-[9px] text-zinc-400">{consumerRate}/s</span>
@@ -209,7 +210,7 @@ export function Backpressure({
               <div
                 key={i}
                 className={cn(
-                  "w-6 h-6 rounded border text-[8px] flex items-center justify-center transition-all duration-300",
+                  "w-6 h-6 rounded border text-[8px] flex items-center justify-center transition-all duration-500",
                   item
                     ? i < Math.floor(queueCapacity * 0.5)
                       ? "bg-emerald-100 dark:bg-emerald-950/40 border-emerald-400 text-emerald-700 dark:text-emerald-400"
@@ -232,7 +233,7 @@ export function Backpressure({
               key={s}
               onClick={() => { setStrategy(s); reset(); }}
               className={cn(
-                "px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all duration-300",
+                "px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all duration-500",
                 strategy === s
                   ? "bg-zinc-900 dark:bg-white text-white dark:text-zinc-900"
                   : "bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700"
@@ -246,40 +247,7 @@ export function Backpressure({
           {STRATEGY_INFO[strategy].desc}
         </div>
 
-        {/* Controls row */}
-        <div className="flex items-center gap-3 flex-wrap">
-          <button
-            onClick={() => setRunning((r) => !r)}
-            className="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-opacity"
-          >
-            {running ? "⏸ Pause" : "▶ Start"}
-          </button>
-          <button
-            onClick={reset}
-            className="px-3 py-2 text-xs font-semibold rounded-lg border border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all duration-200"
-          >
-            Reset
-          </button>
-          <div className="flex items-center gap-2 ml-auto">
-            <span className="text-xs text-zinc-500 dark:text-zinc-400">Producer rate:</span>
-            <button
-              onClick={() => setProducerRate((r) => Math.max(1, r - 1))}
-              className="w-6 h-6 rounded border border-zinc-200 dark:border-zinc-700 text-xs font-bold flex items-center justify-center hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
-            >
-              −
-            </button>
-            <span className="text-xs font-bold text-zinc-700 dark:text-zinc-300 w-6 text-center">{producerRate}</span>
-            <button
-              onClick={() => setProducerRate((r) => Math.min(10, r + 1))}
-              className="w-6 h-6 rounded border border-zinc-200 dark:border-zinc-700 text-xs font-bold flex items-center justify-center hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
-            >
-              +
-            </button>
-          </div>
-        </div>
-
-        {/* Stats row */}
-        <div className="flex items-center gap-4 text-xs">
+        <div className="flex items-center gap-4 text-xs border border-zinc-100 dark:border-zinc-800 rounded-lg p-2 bg-zinc-50 dark:bg-zinc-800/40">
           <div className="flex items-center gap-1.5">
             <div className="w-2 h-2 rounded-full bg-red-500" />
             <span className="text-zinc-500 dark:text-zinc-400">Dropped:</span>
@@ -290,17 +258,39 @@ export function Backpressure({
             <span className="text-zinc-500 dark:text-zinc-400">Processed:</span>
             <span className="font-bold text-emerald-600 dark:text-emerald-400 font-mono">{processed}</span>
           </div>
-          <div className="flex items-center gap-1.5">
-            <div className="w-2 h-2 rounded-full bg-blue-500" />
-            <span className="text-zinc-500 dark:text-zinc-400">Queue:</span>
-            <span className="font-bold text-blue-600 dark:text-blue-400 font-mono">{queue.length}/{queueCapacity}</span>
-          </div>
         </div>
+      </div>
 
-        {/* Key insight */}
-        <div className="text-[10px] text-zinc-400 dark:text-zinc-500 bg-zinc-50 dark:bg-zinc-800/40 rounded-lg px-3 py-2">
-          <strong className="text-zinc-600 dark:text-zinc-300">Without backpressure</strong>, fast producers crash slow consumers. Choose your strategy based on what you can afford to lose.
+      <div className="px-4 py-3 border-t border-zinc-100 dark:border-zinc-800 flex items-center gap-3">
+        <div className="flex items-center gap-2 flex-1 min-w-0">
+          <button
+            onClick={() => setProducerRate((r) => Math.max(1, r - 1))}
+            className="w-6 h-6 rounded border border-zinc-200 dark:border-zinc-700 text-xs font-bold flex items-center justify-center hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all duration-500"
+          >
+            −
+          </button>
+          <span className="text-xs text-zinc-500 dark:text-zinc-400 truncate">
+            {running ? `${producerRate}/s → ${consumerRate}/s` : STRATEGY_INFO[strategy].desc}
+          </span>
+          <button
+            onClick={() => setProducerRate((r) => Math.min(10, r + 1))}
+            className="w-6 h-6 rounded border border-zinc-200 dark:border-zinc-700 text-xs font-bold flex items-center justify-center hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all duration-500"
+          >
+            +
+          </button>
         </div>
+        <button
+          onClick={reset}
+          className="px-3 py-2 text-sm font-semibold rounded-lg border border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all duration-500"
+        >
+          Reset
+        </button>
+        <button
+          onClick={() => setRunning((r) => !r)}
+          className="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-opacity shrink-0"
+        >
+          {running ? "Pause" : "Start"}
+        </button>
       </div>
     </div>
   );

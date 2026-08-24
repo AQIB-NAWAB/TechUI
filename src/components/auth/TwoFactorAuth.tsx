@@ -67,7 +67,7 @@ function TotpTab({ issuer = "FreshMarket" }: { issuer?: string }) {
     setVerifyState("checking");
     setTimeout(() => {
       setVerifyState(entered === code ? "success" : "error");
-    }, 900);
+    }, 1200);
   }
 
   function handleReset() {
@@ -150,7 +150,7 @@ function TotpTab({ issuer = "FreshMarket" }: { issuer?: string }) {
               onKeyDown={(e) => handleDigitKeyDown(i, e)}
               maxLength={1}
               className={cn(
-                "size-8 rounded border text-center text-sm font-mono font-bold focus:outline-none focus:ring-2 transition-all duration-300",
+                "size-8 rounded border text-center text-sm font-mono font-bold focus:outline-none focus:ring-2 transition-all duration-500",
                 "bg-white dark:bg-zinc-900 text-zinc-800 dark:text-zinc-200",
                 verifyState === "success"
                   ? "border-emerald-400 dark:border-emerald-500 ring-emerald-300 dark:ring-emerald-700"
@@ -389,10 +389,10 @@ export function TwoFactorAuth({
   return (
     <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden text-sm">
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-100 dark:border-zinc-800">
+      <div className="h-12 px-4 flex items-center justify-between border-b border-zinc-100 dark:border-zinc-800">
         <div className="flex items-center gap-2">
-          <ShieldCheck className="size-4 text-zinc-600 dark:text-zinc-400" />
-          <span className="font-semibold text-zinc-800 dark:text-zinc-200">Two-Factor Auth</span>
+          <ShieldCheck className="size-4 text-zinc-400 shrink-0" />
+          <span className="text-sm font-semibold text-zinc-800 dark:text-zinc-200">Two-Factor Auth</span>
         </div>
         <div className="flex gap-1">
           {tabs.map((tab) => (
@@ -400,7 +400,7 @@ export function TwoFactorAuth({
               key={tab.id}
               onClick={() => setActiveMethod(tab.id)}
               className={cn(
-                "flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-medium transition-all duration-300",
+                "flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-medium transition-all duration-500",
                 activeMethod === tab.id
                   ? "bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900"
                   : "text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800"
@@ -421,7 +421,7 @@ export function TwoFactorAuth({
       </div>
 
       {/* Footer */}
-      <div className="px-4 py-2 border-t border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/50">
+      <div className="px-4 py-3 border-t border-zinc-100 dark:border-zinc-800 flex items-center gap-2">
         <p className="text-[11px] text-zinc-400 dark:text-zinc-500 text-center">
           {activeMethod === "totp"  && "Time-based · changes every 30s · no server state required"}
           {activeMethod === "sms"   && "Server sends OTP · expires in 5 min · requires phone number"}

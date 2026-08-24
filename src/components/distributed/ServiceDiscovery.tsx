@@ -190,7 +190,7 @@ export function ServiceDiscovery({
                 key={svc.name}
                 onClick={() => setSelected(isSelected ? null : svc.name)}
                 className={cn(
-                  "rounded-lg border p-2.5 text-left transition-all duration-300 cursor-pointer",
+                  "rounded-lg border p-2.5 text-left transition-all duration-500 cursor-pointer",
                   isSelected
                     ? "border-blue-400 dark:border-blue-600 bg-blue-50 dark:bg-blue-950/20"
                     : isUnhealthy
@@ -226,7 +226,7 @@ export function ServiceDiscovery({
 
         {/* Selected service detail */}
         {selected && selectedSvc && (
-          <div className="mt-3 rounded-lg border border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-950/10 p-3 space-y-2 transition-all duration-300">
+          <div className="mt-3 rounded-lg border border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-950/10 p-3 space-y-2 transition-all duration-500">
             <div className="flex items-center gap-2">
               <div className="text-xs font-bold text-blue-700 dark:text-blue-300">{selectedSvc.name}</div>
               <span className={cn(

@@ -434,7 +434,7 @@ export function MutexSemaphore({
             key={t}
             onClick={() => setTab(t)}
             className={cn(
-              "px-4 py-2 text-xs font-semibold capitalize transition-all duration-200",
+              "px-4 py-2 text-xs font-semibold capitalize transition-all duration-500",
               tab === t
                 ? "border-b-2 border-zinc-900 dark:border-white text-zinc-900 dark:text-white"
                 : "text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"

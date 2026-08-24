@@ -184,7 +184,7 @@ export function VirtualDom({ scenario = "text-change" }: VirtualDomProps) {
       }
       setDiffingIdx(i);
       i++;
-      timerRef.current = setTimeout(step, 600);
+      timerRef.current = setTimeout(step, 1200);
     };
 
     timerRef.current = setTimeout(step, 200);
@@ -229,7 +229,7 @@ export function VirtualDom({ scenario = "text-change" }: VirtualDomProps) {
             key={tab}
             onClick={() => setActiveScenario(tab)}
             className={cn(
-              "px-3 py-2 text-xs font-medium whitespace-nowrap transition-all duration-300",
+              "px-3 py-2 text-xs font-medium whitespace-nowrap transition-all duration-500",
               activeScenario === tab
                 ? "border-b-2 border-blue-500 text-blue-600 dark:text-blue-400"
                 : "text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300"

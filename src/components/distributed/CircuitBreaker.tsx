@@ -3,7 +3,7 @@
 import { useState, useCallback } from "react";
 import { z } from "zod";
 import { cn } from "@/lib/utils";
-import { Zap, RefreshCw, CheckCircle2, XCircle, AlertTriangle } from "lucide-react";
+import { Zap, ZapOff, RefreshCw, CheckCircle2, XCircle, AlertTriangle } from "lucide-react";
 
 export const CircuitBreakerSchema = z.object({
   name: z.string().optional().default("Payment Service"),
@@ -32,6 +32,7 @@ const STATE_CFG: Record<CBState, {
   bg: string;
   ring: string;
   icon: React.ReactNode;
+  wireIcon: React.ReactNode;
   description: string;
 }> = {
   closed: {
@@ -40,6 +41,7 @@ const STATE_CFG: Record<CBState, {
     bg: "bg-emerald-50 dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-900/40",
     ring: "border-emerald-400 dark:border-emerald-600",
     icon: <CheckCircle2 className="size-4 text-emerald-500" />,
+    wireIcon: <Zap className="size-5 text-emerald-500" />,
     description: "Circuit is healthy. Requests pass through normally.",
   },
   open: {
@@ -48,6 +50,7 @@ const STATE_CFG: Record<CBState, {
     bg: "bg-red-50 dark:bg-red-950/20 border-red-200 dark:border-red-900/40",
     ring: "border-red-400 dark:border-red-600",
     icon: <XCircle className="size-4 text-red-500" />,
+    wireIcon: <ZapOff className="size-5 text-red-500" />,
     description: "Circuit is tripped. Requests are rejected immediately.",
   },
   "half-open": {
@@ -56,6 +59,7 @@ const STATE_CFG: Record<CBState, {
     bg: "bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-900/40",
     ring: "border-amber-400 dark:border-amber-600",
     icon: <AlertTriangle className="size-4 text-amber-500" />,
+    wireIcon: <Zap className="size-5 text-amber-500" />,
     description: "Probing with limited traffic. Watching for recovery.",
   },
 };
@@ -190,14 +194,74 @@ export function CircuitBreaker({
         )}
       </div>
 
-      {/* State card */}
-      <div className={cn("m-4 rounded-lg border px-4 py-3 flex items-start gap-3", cfg.bg)}>
-        <div className={cn("mt-0.5 p-1.5 rounded-full border", cfg.ring, "bg-white dark:bg-zinc-950 shrink-0")}>
-          {cfg.icon}
+      {/* Circuit visual + state card */}
+      <div className="px-4 pt-4 pb-2 min-h-[220px]">
+        <div className="flex items-center justify-center gap-4 mb-4">
+          <div className="flex flex-col items-center gap-1">
+            <div className="size-10 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900 flex items-center justify-center">
+              <span className="text-[10px] font-semibold text-zinc-500">Client</span>
+            </div>
+          </div>
+
+          <div className="flex-1 flex items-center justify-center relative max-w-[200px]">
+            <svg viewBox="0 0 200 40" className="w-full h-10 transition-all duration-700">
+              <line
+                x1="10" y1="20" x2="85" y2="20"
+                className={cn(
+                  "transition-all duration-700",
+                  state === "open" ? "stroke-red-300 dark:stroke-red-700" :
+                  state === "half-open" ? "stroke-amber-400 dark:stroke-amber-600" :
+                  "stroke-emerald-400 dark:stroke-emerald-600"
+                )}
+                strokeWidth="3"
+                strokeDasharray={state === "half-open" ? "6 4" : undefined}
+              />
+              <line
+                x1="115" y1="20" x2="190" y2="20"
+                className={cn(
+                  "transition-all duration-700",
+                  state === "open" ? "stroke-red-300 dark:stroke-red-700" :
+                  state === "half-open" ? "stroke-amber-400 dark:stroke-amber-600" :
+                  "stroke-emerald-400 dark:stroke-emerald-600"
+                )}
+                strokeWidth="3"
+                strokeDasharray={state === "half-open" ? "6 4" : undefined}
+              />
+              {state === "open" && (
+                <>
+                  <line x1="88" y1="12" x2="96" y2="28" className="stroke-red-500" strokeWidth="2" />
+                  <line x1="96" y1="12" x2="88" y2="28" className="stroke-red-500" strokeWidth="2" />
+                </>
+              )}
+            </svg>
+            <div className={cn(
+              "absolute left-1/2 -translate-x-1/2 size-10 rounded-full border-2 flex items-center justify-center transition-all duration-700 bg-white dark:bg-zinc-950",
+              cfg.ring,
+              state === "open" && "shadow-[0_0_12px_rgba(239,68,68,0.4)]"
+            )}>
+              {cfg.wireIcon}
+            </div>
+          </div>
+
+          <div className="flex flex-col items-center gap-1">
+            <div className="size-10 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900 flex items-center justify-center">
+              <span className="text-[10px] font-semibold text-zinc-500 truncate max-w-[60px]">{name}</span>
+            </div>
+          </div>
         </div>
-        <div>
-          <div className={cn("text-sm font-bold tracking-wide", cfg.color)}>{cfg.label}</div>
-          <div className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">{cfg.description}</div>
+
+        <p className="text-[11px] text-zinc-500 dark:text-zinc-400 text-center mb-3 leading-relaxed">
+          Closed = requests pass through · Open = all requests blocked · Half-Open = testing if service recovered
+        </p>
+
+        <div className={cn("rounded-lg border px-4 py-3 flex items-start gap-3 transition-all duration-700", cfg.bg)}>
+          <div className={cn("mt-0.5 p-1.5 rounded-full border transition-all duration-700", cfg.ring, "bg-white dark:bg-zinc-950 shrink-0")}>
+            {cfg.icon}
+          </div>
+          <div>
+            <div className={cn("text-sm font-bold tracking-wide transition-colors duration-700", cfg.color)}>{cfg.label}</div>
+            <div className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">{cfg.description}</div>
+          </div>
         </div>
       </div>
 
@@ -215,7 +279,7 @@ export function CircuitBreaker({
         </div>
         <div className="h-1.5 rounded-full bg-zinc-100 dark:bg-zinc-800 overflow-hidden">
           <div
-            className={cn("h-full rounded-full transition-all duration-300", progressColor)}
+            className={cn("h-full rounded-full transition-all duration-700", progressColor)}
             style={{ width: `${progress}%` }}
           />
         </div>
@@ -298,8 +362,8 @@ export function CircuitBreaker({
                 <span className={cn(
                   "px-2 py-0.5 rounded-full border font-semibold transition-all",
                   active
-                    ? cn(c.color, "border-current bg-current/10")
-                    : "text-zinc-400 dark:text-zinc-600 border-zinc-200 dark:border-zinc-800"
+                    ? cn(c.color, "border-current bg-current/10 transition-all duration-700")
+                    : "text-zinc-400 dark:text-zinc-600 border-zinc-200 dark:border-zinc-800 transition-all duration-500"
                 )}>
                   {c.label}
                 </span>

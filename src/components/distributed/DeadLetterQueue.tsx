@@ -3,7 +3,7 @@
 import { useState, useRef, useCallback } from "react";
 import { z } from "zod";
 import { cn } from "@/lib/utils";
-import { Inbox, CheckCircle2, XCircle, AlertTriangle, RotateCcw, Search, Trash2 } from "lucide-react";
+import { Inbox, CheckCircle2, XCircle, AlertTriangle, RotateCcw, Search, Trash2, Mail, Cpu } from "lucide-react";
 
 export const DeadLetterQueueSchema = z.object({
   maxRetries: z.number().default(3),
@@ -73,7 +73,7 @@ export function DeadLetterQueue({
           // Success
           setState({ phase: "success", msgId: msg.id });
           setQueue((q) => q.filter((m) => m.id !== msg.id));
-          timerRef.current = setTimeout(() => setState({ phase: "idle" }), 900);
+          timerRef.current = setTimeout(() => setState({ phase: "idle" }), 1200);
         } else {
           // Failure
           setState({ phase: "failed", msgId: msg.id, attempt, maxRetries });
@@ -85,14 +85,14 @@ export function DeadLetterQueue({
                 setQueue((q) => q.filter((m) => m.id !== msg.id));
                 setDlq((d) => [...d, { ...msg, retries: maxRetries, failedAt: new Date().toISOString() }]);
                 setState({ phase: "idle" });
-              }, 900);
+              }, 1200);
             } else {
               attempt++;
-              timerRef.current = setTimeout(tryAttempt, 400);
+              timerRef.current = setTimeout(tryAttempt, 1200);
             }
-          }, 900);
+          }, 1200);
         }
-      }, 900);
+      }, 1200);
     }
 
     tryAttempt();
@@ -124,21 +124,38 @@ export function DeadLetterQueue({
   const activeId = state.phase !== "idle" ? (state as { msgId?: string }).msgId : null;
   const inspectedMsg = dlq.find((m) => m.id === inspecting);
 
+  const footerStatus =
+    state.phase === "idle"
+      ? `${queue.length} message${queue.length !== 1 ? "s" : ""} waiting · ${dlq.length} in DLQ`
+      : state.phase === "processing"
+      ? `Processing ${state.msgId} — attempt ${state.attempt}/${state.maxRetries}`
+      : state.phase === "success"
+      ? `${state.msgId} processed successfully`
+      : state.phase === "failed"
+      ? `${state.msgId} failed — ${state.attempt < state.maxRetries ? "retrying…" : "moving to DLQ"}`
+      : `Moving ${state.msgId} to Dead Letter Queue…`;
+
   return (
     <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden">
-      {/* Header */}
-      <div className="flex items-center gap-3 px-4 h-12 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50">
+      <div className="flex items-center gap-3 px-4 h-12 border-b border-zinc-100 dark:border-zinc-800">
         <Inbox className="size-4 text-zinc-400 shrink-0" />
         <span className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 flex-1">Dead Letter Queue</span>
-        <span className="text-xs font-mono text-zinc-500 dark:text-zinc-400">maxRetries: {maxRetries}</span>
+        <span className="text-xs font-mono text-zinc-500 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-700 px-2 py-0.5 rounded">
+          maxRetries: {maxRetries}
+        </span>
       </div>
 
-      {/* Interactive area */}
-      <div className="min-h-[300px] flex flex-col px-4 pt-3 pb-3 gap-3">
+      <p className="text-sm text-zinc-500 dark:text-zinc-400 px-4 py-2 border-b border-zinc-100 dark:border-zinc-800">
+        Messages that fail all retries go to the DLQ — inspect, fix, then replay.
+      </p>
 
-        {/* Main Queue */}
+      <div className="min-h-[220px] flex flex-col px-4 pt-3 pb-3 gap-3">
+
         <div>
-          <div className="text-[10px] text-zinc-400 dark:text-zinc-500 font-semibold uppercase tracking-wide mb-1.5">Main Queue</div>
+          <div className="flex items-center gap-1.5 mb-1.5">
+            <Mail className="size-3 text-zinc-400" />
+            <span className="text-[10px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500">Main Queue</span>
+          </div>
           {queue.length === 0 ? (
             <div className="text-xs text-zinc-400 dark:text-zinc-500 italic">— empty —</div>
           ) : (
@@ -168,58 +185,10 @@ export function DeadLetterQueue({
           )}
         </div>
 
-        {/* Processing status */}
-        <div className="rounded-lg border border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/40 px-3 py-2 min-h-[56px] flex flex-col justify-center gap-1">
-          {state.phase === "idle" && (
-            <p className="text-xs text-zinc-400 dark:text-zinc-500">Press "Process Next" to consume a message from the queue.</p>
-          )}
-          {state.phase === "processing" && (
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
-              <span className="text-xs font-semibold text-blue-700 dark:text-blue-300">
-                Processing {state.msgId} — attempt {state.attempt}/{state.maxRetries}
-              </span>
-            </div>
-          )}
-          {state.phase === "success" && (
-            <div className="flex items-center gap-2">
-              <CheckCircle2 className="size-4 text-emerald-500" />
-              <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-300">
-                {state.msgId} processed successfully ✓
-              </span>
-            </div>
-          )}
-          {state.phase === "failed" && (
-            <div className="space-y-0.5">
-              <div className="flex items-center gap-2">
-                <XCircle className="size-3.5 text-red-500 shrink-0" />
-                <span className="text-xs font-semibold text-red-700 dark:text-red-400">
-                  {state.msgId} — attempt {state.attempt}/{state.maxRetries} failed
-                </span>
-              </div>
-              {state.attempt < state.maxRetries ? (
-                <p className="text-[10px] text-zinc-400 ml-5">
-                  Retrying in {Math.pow(2, state.attempt)}s (exponential backoff)…
-                </p>
-              ) : (
-                <p className="text-[10px] text-red-500 ml-5 font-semibold">Max retries exceeded → moving to DLQ</p>
-              )}
-            </div>
-          )}
-          {state.phase === "moving-to-dlq" && (
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-red-500 animate-bounce" />
-              <span className="text-xs font-semibold text-red-700 dark:text-red-400">
-                Moving {state.msgId} to Dead Letter Queue…
-              </span>
-            </div>
-          )}
-        </div>
-
-        {/* Dead Letter Queue */}
         <div>
           <div className="flex items-center gap-2 mb-1.5">
-            <div className="text-[10px] text-red-500 dark:text-red-400 font-semibold uppercase tracking-wide">Dead Letter Queue</div>
+            <Cpu className="size-3 text-red-400" />
+            <span className="text-[10px] text-red-500 dark:text-red-400 font-semibold uppercase tracking-widest">Dead Letter Queue</span>
             {dlq.length > 0 && (
               <span className="text-[9px] bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-full px-1.5 py-0.5 font-bold">
                 {dlq.length}
@@ -288,31 +257,31 @@ export function DeadLetterQueue({
           </div>
         )}
 
-        {/* Controls */}
-        <div className="flex items-center gap-2 mt-auto flex-wrap">
-          <button
-            onClick={processNext}
-            disabled={queue.length === 0 || state.phase !== "idle"}
-            className="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
-          >
-            Process Next
-          </button>
-          <button
-            onClick={handleReset}
-            className="px-3 py-2 text-sm font-semibold rounded-lg border border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all duration-200 cursor-pointer"
-          >
-            Reset
-          </button>
-          <span className="text-xs text-zinc-400 dark:text-zinc-500 font-mono ml-auto">
-            queue: {queue.length} · dlq: {dlq.length}
-          </span>
-        </div>
+      </div>
 
-        {/* Key insight */}
-        <div className="text-[10px] text-zinc-400 dark:text-zinc-500 bg-zinc-50 dark:bg-zinc-800/40 rounded-lg px-3 py-2">
-          DLQ captures messages that failed all retries — inspect the bug, fix it, then <strong className="text-zinc-600 dark:text-zinc-300">replay</strong>.
-          Red cards will fail; exponential backoff delays: {Array.from({ length: maxRetries }, (_, i) => `${Math.pow(2, i + 1)}s`).join(", ")}.
-        </div>
+      <div className="px-4 py-3 border-t border-zinc-100 dark:border-zinc-800 flex items-center gap-3">
+        <span className={cn(
+          "text-sm flex-1 transition-all duration-500",
+          state.phase === "success" && "text-emerald-700 dark:text-emerald-400",
+          state.phase === "failed" && "text-red-700 dark:text-red-400",
+          state.phase === "processing" && "text-blue-700 dark:text-blue-400",
+          (state.phase === "idle" || state.phase === "moving-to-dlq") && "text-zinc-500 dark:text-zinc-400",
+        )}>
+          {footerStatus}
+        </span>
+        <button
+          onClick={handleReset}
+          className="px-3 py-2 text-sm font-semibold rounded-lg border border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all duration-500"
+        >
+          Reset
+        </button>
+        <button
+          onClick={processNext}
+          disabled={queue.length === 0 || state.phase !== "idle"}
+          className="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-40 disabled:cursor-not-allowed shrink-0"
+        >
+          Process Next
+        </button>
       </div>
     </div>
   );

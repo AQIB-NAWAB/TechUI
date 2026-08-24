@@ -3,7 +3,7 @@
 import { useState, useMemo } from "react";
 import { z } from "zod";
 import { cn } from "@/lib/utils";
-import { Eye, EyeOff, CheckCircle2, Circle } from "lucide-react";
+import { Eye, EyeOff, CheckCircle2, Circle, Lock } from "lucide-react";
 
 export const PasswordStrengthSchema = z.object({
   initialValue: z.string().optional().default(""),
@@ -43,10 +43,11 @@ export function PasswordStrength({
   const strength = password.length === 0 ? null : STRENGTHS[Math.max(0, Math.min(4, passed - 1))]!;
 
   return (
-    <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 overflow-hidden">
+    <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden">
       {/* Header */}
-      <div className="px-4 py-2.5 border-b border-zinc-100 dark:border-zinc-900 bg-zinc-50 dark:bg-zinc-900/50">
-        <span className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">Password Strength Checker</span>
+      <div className="h-12 px-4 flex items-center gap-2 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50">
+        <Lock className="size-4 text-zinc-400 shrink-0" />
+        <span className="text-sm font-semibold text-zinc-800 dark:text-zinc-200">Password Strength Checker</span>
       </div>
 
       <div className="p-4 space-y-4">
@@ -76,7 +77,7 @@ export function PasswordStrength({
               <div
                 key={i}
                 className={cn(
-                  "flex-1 h-1.5 rounded-full transition-all duration-300",
+                  "flex-1 h-1.5 rounded-full transition-all duration-500",
                   strength && i < strength.bars ? strength.color : "bg-zinc-100 dark:bg-zinc-800"
                 )}
               />

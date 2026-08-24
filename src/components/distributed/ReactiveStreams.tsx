@@ -197,7 +197,7 @@ export function ReactiveStreams({ pipeline = "map" }: ReactiveStreamsProps) {
             key={tab}
             onClick={() => { setActivePipeline(tab); }}
             className={cn(
-              "px-3 py-1.5 text-[11px] font-mono font-semibold rounded-t-md transition-all duration-300 border-b-2",
+              "px-3 py-1.5 text-[11px] font-mono font-semibold rounded-t-md transition-all duration-500 border-b-2",
               activePipeline === tab
                 ? "bg-white dark:bg-zinc-900 text-blue-600 dark:text-blue-400 border-blue-500 shadow-sm"
                 : "text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300 border-transparent"
@@ -376,7 +376,7 @@ export function ReactiveStreams({ pipeline = "map" }: ReactiveStreamsProps) {
           onClick={startAnim}
           disabled={isAnimating}
           className={cn(
-            "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-300",
+            "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-500",
             isAnimating
               ? "bg-zinc-100 dark:bg-zinc-800 text-zinc-400 cursor-not-allowed"
               : "bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 hover:opacity-90"

@@ -3,7 +3,7 @@
 import { useState, useRef } from "react";
 import { z } from "zod";
 import { cn } from "@/lib/utils";
-import { Database } from "lucide-react";
+import { Database, Server, ArrowRight } from "lucide-react";
 
 export const DatabaseShardingSchema = z.object({
   shardKey: z.string().default("user_id"),
@@ -71,7 +71,7 @@ export function DatabaseSharding({
         setRoutedShardId(null);
         setAnimating(false);
       }, 2000);
-    }, 700);
+    }, 1000);
 
     void idx; // used in formula display below
   }
@@ -89,22 +89,33 @@ export function DatabaseSharding({
   return (
     <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden">
       {/* Header */}
-      <div className="flex items-center gap-3 px-4 py-2.5 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/60">
-        <Database className="size-3.5 text-zinc-400 shrink-0" />
-        <span className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 flex-1">Database Sharding</span>
+      <div className="flex items-center gap-3 px-4 h-12 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/60">
+        <Database className="size-4 text-zinc-400 shrink-0" />
+        <span className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 flex-1">Database Sharding</span>
         <span className="text-[10px] font-mono text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 px-2 py-0.5 rounded">
           {shards.length} shards
         </span>
-        <button
-          onClick={handleRoute}
-          disabled={animating}
-          className="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-50"
-        >
-          Route
-        </button>
       </div>
 
-      <div className="p-4 space-y-4 min-h-[260px]">
+      <div className="px-4 py-2 border-b border-zinc-100 dark:border-zinc-800">
+        <p className="text-sm text-zinc-500 dark:text-zinc-400">
+          Split a large database into smaller shards. Each record routes to one shard based on a hash of the shard key.
+        </p>
+      </div>
+
+      <div className="p-4 space-y-4 min-h-[280px]">
+        {/* Routing flow */}
+        <div className="flex items-center justify-center gap-2 py-2 border border-zinc-100 dark:border-zinc-800 rounded-lg bg-zinc-50 dark:bg-zinc-800/40">
+          <Server className={cn("size-4 transition-all duration-500", animating ? "text-blue-500" : "text-zinc-400")} />
+          <div className="relative flex-1 h-1 max-w-[80px] bg-zinc-200 dark:bg-zinc-700 rounded-full overflow-hidden">
+            {animating && (
+              <div className="absolute inset-y-0 w-2 bg-blue-500 rounded-full animate-[travel_1s_ease-in-out_forwards]" />
+            )}
+          </div>
+          <ArrowRight className={cn("size-3 transition-all duration-500", routedShardId ? "text-emerald-500" : "text-zinc-300")} />
+          <Database className={cn("size-4 transition-all duration-500", routedShardId ? "text-emerald-500" : "text-zinc-400")} />
+          <span className="text-[10px] font-semibold text-zinc-500">{routedShardId ? targetShardLabel : "Shard ?"}</span>
+        </div>
         {/* Input + formula row */}
         <div className="flex items-center gap-2 flex-wrap">
           <span className="text-xs text-zinc-500 dark:text-zinc-400 font-mono">{shardKey}:</span>
@@ -173,18 +184,27 @@ export function DatabaseSharding({
       </div>
 
       {/* Footer */}
-      <div className="border-t border-zinc-100 dark:border-zinc-800 px-4 py-2.5 bg-zinc-50 dark:bg-zinc-900/40 flex items-center gap-3 text-[10px] text-zinc-500 dark:text-zinc-400">
-        <span>Total: {totalRecords.toLocaleString()} records</span>
-        <span>·</span>
-        <span
-          className={cn(
-            "font-semibold",
-            distQuality === "Even" ? "text-emerald-600 dark:text-emerald-400" : "text-amber-600 dark:text-amber-400"
-          )}
-        >
-          {distQuality} distribution
+      <div className="border-t border-zinc-100 dark:border-zinc-800 px-4 py-3 bg-zinc-50 dark:bg-zinc-900/40 flex items-center gap-3">
+        <span className="text-xs text-zinc-500 flex-1">
+          {animating ? "Routing record to shard…" : showFormula ? `Routed to ${targetShardLabel}` : `Enter a ${shardKey} and click Route`}
         </span>
+        <span className="text-[10px] text-zinc-400 hidden sm:inline">
+          Total: {totalRecords.toLocaleString()} · {distQuality} distribution
+        </span>
+        <button
+          onClick={handleRoute}
+          disabled={animating}
+          className="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-50 shrink-0"
+        >
+          Route
+        </button>
       </div>
+      <style>{`
+        @keyframes travel {
+          from { left: 0; opacity: 1; }
+          to { left: calc(100% - 8px); opacity: 0.3; }
+        }
+      `}</style>
     </div>
   );
 }

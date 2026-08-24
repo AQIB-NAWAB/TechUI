@@ -149,6 +149,21 @@ import { Http3Quic } from "@/components/networking/Http3Quic";
 import { DesignPatterns } from "@/components/architecture/DesignPatterns";
 import { DataReplication } from "@/components/distributed/DataReplication";
 import { FeatureRollout } from "@/components/devtools/FeatureRollout";
+import { IdempotencyKey } from "@/components/api/IdempotencyKey";
+import { IdempotencyConsumer } from "@/components/distributed/IdempotencyConsumer";
+import { StackVsQueue } from "@/components/edu/StackVsQueue";
+import { SessionVsJwt } from "@/components/auth/SessionVsJwt";
+import { GracefulShutdown } from "@/components/devtools/GracefulShutdown";
+import { HashTableCollision } from "@/components/edu/HashTableCollision";
+import { LeaderElection } from "@/components/distributed/LeaderElection";
+import { ContextWindowOverflow } from "@/components/ai/ContextWindowOverflow";
+import { HmacSigning } from "@/components/api/HmacSigning";
+import { RateLimitHeaders } from "@/components/api/RateLimitHeaders";
+import { TwoPhaseCommit } from "@/components/distributed/TwoPhaseCommit";
+import { GraphTraversalBfsDfs } from "@/components/edu/GraphTraversalBfsDfs";
+import { ReadRepair } from "@/components/distributed/ReadRepair";
+import { AcidVsBase } from "@/components/database/AcidVsBase";
+import { WebSocketVsSse } from "@/components/networking/WebSocketVsSse";
 
 const COMPONENT_MAP: Record<string, React.ComponentType<Record<string, unknown>>> = {
   "api-request":          ApiRequest as React.ComponentType<Record<string, unknown>>,
@@ -299,6 +314,21 @@ const COMPONENT_MAP: Record<string, React.ComponentType<Record<string, unknown>>
   "design-patterns":  DesignPatterns as React.ComponentType<Record<string, unknown>>,
   "data-replication": DataReplication as React.ComponentType<Record<string, unknown>>,
   "feature-rollout":  FeatureRollout as React.ComponentType<Record<string, unknown>>,
+  "idempotency-key":      IdempotencyKey as React.ComponentType<Record<string, unknown>>,
+  "idempotency-consumer": IdempotencyConsumer as React.ComponentType<Record<string, unknown>>,
+  "stack-vs-queue":       StackVsQueue as React.ComponentType<Record<string, unknown>>,
+  "session-vs-jwt":       SessionVsJwt as React.ComponentType<Record<string, unknown>>,
+  "graceful-shutdown":    GracefulShutdown as React.ComponentType<Record<string, unknown>>,
+  "hash-table-collision": HashTableCollision as React.ComponentType<Record<string, unknown>>,
+  "leader-election":      LeaderElection as React.ComponentType<Record<string, unknown>>,
+  "context-window-overflow": ContextWindowOverflow as React.ComponentType<Record<string, unknown>>,
+  "hmac-signing":         HmacSigning as React.ComponentType<Record<string, unknown>>,
+  "rate-limit-headers":   RateLimitHeaders as React.ComponentType<Record<string, unknown>>,
+  "two-phase-commit":     TwoPhaseCommit as React.ComponentType<Record<string, unknown>>,
+  "graph-traversal-bfs-dfs": GraphTraversalBfsDfs as React.ComponentType<Record<string, unknown>>,
+  "read-repair":          ReadRepair as React.ComponentType<Record<string, unknown>>,
+  "acid-vs-base":         AcidVsBase as React.ComponentType<Record<string, unknown>>,
+  "websocket-vs-sse":     WebSocketVsSse as React.ComponentType<Record<string, unknown>>,
 };
 
 export function LivePreview({

@@ -2,7 +2,7 @@
 
 import { z } from "zod";
 import { cn } from "@/lib/utils";
-import { Box, Shield, FolderOpen, Network, Server } from "lucide-react";
+import { Box, Layers, FolderOpen, Network, Server } from "lucide-react";
 
 const PodPhaseEnum = z.enum(["Pending", "Running", "Succeeded", "Failed", "Unknown"]);
 const ContainerStateEnum = z.enum(["waiting", "running", "terminated"]);
@@ -45,14 +45,14 @@ const PHASE_CFG = {
 };
 
 const STATE_CFG = {
-  running:    { border: "border-l-emerald-500", bg: "bg-emerald-50 dark:bg-emerald-950/20",  text: "text-emerald-700 dark:text-emerald-400", label: "running"    },
-  waiting:    { border: "border-l-amber-500",   bg: "bg-amber-50 dark:bg-amber-950/20",      text: "text-amber-700 dark:text-amber-400",     label: "waiting"    },
-  terminated: { border: "border-l-red-400",     bg: "bg-red-50 dark:bg-red-950/20",          text: "text-zinc-500 dark:text-zinc-400",       label: "terminated" },
+  running:    { border: "border-l-emerald-500", bg: "bg-emerald-50/80 dark:bg-emerald-950/20",  text: "text-emerald-700 dark:text-emerald-400", label: "running"    },
+  waiting:    { border: "border-l-amber-500",   bg: "bg-amber-50/80 dark:bg-amber-950/20",      text: "text-amber-700 dark:text-amber-400",     label: "waiting"    },
+  terminated: { border: "border-l-red-400",     bg: "bg-red-50/80 dark:bg-red-950/20",          text: "text-zinc-500 dark:text-zinc-400",       label: "terminated" },
 };
 
 function parseMilli(s: string): number {
   if (!s) return 0;
-  const m = s.match(/^([\d.]+)m?i?$/);
+  const m = s.match(/^([\d.]+)(m|Mi|Gi)?$/);
   if (!m) return 0;
   return parseFloat(m[1]!);
 }
@@ -67,9 +67,9 @@ function ResourceBar({ used, limit, color }: { used?: string; limit?: string; co
 
   return (
     <div className="flex items-center gap-2 flex-1 min-w-0">
-      <span className="font-mono text-[10px] text-zinc-500 dark:text-zinc-400 shrink-0 w-20">{label}</span>
+      <span className="font-mono text-[10px] text-zinc-500 dark:text-zinc-400 shrink-0 w-24">{label}</span>
       {l > 0 && (
-        <div className="flex-1 h-1.5 rounded-full bg-zinc-100 dark:bg-zinc-800 overflow-hidden">
+        <div className="flex-1 h-2 rounded-full bg-zinc-100 dark:bg-zinc-800 overflow-hidden">
           <div className={cn("h-full rounded-full transition-all duration-500", barColor)} style={{ width: `${pct}%` }} />
         </div>
       )}
@@ -93,19 +93,17 @@ export function KubernetesPod({
   const readyCount = containers.filter((c) => c.ready).length;
 
   return (
-    <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 overflow-hidden">
-      {/* Outer header */}
-      <div className="flex items-center gap-2 px-4 py-2.5 border-b border-zinc-100 dark:border-zinc-900 bg-zinc-50 dark:bg-zinc-900/40">
-        <Shield className="size-3.5 text-violet-500 shrink-0" />
+    <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden">
+      <div className="flex items-center gap-2 h-12 px-4 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/50">
+        <Layers className="size-4 text-violet-500 shrink-0" />
         <span className="text-[10px] font-semibold text-zinc-400 uppercase tracking-widest">Kubernetes Pod</span>
         <span className="ml-auto text-[10px] font-mono text-violet-500 dark:text-violet-400">{namespace}</span>
       </div>
 
-      {/* Pod outer box */}
-      <div className="p-4">
-        <div className="border-2 border-dashed border-zinc-300 dark:border-zinc-600 rounded-xl overflow-hidden">
-          {/* Pod header */}
-          <div className={cn("px-4 py-3 border-b-2 border-dashed border-zinc-200 dark:border-zinc-700 flex items-center gap-3 flex-wrap", pc.bg)}>
+      <div className="p-4 min-h-[220px]">
+        <div className="border-2 border-dashed border-violet-300 dark:border-violet-700 rounded-xl overflow-hidden bg-violet-50/20 dark:bg-violet-950/10">
+          <div className={cn("px-4 py-3 border-b-2 border-dashed border-violet-200 dark:border-violet-800 flex items-center gap-3 flex-wrap", pc.bg)}>
+            <Layers className="size-4 text-violet-500 shrink-0" />
             <div className="flex-1 min-w-0">
               <span className="text-xs font-mono font-bold text-zinc-800 dark:text-zinc-100 truncate block">{name}</span>
               <div className="flex items-center gap-3 mt-1 flex-wrap">
@@ -132,43 +130,45 @@ export function KubernetesPod({
             </div>
           </div>
 
-          {/* Containers inside pod */}
-          <div className="divide-y divide-zinc-100 dark:divide-zinc-800">
+          <div className="p-3 space-y-2">
+            <div className="text-[10px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500 px-1">
+              Containers inside pod
+            </div>
             {containers.map((c, i) => {
               const sc = STATE_CFG[c.state ?? "running"];
               return (
                 <div
                   key={i}
-                  className={cn("px-4 py-3 border-l-4", sc.border, sc.bg)}
+                  className={cn("rounded-lg border border-zinc-200 dark:border-zinc-700 border-l-4 px-3 py-2.5", sc.border, sc.bg)}
                 >
                   <div className="flex items-center gap-2 mb-1.5">
                     <Box className="size-3.5 text-blue-500 shrink-0" />
                     <span className="text-xs font-semibold text-zinc-800 dark:text-zinc-200">{c.name}</span>
-                    <span className={cn("text-[10px] font-semibold px-1.5 py-0.5 rounded", sc.text, "bg-white/60 dark:bg-black/20")}>
+                    <span className={cn("text-[10px] font-semibold px-1.5 py-0.5 rounded", sc.text, "bg-white/70 dark:bg-black/20")}>
                       {sc.label}
                     </span>
                     <span className={cn("ml-auto text-[10px] font-bold", c.ready ? "text-emerald-600 dark:text-emerald-400" : "text-red-500")}>
-                      {c.ready ? "✓ Ready" : "✗ Not ready"}
+                      {c.ready ? "Ready" : "Not ready"}
                     </span>
                   </div>
-                  <code className="block text-[10px] font-mono text-zinc-500 dark:text-zinc-400 mb-2 truncate">{c.image}</code>
-                  <div className="grid grid-cols-2 gap-x-4 gap-y-1">
+                  <code className="block text-[10px] font-mono text-zinc-500 dark:text-zinc-400 mb-2 truncate bg-zinc-100 dark:bg-zinc-800 rounded px-2 py-0.5">{c.image}</code>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1.5">
                     {(c.cpu || c.cpuLimit) && (
                       <div className="flex items-center gap-1.5">
-                        <span className="text-[9px] text-zinc-400 uppercase tracking-wide w-6 shrink-0">CPU</span>
-                        <ResourceBar used={c.cpu} limit={c.cpuLimit} color="bg-blue-500" />
+                        <span className="text-[9px] text-zinc-400 uppercase tracking-wide w-8 shrink-0">CPU</span>
+                        <ResourceBar used={c.cpu} limit={c.cpuLimit} color="bg-emerald-500" />
                       </div>
                     )}
                     {(c.memory || c.memoryLimit) && (
                       <div className="flex items-center gap-1.5">
-                        <span className="text-[9px] text-zinc-400 uppercase tracking-wide w-6 shrink-0">Mem</span>
-                        <ResourceBar used={c.memory} limit={c.memoryLimit} color="bg-violet-500" />
+                        <span className="text-[9px] text-zinc-400 uppercase tracking-wide w-8 shrink-0">Mem</span>
+                        <ResourceBar used={c.memory} limit={c.memoryLimit} color="bg-emerald-500" />
                       </div>
                     )}
                   </div>
                   {c.restarts > 0 && (
                     <div className="mt-1.5 text-[10px] text-amber-600 dark:text-amber-400">
-                      ⚠ {c.restarts} restart{c.restarts !== 1 ? "s" : ""}
+                      {c.restarts} restart{c.restarts !== 1 ? "s" : ""}
                     </div>
                   )}
                 </div>
@@ -178,7 +178,6 @@ export function KubernetesPod({
         </div>
       </div>
 
-      {/* Labels */}
       {labels && Object.keys(labels).length > 0 && (
         <div className="px-4 pb-3 flex flex-wrap gap-1.5">
           {Object.entries(labels).map(([k, v]) => (
@@ -189,10 +188,9 @@ export function KubernetesPod({
         </div>
       )}
 
-      {/* Footer */}
-      <div className="border-t border-zinc-100 dark:border-zinc-900 px-4 py-2 flex items-center gap-3 text-[10px] text-zinc-400 flex-wrap">
+      <div className="border-t border-zinc-100 dark:border-zinc-800 px-4 py-3 flex items-center gap-3 text-[10px] text-zinc-400 flex-wrap">
         <div className="flex items-center gap-1.5">
-          <Shield className="size-3" />
+          <Layers className="size-3" />
           <span>{serviceAccount}</span>
         </div>
         {volumes && volumes.length > 0 && (

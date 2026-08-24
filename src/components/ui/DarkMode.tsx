@@ -83,12 +83,6 @@ export function DarkMode({ implementation = "css-variables" }: DarkModeProps) {
           </div>
         </div>
 
-        <button
-          onClick={() => setIsDark((v) => !v)}
-          className="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-opacity self-start"
-        >
-          Toggle CSS vars ({isDark ? "dark" : "light"})
-        </button>
       </div>
     );
   }
@@ -128,12 +122,6 @@ if (saved === 'dark') {
           <div className="text-zinc-400">&lt;/html&gt;</div>
         </div>
 
-        <button
-          onClick={() => setHasClass((v) => !v)}
-          className="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-opacity self-start"
-        >
-          {hasClass ? "Remove .dark class" : "Add .dark class"}
-        </button>
       </div>
     );
   }
@@ -202,12 +190,6 @@ function applyTheme(dark: boolean) {
               {systemDark ? "dark" : "light"}
             </span>
           </div>
-          <button
-            onClick={() => setSystemDark((v) => !v)}
-            className="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-3 py-1.5 text-xs font-semibold hover:opacity-90 transition-opacity shrink-0"
-          >
-            Toggle OS
-          </button>
         </div>
         <div className={cn(
           "rounded-lg border p-3 transition-all duration-500 text-[11px]",
@@ -231,16 +213,25 @@ function applyTheme(dark: boolean) {
     "system":        renderSystem(),
   };
 
+  const tabActions: Record<Tab, { label: string; onClick: () => void; active: boolean }> = {
+    "css-variables": { label: `Toggle (${isDark ? "dark" : "light"})`, onClick: () => setIsDark((v) => !v), active: true },
+    "class-toggle":  { label: hasClass ? "Remove .dark" : "Add .dark", onClick: () => setHasClass((v) => !v), active: true },
+    "media-query":   { label: "Follows OS", onClick: () => {}, active: false },
+    "system":        { label: "Toggle OS", onClick: () => setSystemDark((v) => !v), active: true },
+  };
+
   return (
     <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden">
-      {/* Header */}
-      <div className="flex items-center gap-3 px-4 py-2.5 border-b border-zinc-100 dark:border-zinc-900 bg-zinc-50 dark:bg-zinc-900/50">
-        <Moon className="size-3.5 text-zinc-400 shrink-0" />
-        <span className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 flex-1">Dark Mode</span>
-        <span className="text-[10px] text-zinc-400">4 implementation approaches</span>
+      <div className="h-12 px-4 flex items-center gap-3 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50">
+        <Moon className="size-4 text-zinc-400 shrink-0" />
+        <span className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 flex-1">Dark Mode</span>
+        <span className="text-[10px] text-zinc-400">4 approaches</span>
       </div>
 
-      {/* Tabs */}
+      <div className="text-sm text-zinc-500 dark:text-zinc-400 px-4 py-2 border-b border-zinc-100 dark:border-zinc-800">
+        Switch between light and dark themes — compare CSS variables, class toggles, media queries, and system preference.
+      </div>
+
       <div className="grid grid-cols-4 border-b border-zinc-100 dark:border-zinc-800">
         {(Object.keys(TAB_LABELS) as Tab[]).map((tab) => (
           <button
@@ -258,13 +249,12 @@ function applyTheme(dark: boolean) {
         ))}
       </div>
 
-      <div className="p-4 min-h-[280px] flex flex-col gap-3">
+      <div className="min-h-[220px] p-4 flex flex-col gap-3">
         <div className="transition-all duration-500">
           {tabContent[activeTab]}
         </div>
       </div>
 
-      {/* Trade-offs table */}
       <div className="border-t border-zinc-100 dark:border-zinc-800 px-4 py-3 bg-zinc-50 dark:bg-zinc-900/30">
         <div className="text-[10px] text-zinc-400 font-semibold uppercase tracking-wide mb-2">Approach comparison</div>
         <div className="overflow-x-auto">
@@ -299,6 +289,20 @@ function applyTheme(dark: boolean) {
           <span className="font-semibold text-zinc-700 dark:text-zinc-300">Best practice: </span>
           CSS variables + class toggle + localStorage = flexible, user-controlled, AND persistent.
         </div>
+      </div>
+
+      <div className="border-t border-zinc-100 dark:border-zinc-800 px-4 py-3 flex items-center gap-3">
+        <span className="text-sm text-zinc-500 dark:text-zinc-400 flex-1">
+          {TAB_LABELS[activeTab]} — {activeTab === "media-query" ? "zero JS, follows OS automatically" : "click to preview the approach"}
+        </span>
+        {tabActions[activeTab].active && (
+          <button
+            onClick={tabActions[activeTab].onClick}
+            className="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-opacity"
+          >
+            {tabActions[activeTab].label}
+          </button>
+        )}
       </div>
     </div>
   );

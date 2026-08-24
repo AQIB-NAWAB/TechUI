@@ -87,11 +87,13 @@ function StepRow({
   active,
   done,
   isLast,
+  serverName,
 }: {
   step: HandshakeStep;
   active: boolean;
   done: boolean;
   isLast: boolean;
+  serverName: string;
 }) {
   const visible = active || done;
 
@@ -159,6 +161,16 @@ function StepRow({
             </span>
           </div>
           <p className="text-xs text-zinc-600 dark:text-zinc-400 leading-snug">{step.description}</p>
+          {step.id === 3 && visible && (
+            <div className="mt-2 flex items-center gap-2 px-2.5 py-2 rounded-md border border-emerald-200 dark:border-emerald-800 bg-white dark:bg-zinc-900">
+              <ShieldCheck className="size-4 text-emerald-500 shrink-0" />
+              <div className="min-w-0">
+                <p className="text-[11px] font-semibold text-zinc-700 dark:text-zinc-300 truncate">*.{serverName.replace(/^[^.]+\./, "")}</p>
+                <p className="text-[10px] text-zinc-400">Issuer: Let&apos;s Encrypt R3 · Expires: Dec 2026</p>
+              </div>
+              <span className="text-[10px] font-semibold text-emerald-600 dark:text-emerald-400 shrink-0">✓ Valid</span>
+            </div>
+          )}
           {visible && <TechDetails text={step.techDetails} />}
         </div>
       </div>
@@ -263,6 +275,7 @@ export function TlsHandshake({
             active={activeStep === i}
             done={activeStep > i || (!interactive && i <= activeStep)}
             isLast={i === steps.length - 1}
+            serverName={serverName}
           />
         ))}
       </div>

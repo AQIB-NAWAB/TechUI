@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useRef, useCallback } from "react";
 import { z } from "zod";
 import { cn } from "@/lib/utils";
-import { Database, ChevronLeft, ChevronRight, Play, RotateCcw } from "lucide-react";
+import { Zap, ChevronLeft, RotateCcw } from "lucide-react";
 
 const OperationSchema = z.object({
   op: z.enum(["get", "set"]),
@@ -130,8 +130,6 @@ export function LruCache({
   const [total, setTotal] = useState(0);
   const [evictingKey, setEvictingKey] = useState<string | null>(null);
   const [newKey, setNewKey] = useState<string | null>(null);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const playRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // History for back-stepping
   const historyRef = useRef<StepResult[]>([]);
@@ -184,74 +182,17 @@ export function LruCache({
   }
 
   function handleReset() {
-    if (playRef.current) clearTimeout(playRef.current);
     setStepIndex(-1);
     setSlots([]);
-    setMessage("Press Step → to begin");
+    setMessage("Press Next Step to begin");
     setMessageType("info");
     setHits(0);
     setTotal(0);
     setEvictingKey(null);
     setNewKey(null);
-    setIsPlaying(false);
     historyRef.current = [];
     _idCounter = 1;
   }
-
-  function handleAutoPlay() {
-    if (isPlaying) {
-      if (playRef.current) clearTimeout(playRef.current);
-      setIsPlaying(false);
-      return;
-    }
-    setIsPlaying(true);
-
-    let idx = stepIndex;
-    let currentSlots = slots;
-    let currentHits = hits;
-    let currentTotal = total;
-
-    function tick() {
-      const nextIdx = idx + 1;
-      if (nextIdx >= operations.length) {
-        setIsPlaying(false);
-        return;
-      }
-      const op = operations[nextIdx]!;
-      const result = applyOp(currentSlots, op, capacity, currentHits, currentTotal);
-      historyRef.current[nextIdx] = result;
-
-      setEvictingKey(result.evictedKey ?? null);
-      setNewKey(result.slots[0]?.flash === "new" ? result.slots[0].key : null);
-      setSlots(result.slots);
-      setMessage(result.message);
-      setMessageType(result.messageType);
-      setHits(result.hits);
-      setTotal(result.total);
-      setStepIndex(nextIdx);
-
-      idx = nextIdx;
-      currentSlots = result.slots;
-      currentHits = result.hits;
-      currentTotal = result.total;
-
-      setTimeout(() => {
-        setSlots((prev) => prev.map((s) => ({ ...s, flash: undefined })));
-        setEvictingKey(null);
-        setNewKey(null);
-      }, 600);
-
-      if (nextIdx < operations.length - 1) {
-        playRef.current = setTimeout(tick, 1300);
-      } else {
-        setIsPlaying(false);
-      }
-    }
-
-    playRef.current = setTimeout(tick, 100);
-  }
-
-  useEffect(() => () => { if (playRef.current) clearTimeout(playRef.current); }, []);
 
   const hitRate = total > 0 ? Math.round((hits / total) * 100) : null;
   const isDone = stepIndex >= operations.length - 1;
@@ -259,22 +200,24 @@ export function LruCache({
 
   return (
     <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden">
-      {/* Header */}
-      <div className="flex items-center gap-2 px-4 py-2.5 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/60">
-        <Database className="size-3.5 text-sky-500 shrink-0" />
-        <span className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 flex-1">
-          LRU Cache
-          <span className="ml-1.5 text-[10px] font-normal text-zinc-400">capacity: {capacity}</span>
+      <div className="flex items-center gap-2 px-4 h-12 border-b border-zinc-100 dark:border-zinc-800">
+        <Zap className="size-4 text-violet-500 shrink-0" />
+        <span className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 flex-1">LRU Cache</span>
+        <span className="text-xs font-mono text-zinc-400 border border-zinc-200 dark:border-zinc-700 px-2 py-0.5 rounded">
+          capacity: {capacity}
         </span>
         {hitRate !== null && (
           <span className="text-[10px] text-zinc-500 dark:text-zinc-400">
-            Hit rate: <strong className="text-zinc-700 dark:text-zinc-300">{hits}/{total}</strong> ({hitRate}%)
+            {hits}/{total} hits ({hitRate}%)
           </span>
         )}
       </div>
 
-      {/* Cache slots */}
-      <div className="min-h-[280px] px-4 pt-4 pb-2 space-y-4">
+      <p className="text-sm text-zinc-500 dark:text-zinc-400 px-4 py-2 border-b border-zinc-100 dark:border-zinc-800">
+        Least-recently-used entries get evicted when the cache is full.
+      </p>
+
+      <div className="min-h-[220px] px-4 pt-4 pb-2 space-y-4">
         {/* Slot labels */}
         <div className="flex items-center gap-1 justify-between px-1">
           <span className="text-[10px] font-semibold text-zinc-400">MRU</span>
@@ -357,7 +300,6 @@ export function LruCache({
           </div>
         )}
 
-        {/* Operation progress */}
         <div className="flex items-center gap-1">
           {operations.map((_, i) => (
             <div
@@ -369,70 +311,31 @@ export function LruCache({
             />
           ))}
         </div>
+      </div>
 
-        {/* Controls */}
-        <div className="flex items-center justify-center gap-2 pb-1">
-          <button
-            onClick={handleBack}
-            disabled={stepIndex < 0}
-            className={cn(
-              "flex items-center gap-1 px-3 py-1.5 rounded-lg text-[11px] font-semibold border transition-all duration-300",
-              stepIndex < 0
-                ? "border-zinc-200 dark:border-zinc-700 text-zinc-300 dark:text-zinc-600 cursor-not-allowed"
-                : "border-zinc-300 dark:border-zinc-600 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800"
-            )}
-          >
-            <ChevronLeft className="size-3.5" />
-            Step
-          </button>
-
-          <button
-            onClick={handleReset}
-            className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-[11px] font-semibold border border-zinc-200 dark:border-zinc-700 text-zinc-500 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all duration-300"
-          >
-            <RotateCcw className="size-3" />
-            Reset
-          </button>
-
-          <button
-            onClick={handleStep}
-            disabled={isDone || isPlaying}
-            className={cn(
-              "flex items-center gap-1 px-3 py-1.5 rounded-lg text-[11px] font-semibold border transition-all duration-300",
-              isDone || isPlaying
-                ? "border-zinc-200 dark:border-zinc-700 text-zinc-300 dark:text-zinc-600 cursor-not-allowed"
-                : "border-zinc-300 dark:border-zinc-600 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800"
-            )}
-          >
-            Step
-            <ChevronRight className="size-3.5" />
-          </button>
-
-          <button
-            onClick={handleAutoPlay}
-            disabled={isDone && !isPlaying}
-            className={cn(
-              "flex items-center gap-1 px-3 py-1.5 rounded-lg text-[11px] font-semibold transition-all duration-300",
-              isPlaying
-                ? "bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 border border-amber-300 dark:border-amber-700"
-                : isDone
-                ? "bg-zinc-100 dark:bg-zinc-800 text-zinc-400 cursor-not-allowed border border-zinc-200 dark:border-zinc-700"
-                : "bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 hover:opacity-90"
-            )}
-          >
-            <Play className="size-3.5" />
-            {isPlaying ? "Pause" : "Auto Play"}
-          </button>
-        </div>
-
-        {/* Footer stats */}
-        <div className="flex items-center justify-center gap-4 text-[10px] text-zinc-400 border-t border-zinc-100 dark:border-zinc-800 pt-2">
-          <span>GET: O(1)</span>
-          <span className="text-zinc-200 dark:text-zinc-700">·</span>
-          <span>SET: O(1)</span>
-          <span className="text-zinc-200 dark:text-zinc-700">·</span>
-          <span>Eviction: O(1)</span>
-        </div>
+      <div className="px-4 py-3 border-t border-zinc-100 dark:border-zinc-800 flex items-center gap-2">
+        <button
+          onClick={handleBack}
+          disabled={stepIndex < 0}
+          className="p-2 rounded-lg border border-zinc-200 dark:border-zinc-700 text-zinc-500 hover:bg-zinc-50 dark:hover:bg-zinc-800 disabled:opacity-30 transition-all duration-500"
+          title="Step back"
+        >
+          <ChevronLeft className="size-4" />
+        </button>
+        <button
+          onClick={handleReset}
+          className="p-2 rounded-lg border border-zinc-200 dark:border-zinc-700 text-zinc-500 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all duration-500"
+          title="Reset"
+        >
+          <RotateCcw className="size-3.5" />
+        </button>
+        <span className="text-sm text-zinc-500 dark:text-zinc-400 flex-1 truncate">{message}</span>
+        <button
+          onClick={isDone ? handleReset : handleStep}
+          className="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-opacity shrink-0"
+        >
+          {isDone ? "Replay" : "Next Step"}
+        </button>
       </div>
     </div>
   );

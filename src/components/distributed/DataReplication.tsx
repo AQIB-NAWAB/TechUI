@@ -224,10 +224,9 @@ export function DataReplication({
 
   return (
     <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden">
-      {/* Header */}
-      <div className="flex items-center gap-2.5 px-4 py-2.5 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50">
-        <Database className="size-3.5 text-zinc-400 shrink-0" />
-        <span className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 flex-1">Data Replication</span>
+      <div className="flex items-center gap-3 px-4 h-12 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50">
+        <Database className="size-4 text-zinc-400 shrink-0" />
+        <span className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 flex-1">Data Replication</span>
         <span className={cn(
           "text-[10px] font-bold px-2 py-0.5 rounded-full",
           mode === "async"
@@ -236,13 +235,16 @@ export function DataReplication({
         )}>
           {mode === "async" ? "Async" : "Sync"} mode
         </span>
-        <button onClick={resetAll} className="p-1 rounded text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors">
+        <button onClick={resetAll} className="p-1 rounded text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-all duration-500">
           <RefreshCw className="size-3.5" />
         </button>
       </div>
 
-      {/* DB nodes diagram */}
-      <div className="min-h-[280px] p-4 flex flex-col gap-4">
+      <p className="text-sm text-zinc-500 dark:text-zinc-400 px-4 py-2 border-b border-zinc-100 dark:border-zinc-800">
+        Copies database writes from a primary to replica servers — async is fast but may lose data; sync waits for all replicas.
+      </p>
+
+      <div className="min-h-[240px] p-4 flex flex-col gap-4">
         {/* Primary */}
         {primaryNode && <NodeBox node={primaryNode} lagMs={lagMs} />}
 
@@ -252,7 +254,7 @@ export function DataReplication({
             <div className="flex flex-col justify-around h-full">
               {replicaNodes.map((_, i) => (
                 <div key={i} className={cn(
-                  "h-6 border-l-2 border-b-2 rounded-bl border-zinc-200 dark:border-zinc-700 w-5 transition-colors duration-300",
+                  "h-6 border-l-2 border-b-2 rounded-bl border-zinc-200 dark:border-zinc-700 w-5 transition-colors duration-500",
                   animating && "border-blue-300 dark:border-blue-700"
                 )} />
               ))}
@@ -271,7 +273,7 @@ export function DataReplication({
         {/* Mode explanation */}
         <div className="grid grid-cols-2 gap-2 mt-auto">
           <div className={cn(
-            "rounded-lg p-2 border text-[10px] transition-all duration-300",
+            "rounded-lg p-2 border text-[10px] transition-all duration-500",
             mode === "async"
               ? "border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/20 text-amber-800 dark:text-amber-200"
               : "border-zinc-100 dark:border-zinc-800 text-zinc-400"
@@ -281,7 +283,7 @@ export function DataReplication({
             <br /><span className="text-red-600 dark:text-red-400">Risk: data loss if primary crashes before replication.</span>
           </div>
           <div className={cn(
-            "rounded-lg p-2 border text-[10px] transition-all duration-300",
+            "rounded-lg p-2 border text-[10px] transition-all duration-500",
             mode === "sync"
               ? "border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-950/20 text-blue-800 dark:text-blue-200"
               : "border-zinc-100 dark:border-zinc-800 text-zinc-400"
@@ -307,67 +309,46 @@ export function DataReplication({
         )}
       </div>
 
-      {/* Lag slider */}
-      <div className="border-t border-zinc-100 dark:border-zinc-800 px-4 py-2.5">
-        <div className="flex items-center gap-3">
-          <span className="text-[10px] text-zinc-500 shrink-0 w-20">Replication lag</span>
-          <input
-            type="range"
-            min={10}
-            max={1000}
-            step={10}
-            value={lagMs}
-            onChange={(e) => setLagMs(Number(e.target.value))}
-            className="flex-1 h-1.5 accent-zinc-700 dark:accent-zinc-300"
-          />
-          <span className="text-[10px] font-mono text-zinc-600 dark:text-zinc-400 shrink-0 w-12 text-right">{lagMs}ms</span>
-        </div>
-      </div>
-
-      {/* Controls */}
-      <div className="border-t border-zinc-100 dark:border-zinc-800 px-4 py-2.5 flex items-center gap-2 flex-wrap bg-zinc-50/50 dark:bg-zinc-900/20">
-        <button
-          onClick={simulateWrite}
-          disabled={animating || crashed}
-          className={cn(
-            "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-300",
-            animating || crashed
-              ? "bg-zinc-100 dark:bg-zinc-800 text-zinc-400 cursor-not-allowed"
-              : "bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 hover:opacity-90"
-          )}
-        >
-          <Zap className="size-3.5" />
-          Write
-        </button>
-
+      <div className="border-t border-zinc-100 dark:border-zinc-800 px-4 py-3 flex items-center gap-2 flex-wrap bg-zinc-50 dark:bg-zinc-900/30">
+        <span className="text-sm text-zinc-500 dark:text-zinc-400 flex-1 min-w-[140px]">
+          {animating ? "Replicating write…" : log[0] ?? `Write latency: ${writeLatency}`}
+        </span>
         <button
           onClick={() => setMode((m) => m === "async" ? "sync" : "async")}
           disabled={animating}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border border-zinc-200 dark:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors text-zinc-600 dark:text-zinc-400"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border border-zinc-200 dark:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all duration-500 text-zinc-600 dark:text-zinc-400 disabled:opacity-50"
         >
           <RefreshCw className="size-3.5" />
-          Toggle {mode === "async" ? "Sync" : "Async"}
+          {mode === "async" ? "Sync" : "Async"}
         </button>
-
         {!crashed && (
           <button
             onClick={simulateCrash}
             disabled={animating}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/20 transition-colors ml-auto"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/20 transition-all duration-500 disabled:opacity-50"
           >
             <AlertTriangle className="size-3.5" />
-            Crash Primary
+            Crash
           </button>
         )}
-        {crashed && (
-          <button
-            onClick={resetAll}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border border-emerald-200 dark:border-emerald-800 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/20 transition-colors ml-auto"
-          >
-            <Check className="size-3.5" />
-            Restore
-          </button>
-        )}
+        <button
+          onClick={crashed ? resetAll : simulateWrite}
+          disabled={animating && !crashed}
+          className={cn(
+            "flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-semibold transition-all duration-500",
+            animating || (crashed === false && crashed)
+              ? "bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 hover:opacity-90 disabled:opacity-50"
+              : crashed
+                ? "bg-emerald-600 text-white hover:opacity-90"
+                : "bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 hover:opacity-90 disabled:opacity-50"
+          )}
+        >
+          {crashed ? (
+            <><Check className="size-3.5" /> Restore</>
+          ) : (
+            <><Zap className="size-3.5" /> Write</>
+          )}
+        </button>
       </div>
     </div>
   );

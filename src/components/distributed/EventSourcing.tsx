@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { z } from "zod";
 import { cn } from "@/lib/utils";
-import { ListOrdered, Plus, RefreshCw, ShoppingCart, ChevronRight } from "lucide-react";
+import { ListOrdered, Plus, RefreshCw, ShoppingCart, ChevronRight, Database } from "lucide-react";
 
 export const EventSourcingSchema = z.object({
   entityType: z.string().default("ShoppingCart"),
@@ -104,7 +104,6 @@ function replayEvents(entityType: string, events: EventSourcingProps["events"]):
     } else if (ev.type === "OrderPlaced") {
       state.placed = true;
     } else if (ev.type === "MoneyDeposited") {
-      // treat like an item for display
       const key = "__balance__";
       if (!state.items[key]) state.items[key] = { qty: 0, price: 1 };
       state.items[key].qty += (d.amount as number) ?? 0;
@@ -146,12 +145,12 @@ export function EventSourcing({ entityType = "ShoppingCart", events = [] }: Even
       i++;
       setVisibleCount(i);
       if (i < log.length) {
-        timerRef.current = setTimeout(step, 600);
+        timerRef.current = setTimeout(step, 1200);
       } else {
-        timerRef.current = setTimeout(() => setReplaying(false), 400);
+        timerRef.current = setTimeout(() => setReplaying(false), 1000);
       }
     }
-    timerRef.current = setTimeout(step, 400);
+    timerRef.current = setTimeout(step, 1000);
   }
 
   useEffect(() => () => { if (timerRef.current) clearTimeout(timerRef.current); }, []);
@@ -162,46 +161,57 @@ export function EventSourcing({ entityType = "ShoppingCart", events = [] }: Even
   );
   const total = subtotal * (1 - currentState.discount);
 
+  const footerStatus = replaying
+    ? `Replaying events… ${visibleCount}/${log.length}`
+    : `${visibleCount} events applied — state derived from log`;
+
   return (
     <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden">
-      {/* Header */}
-      <div className="flex items-center gap-2 px-4 h-12 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/60">
-        <ListOrdered className="size-3.5 text-zinc-400 shrink-0" />
-        <span className="text-xs font-semibold text-zinc-800 dark:text-zinc-200 flex-1">
-          Event Sourcing — {entityType}
+      <div className="flex items-center gap-2 px-4 h-12 border-b border-zinc-100 dark:border-zinc-800">
+        <ListOrdered className="size-4 text-zinc-400 shrink-0" />
+        <span className="text-sm font-semibold text-zinc-800 dark:text-zinc-200 flex-1">
+          Event Sourcing
         </span>
+        <span className="text-xs font-mono text-zinc-400 border border-zinc-200 dark:border-zinc-700 px-2 py-0.5 rounded">
+          {entityType}
+        </span>
+        <button
+          onClick={replay}
+          disabled={replaying}
+          title="Replay from scratch"
+          className="p-1.5 rounded-lg border border-zinc-200 dark:border-zinc-700 text-zinc-500 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all duration-500 disabled:opacity-40"
+        >
+          <RefreshCw className={cn("size-3.5", replaying && "animate-spin")} />
+        </button>
       </div>
 
-      {/* Two panels */}
-      <div className="flex min-h-[280px] divide-x divide-zinc-100 dark:divide-zinc-800">
-        {/* Left: Event Log */}
-        <div className="flex-1 flex flex-col">
-          <div className="px-3 py-2 border-b border-zinc-100 dark:border-zinc-800">
-            <span className="text-[10px] font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wide">
+      <p className="text-sm text-zinc-500 dark:text-zinc-400 px-4 py-2 border-b border-zinc-100 dark:border-zinc-800">
+        Store every change as an event — rebuild current state by replaying the log.
+      </p>
+
+      <div className="min-h-[220px] flex divide-x divide-zinc-100 dark:divide-zinc-800">
+        <div className="flex-1 flex flex-col min-w-0">
+          <div className="px-3 py-2 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/50">
+            <span className="text-[10px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500">
               Event Log
             </span>
           </div>
-          <div className="flex-1 overflow-y-auto px-2 py-1 space-y-0.5">
+          <div className="flex-1 overflow-y-auto px-2 py-1 space-y-0.5 max-h-[180px]">
             {log.map((ev, i) => {
               const visible = i < visibleCount;
               return (
                 <div
                   key={i}
                   className={cn(
-                    "flex items-center gap-2 px-2 py-1.5 rounded-md transition-all duration-500",
+                    "flex items-center gap-2 px-2 py-1.5 rounded-md border border-transparent transition-all duration-500",
                     visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2 pointer-events-none",
                     replaying && i === visibleCount - 1
-                      ? "bg-blue-50 dark:bg-blue-950/30"
+                      ? "bg-blue-50 dark:bg-blue-950/30 border-blue-200 dark:border-blue-800"
                       : "hover:bg-zinc-50 dark:hover:bg-zinc-800/50"
                   )}
                 >
                   <ChevronRight className="size-3 text-zinc-300 dark:text-zinc-600 shrink-0" />
-                  <span
-                    className={cn(
-                      "text-[10px] font-semibold px-1.5 py-0.5 rounded shrink-0",
-                      EVENT_COLORS[ev.type] ?? DEFAULT_COLOR
-                    )}
-                  >
+                  <span className={cn("text-[10px] font-semibold px-1.5 py-0.5 rounded shrink-0", EVENT_COLORS[ev.type] ?? DEFAULT_COLOR)}>
                     {ev.type}
                   </span>
                   <span className="text-[10px] text-zinc-500 dark:text-zinc-400 truncate flex-1">
@@ -214,26 +224,11 @@ export function EventSourcing({ entityType = "ShoppingCart", events = [] }: Even
               );
             })}
           </div>
-          {/* Actions */}
-          <div className="px-3 py-2.5 border-t border-zinc-100 dark:border-zinc-800 flex gap-2">
-            <button
-              onClick={addEvent}
-              disabled={replaying}
-              className={cn(
-                "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-500",
-                "bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 hover:opacity-90 disabled:opacity-50"
-              )}
-            >
-              <Plus className="size-3" />
-              Add Event
-            </button>
-          </div>
         </div>
 
-        {/* Right: Current State */}
-        <div className="flex-1 flex flex-col">
-          <div className="px-3 py-2 border-b border-zinc-100 dark:border-zinc-800">
-            <span className="text-[10px] font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wide">
+        <div className="flex-1 flex flex-col min-w-0">
+          <div className="px-3 py-2 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/50">
+            <span className="text-[10px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500">
               Current State
             </span>
           </div>
@@ -250,15 +245,12 @@ export function EventSourcing({ entityType = "ShoppingCart", events = [] }: Even
                 </span>
               )}
             </div>
-            <div className="border-t border-zinc-100 dark:border-zinc-800 pt-2 space-y-1.5">
+            <div className="border border-zinc-100 dark:border-zinc-800 rounded-lg p-2 space-y-1.5 bg-zinc-50 dark:bg-zinc-800/40 min-h-[80px]">
               {Object.entries(currentState.items).length === 0 ? (
                 <p className="text-[10px] text-zinc-400 dark:text-zinc-500 italic">Empty</p>
               ) : (
                 Object.entries(currentState.items).map(([key, val]) => (
-                  <div
-                    key={key}
-                    className="flex items-center justify-between text-xs transition-all duration-500"
-                  >
+                  <div key={key} className="flex items-center justify-between text-xs transition-all duration-500">
                     <span className="text-zinc-700 dark:text-zinc-300 capitalize">{key}</span>
                     <div className="flex items-center gap-2">
                       <span className="text-zinc-500 dark:text-zinc-400">×{val.qty}</span>
@@ -273,13 +265,9 @@ export function EventSourcing({ entityType = "ShoppingCart", events = [] }: Even
               )}
             </div>
             {currentState.coupon && (
-              <div className="flex items-center justify-between text-xs border-t border-zinc-100 dark:border-zinc-800 pt-1.5">
-                <span className="text-violet-600 dark:text-violet-400 font-medium">
-                  Coupon: {currentState.coupon}
-                </span>
-                <span className="text-violet-600 dark:text-violet-400">
-                  -{Math.round(currentState.discount * 100)}%
-                </span>
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-violet-600 dark:text-violet-400 font-medium">Coupon: {currentState.coupon}</span>
+                <span className="text-violet-600 dark:text-violet-400">-{Math.round(currentState.discount * 100)}%</span>
               </div>
             )}
             {Object.keys(currentState.items).length > 0 && (
@@ -289,28 +277,25 @@ export function EventSourcing({ entityType = "ShoppingCart", events = [] }: Even
               </div>
             )}
           </div>
-          {/* Replay button */}
-          <div className="px-3 py-2.5 border-t border-zinc-100 dark:border-zinc-800">
-            <button
-              onClick={replay}
-              disabled={replaying}
-              className={cn(
-                "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold w-full justify-center transition-all duration-500",
-                "border border-zinc-200 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 disabled:opacity-50"
-              )}
-            >
-              {replaying ? <RefreshCw className="size-3 animate-spin" /> : <RefreshCw className="size-3" />}
-              {replaying ? "Replaying…" : "Replay from scratch →"}
-            </button>
-          </div>
         </div>
       </div>
 
-      {/* Footer insight */}
-      <div className="border-t border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/40 px-4 py-2">
-        <p className="text-[10px] text-zinc-400 dark:text-zinc-500">
-          The event log is the source of truth — state is always derived from events
-        </p>
+      <div className="px-4 py-3 border-t border-zinc-100 dark:border-zinc-800 flex items-center gap-3">
+        <div className="flex items-center gap-1.5 flex-1 min-w-0">
+          <Database className="size-3.5 text-zinc-400 shrink-0" />
+          <span className="text-sm text-zinc-500 dark:text-zinc-400 truncate">{footerStatus}</span>
+        </div>
+        <button
+          onClick={addEvent}
+          disabled={replaying}
+          className={cn(
+            "flex items-center gap-1.5 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-opacity shrink-0",
+            replaying && "opacity-50 cursor-not-allowed"
+          )}
+        >
+          <Plus className="size-3.5" />
+          Add Event
+        </button>
       </div>
     </div>
   );

@@ -155,7 +155,7 @@ export function AsyncAwait({
       }
       setActiveLine(lineIdx);
       const isStep = lines[lineIdx]?.isStep;
-      const delay = isStep ? 700 : 350;
+      const delay = isStep ? 1000 : 500;
       if (isStep) {
         const si = stepIdx;
         animRef.current = setTimeout(() => {
@@ -180,14 +180,16 @@ export function AsyncAwait({
 
   return (
     <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden">
-      {/* Header */}
-      <div className="flex items-center gap-2 px-4 py-3 border-b border-zinc-100 dark:border-zinc-800">
-        <Code2 className="w-4 h-4 text-blue-500" />
-        <span className="font-semibold text-sm text-zinc-900 dark:text-zinc-100">Async/Await Patterns</span>
+      <div className="flex items-center gap-3 px-4 h-12 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50">
+        <Code2 className="size-4 text-zinc-400 shrink-0" />
+        <span className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 flex-1">Async/Await Patterns</span>
       </div>
 
-      {/* Tabs */}
-      <div className="flex border-b border-zinc-100 dark:border-zinc-800 px-4 pt-3 gap-1">
+      <p className="text-sm text-zinc-500 dark:text-zinc-400 px-4 py-2 border-b border-zinc-100 dark:border-zinc-800">
+        Three ways to handle async code — from nested callbacks to clean async/await syntax.
+      </p>
+
+      <div className="flex border-b border-zinc-100 dark:border-zinc-800 px-4 pt-2 gap-1">
         {TABS.map(tab => (
           <button
             key={tab.id}
@@ -204,10 +206,8 @@ export function AsyncAwait({
         ))}
       </div>
 
-      {/* Body */}
-      <div className="px-4 py-4 min-h-[280px] flex flex-col gap-3">
-        {/* Code Block */}
-        <div className="rounded-lg bg-zinc-950 dark:bg-zinc-950 p-3 font-mono text-xs overflow-x-auto flex-1">
+      <div className="min-h-[220px] px-4 py-4 flex flex-col gap-3">
+        <div className="rounded-lg border border-zinc-100 dark:border-zinc-800 bg-zinc-950 p-3 font-mono text-xs overflow-x-auto flex-1">
           {lines.map((line, i) => {
             const isActive = activeLine === i;
             const tokens = tokenize(line.text);
@@ -215,7 +215,7 @@ export function AsyncAwait({
               <div
                 key={i}
                 className={cn(
-                  "px-1 py-0.5 rounded transition-all duration-300 whitespace-pre leading-relaxed",
+                  "px-1 py-0.5 rounded transition-all duration-500 whitespace-pre leading-relaxed",
                   isActive ? "bg-blue-900/60 text-white" : "text-zinc-300"
                 )}
               >
@@ -229,38 +229,40 @@ export function AsyncAwait({
           })}
         </div>
 
-        {/* Label */}
         <p className={cn("text-xs font-medium", styleLabel.color)}>{styleLabel.text}</p>
 
-        {/* Controls + Steps */}
-        <div className="flex items-center gap-3 flex-wrap">
-          <button
-            onClick={handleRun}
-            disabled={running}
-            className="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-40 shrink-0"
-          >
-            {running ? "Running..." : "Run"}
-          </button>
-          <div className="flex gap-3 flex-wrap">
-            {stepLabels.map((label, i) => {
-              const done = completedSteps.includes(i);
-              const active = stepLines[i] === activeLine;
-              return (
-                <span
-                  key={i}
-                  className={cn(
-                    "text-xs transition-all duration-500 font-mono",
-                    done ? "text-emerald-600 dark:text-emerald-400" :
-                    active ? "text-blue-600 dark:text-blue-400 animate-pulse" :
-                    "text-zinc-400 dark:text-zinc-500"
-                  )}
-                >
-                  {label} {done ? "✓" : active ? "..." : ""}
-                </span>
-              );
-            })}
-          </div>
+        <div className="flex gap-3 flex-wrap">
+          {stepLabels.map((label, i) => {
+            const done = completedSteps.includes(i);
+            const active = stepLines[i] === activeLine;
+            return (
+              <span
+                key={i}
+                className={cn(
+                  "text-xs transition-all duration-500 font-mono",
+                  done ? "text-emerald-600 dark:text-emerald-400" :
+                  active ? "text-blue-600 dark:text-blue-400 animate-pulse" :
+                  "text-zinc-400 dark:text-zinc-500"
+                )}
+              >
+                {label} {done ? "✓" : active ? "..." : ""}
+              </span>
+            );
+          })}
         </div>
+      </div>
+
+      <div className="border-t border-zinc-100 dark:border-zinc-800 px-4 py-3 flex items-center gap-3 bg-zinc-50 dark:bg-zinc-900/30">
+        <span className="text-sm text-zinc-500 dark:text-zinc-400 flex-1">
+          {running ? "Stepping through async calls…" : "Run to watch each async step execute in order"}
+        </span>
+        <button
+          onClick={handleRun}
+          disabled={running}
+          className="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-40 shrink-0"
+        >
+          {running ? "Running..." : "Run"}
+        </button>
       </div>
     </div>
   );

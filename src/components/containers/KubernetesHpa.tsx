@@ -63,7 +63,7 @@ export function KubernetesHpa({
       current += step;
       setReplicas(current);
       if (current !== to) {
-        animRef.current = setTimeout(next, 600);
+        animRef.current = setTimeout(next, 1200);
       } else {
         setHistory(prev => {
           const next6 = [...prev.slice(-5), { pods: to, label: "now" }].map((h, i, arr) =>
@@ -120,17 +120,17 @@ export function KubernetesHpa({
 
   return (
     <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden">
-      {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-100 dark:border-zinc-800">
-        <div className="flex items-center gap-2">
-          <Activity className="w-4 h-4 text-blue-500" />
-          <span className="font-semibold text-sm text-zinc-900 dark:text-zinc-100">Kubernetes HPA</span>
-        </div>
-        <span className="font-mono text-xs text-zinc-500 dark:text-zinc-400">{deploymentName}</span>
+      <div className="flex items-center gap-3 px-4 h-12 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50">
+        <Activity className="size-4 text-zinc-400 shrink-0" />
+        <span className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 flex-1">Kubernetes HPA</span>
+        <span className="font-mono text-[10px] text-zinc-400">{deploymentName}</span>
       </div>
 
-      {/* Body */}
-      <div className="px-4 py-4 min-h-[280px] flex flex-col gap-4">
+      <p className="text-sm text-zinc-500 dark:text-zinc-400 px-4 py-2 border-b border-zinc-100 dark:border-zinc-800">
+        Automatically adds or removes pods when CPU usage goes above or below your target.
+      </p>
+
+      <div className="min-h-[220px] px-4 py-4 flex flex-col gap-4">
         {/* CPU Bar */}
         <div className="flex items-center gap-3">
           <span className="text-xs font-medium text-zinc-600 dark:text-zinc-400 w-28 shrink-0">
@@ -167,54 +167,45 @@ export function KubernetesHpa({
           <span className="text-xs text-zinc-500 dark:text-zinc-400 shrink-0 font-mono">{replicas} / {maxReplicas}</span>
         </div>
 
-        {/* Buttons */}
-        <div className="flex gap-2">
-          <button
-            onClick={handleSpike}
-            disabled={scaling}
-            className="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-40"
-          >
-            Spike Traffic →
-          </button>
-          <button
-            onClick={handleScaleDown}
-            disabled={scaling}
-            className="border border-zinc-200 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 rounded-lg px-4 py-2 text-sm font-semibold hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all duration-500 disabled:opacity-40"
-          >
-            Scale Down ←
-          </button>
-        </div>
-
-        {/* Formula */}
-        <div className="rounded-lg bg-zinc-50 dark:bg-zinc-800/50 px-3 py-2 text-xs font-mono text-zinc-600 dark:text-zinc-400">
-          <span className="text-zinc-400 dark:text-zinc-500">Formula: </span>
-          desired = ceil(current × actual/target)<br />
-          <span className="text-zinc-900 dark:text-zinc-100">
-            = ceil({replicas} × {Math.round(cpu)}/{targetCpuPercent}) = ceil({(replicas * cpu / targetCpuPercent).toFixed(1)}) = {formulaResult}
-            {" "}
-            <span className={noChange ? "text-emerald-600 dark:text-emerald-400" : "text-amber-600 dark:text-amber-400"}>
-              {noChange ? "✓ no change" : `→ scaling to ${formulaResult}`}
-            </span>
+        <div className="rounded-lg border border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/50 px-3 py-2 text-xs font-mono text-zinc-600 dark:text-zinc-400">
+          <span className="text-zinc-400">desired = ceil({replicas} × {Math.round(cpu)}/{targetCpuPercent}) = </span>
+          <span className="text-zinc-900 dark:text-zinc-100 font-bold">{formulaResult}</span>
+          <span className={noChange ? " text-emerald-600 dark:text-emerald-400" : " text-amber-600 dark:text-amber-400"}>
+            {noChange ? " · no change" : ` → scaling to ${formulaResult}`}
           </span>
         </div>
 
-        {/* History Bar */}
-        <div className="mt-auto">
-          <div className="border-t border-zinc-100 dark:border-zinc-800 pt-3">
-            <div className="flex items-end gap-1.5">
-              <span className="text-[10px] text-zinc-400 dark:text-zinc-500 mr-1 shrink-0">History:</span>
-              {history.map((h, i) => (
-                <div key={i} className="flex flex-col items-center gap-0.5 flex-1">
-                  <div
-                    className="w-full rounded-sm bg-blue-400 dark:bg-blue-500 transition-all duration-500"
-                    style={{ height: `${Math.max(4, (h.pods / historyMax) * 28)}px` }}
-                  />
-                  <span className="text-[9px] text-zinc-400 dark:text-zinc-500 font-mono">{h.pods}p</span>
-                </div>
-              ))}
-            </div>
+        <div className="mt-auto border-t border-zinc-100 dark:border-zinc-800 pt-3">
+          <div className="flex items-end gap-1.5">
+            <span className="text-[10px] text-zinc-400 mr-1 shrink-0">History:</span>
+            {history.map((h, i) => (
+              <div key={i} className="flex flex-col items-center gap-0.5 flex-1">
+                <div
+                  className="w-full rounded-sm bg-blue-400 dark:bg-blue-500 transition-all duration-500"
+                  style={{ height: `${Math.max(4, (h.pods / historyMax) * 28)}px` }}
+                />
+                <span className="text-[9px] text-zinc-400 font-mono">{h.pods}p</span>
+              </div>
+            ))}
           </div>
         </div>
+      </div>
+
+      <div className="border-t border-zinc-100 dark:border-zinc-800 px-4 py-3 flex items-center gap-3 bg-zinc-50 dark:bg-zinc-900/30">
+        <span className="text-sm text-zinc-500 dark:text-zinc-400 flex-1">
+          {scaling
+            ? `Scaling ${replicas} → ${desiredReplicas} pods…`
+            : cpu > targetCpuPercent
+            ? "CPU above target — HPA will add pods"
+            : `${replicas} pods running · CPU at ${Math.round(cpu)}%`}
+        </span>
+        <button
+          onClick={handleSpike}
+          disabled={scaling}
+          className="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-40"
+        >
+          Spike Traffic
+        </button>
       </div>
     </div>
   );

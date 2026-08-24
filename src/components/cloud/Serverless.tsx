@@ -84,16 +84,16 @@ export function Serverless({
           step++;
           setScaleStep(step);
           if (step < SCALE_STEPS.length - 1) {
-            animRef.current = setTimeout(scaleNext, 600);
+            animRef.current = setTimeout(scaleNext, 1000);
           } else {
             // cool down
             animRef.current = setTimeout(() => {
               setScaleStep(1);
-              animRef.current = setTimeout(() => setScaleStep(0), 800);
+              animRef.current = setTimeout(() => setScaleStep(0), 1200);
             }, 1500);
           }
         }
-        animRef.current = setTimeout(scaleNext, 400);
+        animRef.current = setTimeout(scaleNext, 1000);
         return;
       }
       setPhaseIdx(idx);
@@ -129,9 +129,9 @@ export function Serverless({
   return (
     <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden">
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-100 dark:border-zinc-800">
+      <div className="flex items-center justify-between px-4 h-12 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50">
         <div className="flex items-center gap-2">
-          <Zap className="w-4 h-4 text-amber-500" />
+          <Zap className="size-4 text-amber-500" />
           <span className="font-semibold text-sm text-zinc-900 dark:text-zinc-100">
             Serverless
           </span>
@@ -168,8 +168,14 @@ export function Serverless({
         ))}
       </div>
 
+      <div className="px-4 py-2 border-b border-zinc-100 dark:border-zinc-800">
+        <p className="text-sm text-zinc-500 dark:text-zinc-400">
+          Run code on demand — no servers to manage. First request is slow (cold start); later requests reuse a warm container.
+        </p>
+      </div>
+
       {/* Body */}
-      <div className="px-4 py-4 min-h-[300px] flex flex-col gap-4">
+      <div className="px-4 py-4 min-h-[320px] flex flex-col gap-4">
         {/* Runtime + memory */}
         <div className="flex gap-3 text-xs text-zinc-500 dark:text-zinc-400 font-mono">
           <span>Runtime: <span className="text-zinc-700 dark:text-zinc-300 font-semibold">{runtime}</span></span>
@@ -320,32 +326,39 @@ export function Serverless({
             Serverless pays only for actual execution — zero cost at zero traffic.
           </p>
         </div>
+      </div>
 
-        {/* Buttons */}
-        <div className="flex items-center gap-2 flex-wrap">
+      {/* Footer */}
+      <div className="px-4 py-3 border-t border-zinc-100 dark:border-zinc-800 flex items-center gap-2 flex-wrap bg-zinc-50 dark:bg-zinc-900/30">
+        <span className="text-xs text-zinc-500 flex-1">
+          {mode === "idle"
+            ? "Simulate a cold or warm start to see the difference"
+            : mode === "cold"
+            ? "Cold start: container must boot before handling the request"
+            : "Warm start: container already running — instant response"}
+        </span>
+        <button
+          onClick={handleCold}
+          disabled={mode !== "idle" && phaseIdx < phases.length}
+          className="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-40"
+        >
+          Simulate Cold Start
+        </button>
+        <button
+          onClick={handleWarm}
+          disabled={mode !== "idle" && phaseIdx < phases.length}
+          className="bg-emerald-600 text-white rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-40"
+        >
+          Simulate Warm Start
+        </button>
+        {mode !== "idle" && (
           <button
-            onClick={handleCold}
-            disabled={mode !== "idle" && phaseIdx < phases.length}
-            className="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-40"
+            onClick={reset}
+            className="text-xs text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-all duration-500"
           >
-            Simulate Cold Start
+            Reset
           </button>
-          <button
-            onClick={handleWarm}
-            disabled={mode !== "idle" && phaseIdx < phases.length}
-            className="bg-emerald-600 text-white rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-40"
-          >
-            Simulate Warm Start
-          </button>
-          {mode !== "idle" && (
-            <button
-              onClick={reset}
-              className="text-xs text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors"
-            >
-              Reset
-            </button>
-          )}
-        </div>
+        )}
       </div>
     </div>
   );

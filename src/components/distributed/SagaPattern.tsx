@@ -3,7 +3,7 @@
 import { useState, useRef } from "react";
 import { z } from "zod";
 import { cn } from "@/lib/utils";
-import { RotateCcw, ChevronDown, CheckCircle2, XCircle, ArrowRight } from "lucide-react";
+import { RotateCcw, ChevronDown, CheckCircle2, XCircle, ArrowRight, Server } from "lucide-react";
 
 export const SagaPatternSchema = z.object({
   sagaName: z.string().default("Order Checkout"),
@@ -63,6 +63,7 @@ export function SagaPattern({
   const [running, setRunning] = useState(false);
   const [outcome, setOutcome] = useState<"idle" | "success" | "rolled-back">("idle");
   const [failOpen, setFailOpen] = useState(false);
+  const [failureMode, setFailureMode] = useState(false);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const clearTimer = () => { if (timerRef.current) clearTimeout(timerRef.current); };
@@ -94,21 +95,19 @@ export function SagaPattern({
           s[i] = "done";
           return s;
         });
-        timerRef.current = setTimeout(() => next(i + 1), 200);
-      }, 900);
+        timerRef.current = setTimeout(() => next(i + 1), 1000);
+      }, 1000);
     };
-    timerRef.current = setTimeout(() => next(0), 150);
+    timerRef.current = setTimeout(() => next(0), 1000);
   };
 
   const runWithFailure = (failIdx: number) => {
     reset();
     setRunning(true);
-    // 1-based failAt → 0-based
     const failAt0 = failIdx - 1;
 
     const forward = (i: number) => {
       if (i > failAt0) {
-        // shouldn't happen, but safety
         setOutcome("success");
         setRunning(false);
         return;
@@ -120,22 +119,21 @@ export function SagaPattern({
       });
       timerRef.current = setTimeout(() => {
         if (i === failAt0) {
-          // fail this step
           setStatuses((prev) => {
             const s = [...prev];
             s[i] = "failed";
             return s;
           });
-          timerRef.current = setTimeout(() => compensate(i - 1), 600);
+          timerRef.current = setTimeout(() => compensate(i - 1), 1000);
         } else {
           setStatuses((prev) => {
             const s = [...prev];
             s[i] = "done";
             return s;
           });
-          timerRef.current = setTimeout(() => forward(i + 1), 200);
+          timerRef.current = setTimeout(() => forward(i + 1), 1000);
         }
-      }, 900);
+      }, 1000);
     };
 
     const compensate = (i: number) => {
@@ -155,30 +153,75 @@ export function SagaPattern({
           s[i] = "compensated";
           return s;
         });
-        timerRef.current = setTimeout(() => compensate(i - 1), 200);
-      }, 900);
+        timerRef.current = setTimeout(() => compensate(i - 1), 1000);
+      }, 1000);
     };
 
-    timerRef.current = setTimeout(() => forward(0), 150);
+    timerRef.current = setTimeout(() => forward(0), 1000);
+  };
+
+  const handleRun = () => {
+    if (failureMode) runWithFailure(failStep);
+    else runHappy();
   };
 
   const cc = (color?: string) => COLOR_MAP[(color as keyof typeof COLOR_MAP) ?? "blue"] ?? COLOR_MAP.blue;
 
+  const statusText =
+    outcome === "success"
+      ? `All ${steps.length} steps complete — saga succeeded`
+      : outcome === "rolled-back"
+      ? `Failed at step ${failStep} — compensating transactions rolled back`
+      : running
+      ? failureMode
+        ? `Running saga with failure at step ${failStep}…`
+        : "Running saga steps…"
+      : "Each service reacts to events and rolls back on failure";
+
   return (
     <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden">
-      {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-100 dark:border-zinc-800">
-        <div className="flex items-center gap-2">
-          <RotateCcw className="size-4 text-violet-500" />
-          <span className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">Saga Pattern</span>
-        </div>
+      <div className="flex items-center gap-2 px-4 h-12 border-b border-zinc-100 dark:border-zinc-800">
+        <RotateCcw className="size-4 text-violet-500 shrink-0" />
+        <span className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 flex-1">Saga Pattern</span>
         <span className="text-xs font-mono text-zinc-400 border border-zinc-200 dark:border-zinc-700 px-2 py-0.5 rounded">
           {sagaName}
         </span>
+        <div className="relative">
+          <button
+            disabled={running}
+            onClick={() => setFailOpen((v) => !v)}
+            className="flex items-center gap-1 px-2 py-1 rounded-lg border border-zinc-200 dark:border-zinc-700 text-[10px] font-semibold text-zinc-500 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all duration-500 disabled:opacity-50"
+          >
+            Fail @{failStep}
+            <ChevronDown className={cn("size-3 transition-transform duration-500", failOpen && "rotate-180")} />
+          </button>
+          {failOpen && (
+            <div className="absolute top-full mt-1 right-0 z-10 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 shadow-lg overflow-hidden">
+              {steps.map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => { setFailStep(i + 1); setFailOpen(false); setFailureMode(true); }}
+                  className="block w-full text-left px-3 py-1.5 text-xs hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all duration-500 text-zinc-700 dark:text-zinc-300"
+                >
+                  Step {i + 1}
+                </button>
+              ))}
+              <button
+                onClick={() => { setFailureMode(false); setFailOpen(false); }}
+                className="block w-full text-left px-3 py-1.5 text-xs border-t border-zinc-100 dark:border-zinc-800 hover:bg-emerald-50 dark:hover:bg-emerald-950/20 text-emerald-700 dark:text-emerald-400"
+              >
+                Happy path (no failure)
+              </button>
+            </div>
+          )}
+        </div>
       </div>
 
-      {/* Timeline */}
-      <div className="min-h-[300px] px-4 pt-4 pb-2">
+      <p className="text-sm text-zinc-500 dark:text-zinc-400 px-4 py-2 border-b border-zinc-100 dark:border-zinc-800">
+        A distributed transaction split into steps — if one fails, earlier steps undo themselves.
+      </p>
+
+      <div className="min-h-[220px] px-4 py-3 flex flex-col justify-center">
         <div className="space-y-2">
           {steps.map((step, i) => {
             const s = statuses[i];
@@ -197,30 +240,18 @@ export function SagaPattern({
                   s === "compensated"  && "border-zinc-300 dark:border-zinc-600 bg-zinc-100 dark:bg-zinc-800/60 opacity-70",
                 )}
               >
-                {/* Status icon */}
                 <div className="shrink-0 w-5 h-5 flex items-center justify-center">
-                  {s === "idle"         && <span className="w-2 h-2 rounded-full bg-zinc-300 dark:bg-zinc-600" />}
+                  {s === "idle"         && <Server className="size-3.5 text-zinc-400" />}
                   {s === "running"      && <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />}
                   {s === "done"         && <CheckCircle2 className="size-4 text-emerald-500" />}
                   {s === "failed"       && <XCircle className="size-4 text-red-500" />}
                   {s === "compensating" && <RotateCcw className="size-4 text-amber-500 animate-spin" />}
                   {s === "compensated"  && <RotateCcw className="size-4 text-zinc-400" />}
                 </div>
-
-                {/* Step number */}
-                <span className="text-[10px] font-mono font-semibold text-zinc-400 w-4 shrink-0">
-                  {i + 1}
-                </span>
-
-                {/* Service badge */}
-                <span className={cn(
-                  "text-[9px] font-semibold px-1.5 py-0.5 rounded border shrink-0",
-                  col.badge
-                )}>
+                <span className="text-[10px] font-mono font-semibold text-zinc-400 w-4 shrink-0">{i + 1}</span>
+                <span className={cn("text-[9px] font-semibold px-1.5 py-0.5 rounded border shrink-0", col.badge)}>
                   {step.service}
                 </span>
-
-                {/* Action or compensating action */}
                 <span className="text-xs font-medium text-zinc-700 dark:text-zinc-300 flex-1 truncate">
                   {isCompensating ? (
                     <span className="text-amber-700 dark:text-amber-300">↩ {step.compensate}</span>
@@ -228,8 +259,6 @@ export function SagaPattern({
                     step.action
                   )}
                 </span>
-
-                {/* Event published (only on done) */}
                 {s === "done" && (
                   <div className="flex items-center gap-1 shrink-0">
                     <ArrowRight className="size-3 text-zinc-400" />
@@ -238,84 +267,31 @@ export function SagaPattern({
                     </span>
                   </div>
                 )}
-                {s === "compensated" && (
-                  <span className="text-[9px] text-zinc-400 shrink-0">rolled back</span>
-                )}
               </div>
             );
           })}
         </div>
-
-        {/* Outcome message */}
-        <div className={cn(
-          "mt-3 px-3 py-2 rounded-lg text-[11px] font-medium text-center transition-all duration-500",
-          outcome === "idle"        && "bg-zinc-50 dark:bg-zinc-800/40 text-zinc-400",
-          outcome === "success"     && "bg-emerald-50 dark:bg-emerald-950/20 text-emerald-700 dark:text-emerald-300",
-          outcome === "rolled-back" && "bg-red-50 dark:bg-red-950/20 text-red-700 dark:text-red-300",
-        )}>
-          {outcome === "idle"        && "Click a button below to run the saga"}
-          {outcome === "success"     && `✓ All ${steps.length} steps complete — ${sagaName} saga succeeded`}
-          {outcome === "rolled-back" && `✗ Failed at step ${failStep} — compensating transactions rolled back all changes`}
-        </div>
-
-        {/* Controls */}
-        <div className="flex gap-3 mt-3">
-          <button
-            disabled={running}
-            onClick={runHappy}
-            className={cn(
-              "flex-1 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-3 py-2 text-sm font-semibold hover:opacity-90 transition-opacity",
-              running && "opacity-50 cursor-not-allowed"
-            )}
-          >
-            Run (Happy Path)
-          </button>
-
-          <div className="flex gap-1.5 flex-1">
-            {/* Fail at selector */}
-            <div className="relative">
-              <button
-                disabled={running}
-                onClick={() => setFailOpen((v) => !v)}
-                className="h-full flex items-center gap-1.5 px-3 rounded-lg border border-red-300 dark:border-red-700 text-red-700 dark:text-red-300 text-xs font-semibold hover:bg-red-50 dark:hover:bg-red-950/20 transition-colors disabled:opacity-50"
-              >
-                Fail @{failStep}
-                <ChevronDown className={cn("size-3 transition-transform duration-300", failOpen && "rotate-180")} />
-              </button>
-              {failOpen && (
-                <div className="absolute bottom-full mb-1 left-0 z-10 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 shadow-lg overflow-hidden">
-                  {steps.map((_, i) => (
-                    <button
-                      key={i}
-                      onClick={() => { setFailStep(i + 1); setFailOpen(false); }}
-                      className="block w-full text-left px-3 py-1.5 text-xs hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors text-zinc-700 dark:text-zinc-300"
-                    >
-                      Step {i + 1}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            <button
-              disabled={running}
-              onClick={() => runWithFailure(failStep)}
-              className={cn(
-                "flex-1 rounded-lg border border-red-300 dark:border-red-700 text-red-700 dark:text-red-300 px-3 py-2 text-sm font-semibold hover:bg-red-50 dark:hover:bg-red-950/20 transition-colors",
-                running && "opacity-50 cursor-not-allowed"
-              )}
-            >
-              Run with Failure
-            </button>
-          </div>
-        </div>
       </div>
 
-      {/* Insight footer */}
-      <div className="px-4 py-2.5 border-t border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/40">
-        <p className="text-[11px] text-zinc-500 dark:text-zinc-400">
-          <strong className="text-zinc-700 dark:text-zinc-300">Key insight:</strong> No central coordinator — each service reacts to events and knows its compensating action.
-        </p>
+      <div className="px-4 py-3 border-t border-zinc-100 dark:border-zinc-800 flex items-center gap-3">
+        <span className={cn(
+          "text-sm flex-1 transition-all duration-500",
+          outcome === "success"     && "text-emerald-700 dark:text-emerald-400",
+          outcome === "rolled-back" && "text-red-700 dark:text-red-400",
+          outcome === "idle"        && "text-zinc-500 dark:text-zinc-400",
+        )}>
+          {statusText}
+        </span>
+        <button
+          disabled={running}
+          onClick={handleRun}
+          className={cn(
+            "bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-opacity shrink-0",
+            running && "opacity-50 cursor-not-allowed"
+          )}
+        >
+          {running ? "Running…" : failureMode ? `Run (fail @${failStep})` : "Run Saga"}
+        </button>
       </div>
     </div>
   );

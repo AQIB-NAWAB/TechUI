@@ -83,7 +83,7 @@ export function CursorPagination({
         setPage((p) => p + 1);
       }
       setAnimating(false);
-    }, 400);
+    }, 1200);
   }
 
   function reset() {

@@ -194,16 +194,18 @@ export function PromiseCombinators({
 
   return (
     <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden">
-      {/* Header */}
-      <div className="flex items-center gap-2 px-4 py-3 border-b border-zinc-100 dark:border-zinc-800">
-        <Layers className="w-4 h-4 text-violet-500" />
-        <span className="font-semibold text-sm text-zinc-900 dark:text-zinc-100">
+      <div className="flex items-center gap-3 px-4 h-12 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50">
+        <Layers className="size-4 text-zinc-400 shrink-0" />
+        <span className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 flex-1">
           Promise Combinators
         </span>
       </div>
 
-      {/* Tabs */}
-      <div className="flex flex-wrap border-b border-zinc-100 dark:border-zinc-800 px-4 pt-3 gap-1">
+      <p className="text-sm text-zinc-500 dark:text-zinc-400 px-4 py-2 border-b border-zinc-100 dark:border-zinc-800">
+        Run multiple async tasks together — each combinator decides when to resolve or reject.
+      </p>
+
+      <div className="flex flex-wrap border-b border-zinc-100 dark:border-zinc-800 px-4 pt-2 gap-1">
         {TABS.map((tab) => (
           <button
             key={tab.id}
@@ -220,28 +222,21 @@ export function PromiseCombinators({
         ))}
       </div>
 
-      {/* Body */}
-      <div className="px-4 py-4 min-h-[300px] flex flex-col gap-4">
-        {/* Signature */}
-        <div className="font-mono text-xs bg-zinc-950 rounded-lg px-3 py-2 text-violet-300">
+      <div className="min-h-[220px] px-4 py-4 flex flex-col gap-3">
+        <div className="font-mono text-xs bg-zinc-950 rounded-lg border border-zinc-800 px-3 py-2 text-violet-300">
           Promise.{activeTab}([{tasks.map((t) => t.name).join(", ")}])
         </div>
 
-        {/* Gantt Chart */}
         <div className="flex flex-col gap-2">
           {tasks.map((task) => {
             const widthPct = (task.durationMs / maxDuration) * 100;
             const taskProgress = Math.min(elapsedMs / task.durationMs, 1);
             const taskDone = elapsedMs >= task.durationMs;
-            const isSettlementPoint =
-              settlement.ms === task.durationMs;
             const succeeds = task.succeeds ?? true;
 
             let barColor = "bg-blue-500";
             if (taskDone) {
-              barColor = succeeds
-                ? "bg-emerald-500"
-                : "bg-red-500";
+              barColor = succeeds ? "bg-emerald-500" : "bg-red-500";
             }
 
             return (
@@ -249,87 +244,53 @@ export function PromiseCombinators({
                 <span className="font-mono text-xs text-zinc-500 dark:text-zinc-400 w-28 shrink-0 truncate">
                   {task.name}
                 </span>
-                <div
-                  className="relative h-5 bg-zinc-100 dark:bg-zinc-800 rounded overflow-hidden flex-1"
-                  style={{ minWidth: 80 }}
-                >
-                  {/* Bar background (full width outline) */}
+                <div className="relative h-5 bg-zinc-100 dark:bg-zinc-800 rounded overflow-hidden flex-1 border border-zinc-100 dark:border-zinc-800">
                   <div
                     className="absolute inset-y-0 left-0 rounded opacity-20"
                     style={{ width: `${widthPct}%`, backgroundColor: "#6366f1" }}
                   />
-                  {/* Animated fill */}
                   <div
-                    className={cn("absolute inset-y-0 left-0 rounded transition-all duration-[30ms]", barColor)}
+                    className={cn("absolute inset-y-0 left-0 rounded transition-all duration-500", barColor)}
                     style={{ width: `${widthPct * taskProgress}%` }}
                   />
-                  {/* Settlement vertical tick */}
-                  {isSettlementPoint && settled && (
-                    <div className="absolute inset-y-0 right-0 w-0.5 bg-yellow-400" />
-                  )}
                 </div>
-                <span className="text-xs text-zinc-400 dark:text-zinc-500 w-12 shrink-0 text-right">
-                  {task.durationMs}ms
-                </span>
+                <span className="text-xs text-zinc-400 w-12 shrink-0 text-right">{task.durationMs}ms</span>
                 <span className="text-xs w-6 shrink-0">
-                  {taskDone
-                    ? succeeds
-                      ? "✓"
-                      : "✗"
-                    : elapsedMs > 0
-                    ? "…"
-                    : ""}
+                  {taskDone ? (succeeds ? "✓" : "✗") : elapsedMs > 0 ? "…" : ""}
                 </span>
               </div>
             );
           })}
         </div>
 
-        {/* Settlement indicator */}
         <div
           className={cn(
-            "rounded-lg px-3 py-2 text-xs font-medium transition-all duration-500",
+            "rounded-lg px-3 py-2 text-xs font-medium transition-all duration-500 border",
             settled
               ? settlement.success
-                ? "bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800"
-                : "bg-red-50 dark:bg-red-950/30 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-800"
-              : "bg-zinc-50 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-700"
+                ? "bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800"
+                : "bg-red-50 dark:bg-red-950/30 text-red-700 dark:text-red-300 border-red-200 dark:border-red-800"
+              : "bg-zinc-50 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 border-zinc-200 dark:border-zinc-700"
           )}
         >
           {settled
             ? `${settlement.success ? "✓ Resolved" : "✗ Rejected"}: ${settlement.message}`
             : running
             ? `Running… ${elapsedMs}ms elapsed`
-            : "Press Run to animate"}
+            : info.key}
         </div>
+      </div>
 
-        {/* Key insight */}
-        <div className="rounded-lg bg-zinc-50 dark:bg-zinc-800 px-3 py-2">
-          <p className={cn("text-xs font-semibold mb-0.5", info.color)}>
-            {info.key}
-          </p>
-          <p className="text-xs text-zinc-500 dark:text-zinc-400">
-            {info.description}
-          </p>
-        </div>
-
-        {/* Controls */}
-        <div className="flex items-center gap-2">
-          <button
-            onClick={handleRun}
-            className="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-opacity"
-          >
-            {running ? "Stop" : settled ? "Run Again" : "Run"}
-          </button>
-          {settled && (
-            <button
-              onClick={reset}
-              className="text-xs text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors"
-            >
-              Reset
-            </button>
-          )}
-        </div>
+      <div className="border-t border-zinc-100 dark:border-zinc-800 px-4 py-3 flex items-center gap-3 bg-zinc-50 dark:bg-zinc-900/30">
+        <span className="text-sm text-zinc-500 dark:text-zinc-400 flex-1">
+          {settled ? info.description : "Press Run to watch tasks resolve under this combinator"}
+        </span>
+        <button
+          onClick={handleRun}
+          className="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-opacity"
+        >
+          {running ? "Stop" : settled ? "Run Again" : "Run"}
+        </button>
       </div>
     </div>
   );

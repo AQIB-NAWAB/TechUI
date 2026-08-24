@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { z } from "zod";
 import { cn } from "@/lib/utils";
-import { ChevronRight, ChevronLeft, User } from "lucide-react";
+import { ChevronRight, ChevronLeft, User, FileText, CheckCircle2, XCircle } from "lucide-react";
 
 export const PaginationPatternSchema = z.object({
   pattern: z.enum(["offset", "cursor", "keyset"]).default("cursor"),
@@ -81,6 +81,8 @@ export function PaginationPattern({
   const pageNames = NAMES.slice(offset, offset + pageSize);
   const apiCall = buildApiCall(active, page, pageSize, resource, NAMES);
   const cmp = COMPARISON[active];
+  const lastItemId = offset + pageSize;
+  const cursorValue = active === "cursor" ? getCursor(lastItemId, resource) : active === "keyset" ? String(lastItemId) : null;
 
   const slideOut = animDir === "right" ? "-translate-x-8 opacity-0" : "translate-x-8 opacity-0";
   const slideIn = animDir === "right" ? "translate-x-8 opacity-0" : "-translate-x-8 opacity-0";
@@ -89,6 +91,7 @@ export function PaginationPattern({
     <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden">
       {/* Header with tabs */}
       <div className="flex items-center gap-0 px-4 h-12 border-b border-zinc-100 dark:border-zinc-800">
+        <FileText className="size-4 text-zinc-500 shrink-0 mr-2" />
         <span className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 mr-4">Pagination</span>
         <div className="flex gap-1 ml-auto">
           {(["offset", "cursor", "keyset"] as Pattern[]).map((p) => (
@@ -142,7 +145,16 @@ export function PaginationPattern({
         </div>
 
         {/* Page controls */}
-        <div className="flex items-center justify-center gap-4">
+        <div className="flex flex-col items-center gap-2">
+          {cursorValue && (
+            <div className="flex items-center gap-2 px-3 py-1 rounded-lg bg-violet-50 dark:bg-violet-950/40 border border-violet-200 dark:border-violet-800">
+              <span className="text-[10px] font-semibold uppercase tracking-widest text-violet-500 dark:text-violet-400">
+                {active === "cursor" ? "Cursor" : "After ID"}
+              </span>
+              <code className="text-[11px] font-mono text-violet-700 dark:text-violet-300">{cursorValue}</code>
+            </div>
+          )}
+          <div className="flex items-center justify-center gap-4">
           <button
             onClick={() => goTo(page - 1)}
             disabled={page === 0 || !interactive}
@@ -162,6 +174,7 @@ export function PaginationPattern({
             Next
             <ChevronRight className="size-4" />
           </button>
+          </div>
         </div>
       </div>
 
@@ -183,7 +196,10 @@ export function PaginationPattern({
             "flex items-center gap-1 text-[11px] font-medium",
             supported ? "text-emerald-600 dark:text-emerald-400" : "text-zinc-400 dark:text-zinc-600"
           )}>
-            {supported ? "✓" : "✗"} {label}
+            {supported
+              ? <CheckCircle2 className="size-3 shrink-0" />
+              : <XCircle className="size-3 shrink-0" />}
+            {label}
           </span>
         ))}
       </div>

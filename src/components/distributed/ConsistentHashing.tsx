@@ -3,7 +3,7 @@
 import { useState, useCallback } from "react";
 import { z } from "zod";
 import { cn } from "@/lib/utils";
-import { RotateCw } from "lucide-react";
+import { RotateCw, Server, Key } from "lucide-react";
 
 export const ConsistentHashingSchema = z.object({
   servers: z.array(z.object({
@@ -128,48 +128,38 @@ export function ConsistentHashing({
 
   return (
     <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden">
-      {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-100 dark:border-zinc-800">
-        <div className="flex items-center gap-2">
-          <RotateCw className="size-4 text-blue-500" />
-          <span className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">Consistent Hashing</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <button
-            onClick={removeServer}
-            disabled={extraCount === 0}
-            className={cn(
-              "rounded-lg px-3 py-1.5 text-xs font-semibold border border-zinc-200 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all duration-300",
-              extraCount === 0 && "opacity-40 cursor-not-allowed"
-            )}
-          >
-            − Remove Server
-          </button>
-          <button
-            onClick={addServer}
-            disabled={extraCount >= EXTRA_SERVER_POSITIONS.length}
-            className={cn(
-              "bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-3 py-1.5 text-xs font-semibold hover:opacity-90 transition-opacity",
-              extraCount >= EXTRA_SERVER_POSITIONS.length && "opacity-40 cursor-not-allowed"
-            )}
-          >
-            + Add Server
-          </button>
-        </div>
+      <div className="flex items-center gap-2 px-4 h-12 border-b border-zinc-100 dark:border-zinc-800">
+        <RotateCw className="size-4 text-blue-500 shrink-0" />
+        <span className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 flex-1">Consistent Hashing</span>
+        <span className="text-xs font-mono text-zinc-400 border border-zinc-200 dark:border-zinc-700 px-2 py-0.5 rounded">
+          {servers.length} servers
+        </span>
+        <button
+          onClick={removeServer}
+          disabled={extraCount === 0}
+          className={cn(
+            "rounded-lg px-2 py-1 text-[10px] font-semibold border border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all duration-500",
+            extraCount === 0 && "opacity-40 cursor-not-allowed"
+          )}
+        >
+          − Remove
+        </button>
       </div>
 
-      {/* Remap notification */}
+      <p className="text-sm text-zinc-500 dark:text-zinc-400 px-4 py-2 border-b border-zinc-100 dark:border-zinc-800">
+        Keys map to the next server clockwise — adding a server only remaps ~1/N of keys.
+      </p>
+
       <div className={cn(
-        "overflow-hidden transition-all duration-500",
-        remapMsg ? "max-h-12 opacity-100" : "max-h-0 opacity-0"
+        "overflow-hidden transition-all duration-500 border-b border-zinc-100 dark:border-zinc-800",
+        remapMsg ? "max-h-10 opacity-100" : "max-h-0 opacity-0"
       )}>
-        <div className="px-4 py-2 bg-amber-50 dark:bg-amber-950/20 border-b border-amber-200 dark:border-amber-800 text-xs text-amber-700 dark:text-amber-300 font-medium">
+        <div className="px-4 py-2 bg-amber-50 dark:bg-amber-950/20 text-xs text-amber-700 dark:text-amber-300 font-medium">
           Keys remapped: <strong>{remapMsg}</strong>
         </div>
       </div>
 
-      {/* Main content */}
-      <div className="flex flex-col sm:flex-row items-start gap-4 p-4 min-h-[300px]">
+      <div className="flex flex-col sm:flex-row items-start gap-4 p-4 min-h-[220px]">
         {/* Ring SVG */}
         <div className="flex-shrink-0 w-full sm:w-auto flex justify-center">
           <svg viewBox="0 0 220 220" className="w-full max-w-[220px]">
@@ -279,8 +269,11 @@ export function ConsistentHashing({
         <div className="flex-1 min-w-0 space-y-3">
           {/* Server list */}
           <div>
-            <div className="text-[10px] font-semibold text-zinc-400 uppercase tracking-widest mb-1.5">
-              Servers ({servers.length})
+            <div className="flex items-center gap-1.5 mb-1.5">
+              <Server className="size-3 text-zinc-400" />
+              <span className="text-[10px] font-semibold uppercase tracking-widest text-zinc-400">
+                Servers ({servers.length})
+              </span>
             </div>
             <div className="space-y-1">
               {[...servers].sort((a, b) => a.position - b.position).map((server) => {
@@ -298,10 +291,9 @@ export function ConsistentHashing({
                         : "bg-zinc-50 dark:bg-zinc-800/40 border-zinc-100 dark:border-zinc-800"
                     )}
                   >
-                    <div
-                      className="size-2.5 rounded-full shrink-0"
-                      style={{ backgroundColor: color.light }}
-                    />
+                    <div className="size-2.5 rounded-full shrink-0 flex items-center justify-center">
+                      <Server className="size-2" style={{ color: color.light }} />
+                    </div>
                     <span className={cn("font-medium", color.text)}>{server.name}</span>
                     <span className="text-zinc-400 text-[9px] ml-auto font-mono">
                       {Math.round(server.position * 100)}%
@@ -320,8 +312,11 @@ export function ConsistentHashing({
 
           {/* Key selection info */}
           <div>
-            <div className="text-[10px] font-semibold text-zinc-400 uppercase tracking-widest mb-1.5">
-              Keys — click ring to select
+            <div className="flex items-center gap-1.5 mb-1.5">
+              <Key className="size-3 text-zinc-400" />
+              <span className="text-[10px] font-semibold uppercase tracking-widest text-zinc-400">
+                Keys — click ring to select
+              </span>
             </div>
             {selectedKeyObj && servingServer ? (
               <div className="rounded-md border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/20 px-3 py-2 text-xs space-y-0.5">
@@ -341,12 +336,22 @@ export function ConsistentHashing({
         </div>
       </div>
 
-      {/* Insight footer */}
-      <div className="px-4 py-2.5 border-t border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/40">
-        <p className="text-[11px] text-zinc-500 dark:text-zinc-400">
-          <strong className="text-zinc-700 dark:text-zinc-300">Key insight:</strong>{" "}
-          Adding/removing a server only affects ~1/N of keys — the rest stay on the same server.
-        </p>
+      <div className="px-4 py-3 border-t border-zinc-100 dark:border-zinc-800 flex items-center gap-3">
+        <span className="text-sm text-zinc-500 dark:text-zinc-400 flex-1">
+          {selectedKeyObj && servingServer
+            ? `${selectedKeyObj.name} → ${servingServer.name}`
+            : "Click a dot on the ring to see key placement"}
+        </span>
+        <button
+          onClick={addServer}
+          disabled={extraCount >= EXTRA_SERVER_POSITIONS.length}
+          className={cn(
+            "bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-opacity shrink-0",
+            extraCount >= EXTRA_SERVER_POSITIONS.length && "opacity-40 cursor-not-allowed"
+          )}
+        >
+          Add Server
+        </button>
       </div>
     </div>
   );

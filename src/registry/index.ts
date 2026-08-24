@@ -147,6 +147,21 @@ import { Http3QuicSchema } from "@/components/networking/Http3Quic";
 import { DesignPatternsSchema } from "@/components/architecture/DesignPatterns";
 import { DataReplicationSchema } from "@/components/distributed/DataReplication";
 import { FeatureRolloutSchema } from "@/components/devtools/FeatureRollout";
+import { IdempotencyKeySchema } from "@/components/api/IdempotencyKey";
+import { IdempotencyConsumerSchema } from "@/components/distributed/IdempotencyConsumer";
+import { StackVsQueueSchema } from "@/components/edu/StackVsQueue";
+import { SessionVsJwtSchema } from "@/components/auth/SessionVsJwt";
+import { GracefulShutdownSchema } from "@/components/devtools/GracefulShutdown";
+import { HashTableCollisionSchema } from "@/components/edu/HashTableCollision";
+import { LeaderElectionSchema } from "@/components/distributed/LeaderElection";
+import { ContextWindowOverflowSchema } from "@/components/ai/ContextWindowOverflow";
+import { HmacSigningSchema } from "@/components/api/HmacSigning";
+import { RateLimitHeadersSchema } from "@/components/api/RateLimitHeaders";
+import { TwoPhaseCommitSchema } from "@/components/distributed/TwoPhaseCommit";
+import { GraphTraversalBfsDfsSchema } from "@/components/edu/GraphTraversalBfsDfs";
+import { ReadRepairSchema } from "@/components/distributed/ReadRepair";
+import { AcidVsBaseSchema } from "@/components/database/AcidVsBase";
+import { WebSocketVsSseSchema } from "@/components/networking/WebSocketVsSse";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyEntry = ComponentEntry<any>;
@@ -595,7 +610,7 @@ export const registry: Record<string, AnyEntry> = {
           animate: true,
           participants: [
             { id: "client", label: "Client", type: "client" },
-            { id: "cache", label: "Redis Cache", type: "database" },
+            { id: "cache", label: "Redis Cache", type: "service" },
             { id: "db", label: "Database", type: "database" },
           ],
           messages: [
@@ -1376,7 +1391,8 @@ kubectl rollout status deployment/myapp`,
       timeout: 30,
       status: "success",
       duration: 142,
-      coldStart: false,
+      coldStart: true,
+      coldStartMs: 748,
       invocations: 48291,
       errors: 12,
       env: [
@@ -5294,6 +5310,489 @@ const users = await db.query(\`
     },
     examples: [
       { label: "Fast rollout", props: { featureName: "Dark Mode Toggle", targetPercent: 25, stages: [{ label: "Employees", percent: 5, durationHours: 4 }, { label: "Beta", percent: 20, durationHours: 12 }, { label: "Everyone", percent: 100, durationHours: 24 }] } },
+    ],
+    Component: null as unknown as AnyEntry["Component"],
+  },
+
+  "idempotency-key": {
+    id: "idempotency-key",
+    name: "Idempotency Key",
+    category: "api" as ComponentCategory,
+    description: "Duplicate request handling — same key returns cached response, no double charge",
+    schema: IdempotencyKeySchema,
+    tags: ["idempotency", "api", "payments", "retry", "deduplication"],
+    interactive: true,
+    defaultProps: {
+      endpoint: "POST /payments",
+      idempotencyKey: "pay_7f3a9c2b",
+      amount: 49.99,
+      interactive: true,
+    },
+    examples: [
+      { label: "Subscription charge", props: { endpoint: "POST /subscriptions", idempotencyKey: "sub_9k2m1x", amount: 9.99 } },
+      { label: "Large payment", props: { endpoint: "POST /payments", idempotencyKey: "pay_large_001", amount: 499.0 } },
+    ],
+    Component: null as unknown as AnyEntry["Component"],
+  },
+
+  "idempotency-consumer": {
+    id: "idempotency-consumer",
+    name: "Idempotency Consumer",
+    category: "distributed" as ComponentCategory,
+    description: "Message deduplication — consumer skips already-processed message IDs from the queue",
+    schema: IdempotencyConsumerSchema,
+    tags: ["idempotency", "consumer", "deduplication", "queue", "messaging", "distributed"],
+    interactive: true,
+    defaultProps: {
+      queueName: "order-events",
+      dedupWindowSeconds: 300,
+      interactive: true,
+    },
+    examples: [
+      { label: "Short TTL window", props: { queueName: "payment-events", dedupWindowSeconds: 60 } },
+      { label: "Long TTL window", props: { queueName: "inventory-sync", dedupWindowSeconds: 3600 } },
+    ],
+    Component: null as unknown as AnyEntry["Component"],
+  },
+
+  "stack-vs-queue": {
+    id: "stack-vs-queue",
+    name: "Stack vs Queue",
+    category: "edu" as ComponentCategory,
+    description: "LIFO stack vs FIFO queue — side-by-side visual showing different removal order",
+    schema: StackVsQueueSchema,
+    tags: ["stack", "queue", "data-structure", "lifo", "fifo", "edu", "algorithm"],
+    interactive: true,
+    defaultProps: {
+      initialItems: ["A", "B", "C"],
+      nextItem: "D",
+      interactive: true,
+    },
+    examples: [
+      { label: "Two items", props: { initialItems: ["X", "Y"], nextItem: "Z" } },
+      { label: "Numbers", props: { initialItems: ["1", "2", "3", "4"], nextItem: "5" } },
+    ],
+    Component: null as unknown as AnyEntry["Component"],
+  },
+
+  "session-vs-jwt": {
+    id: "session-vs-jwt",
+    name: "Session vs JWT",
+    category: "auth" as ComponentCategory,
+    description: "Side-by-side auth comparison — cookie + server store vs stateless signed token on every request",
+    schema: SessionVsJwtSchema,
+    tags: ["session", "jwt", "auth", "cookie", "token", "stateless", "comparison"],
+    interactive: true,
+    defaultProps: {
+      serverName: "api.example.com",
+      initialMode: "session",
+      interactive: true,
+    },
+    examples: [
+      { label: "JWT mode", props: { serverName: "api.example.com", initialMode: "jwt" as const } },
+      { label: "Custom server", props: { serverName: "auth.myapp.io", initialMode: "session" as const } },
+    ],
+    Component: null as unknown as AnyEntry["Component"],
+  },
+
+  "graceful-shutdown": {
+    id: "graceful-shutdown",
+    name: "Graceful Shutdown",
+    category: "devtools" as ComponentCategory,
+    description: "SIGTERM drain animation — block new connections, finish in-flight requests, then exit cleanly",
+    schema: GracefulShutdownSchema,
+    tags: ["shutdown", "sigterm", "drain", "deploy", "kubernetes", "zero-downtime"],
+    interactive: true,
+    defaultProps: {
+      serviceName: "api-server",
+      initialConnections: 6,
+      drainTimeoutSeconds: 30,
+      interactive: true,
+    },
+    examples: [
+      { label: "Heavy load", props: { serviceName: "checkout-api", initialConnections: 10, drainTimeoutSeconds: 45 } },
+      { label: "Small service", props: { serviceName: "health-worker", initialConnections: 3, drainTimeoutSeconds: 15 } },
+    ],
+    Component: null as unknown as AnyEntry["Component"],
+  },
+
+  "hash-table-collision": {
+    id: "hash-table-collision",
+    name: "Hash Table Collisions",
+    category: "edu" as ComponentCategory,
+    description: "Chaining vs open addressing — watch keys collide and get stored differently",
+    schema: HashTableCollisionSchema,
+    tags: ["hash-table", "collision", "chaining", "open-addressing", "data-structure", "edu"],
+    interactive: true,
+    defaultProps: {
+      title: "Hash Table Collisions",
+      strategy: "chaining",
+      bucketCount: 6,
+      keysToInsert: ["cat", "act", "tac", "dog", "god"],
+      interactive: true,
+    },
+    examples: [
+      {
+        label: "Open addressing",
+        props: {
+          title: "Linear Probing",
+          strategy: "open-addressing" as const,
+          bucketCount: 6,
+          keysToInsert: ["cat", "act", "tac", "dog", "god"],
+          interactive: true,
+        },
+      },
+      {
+        label: "More buckets",
+        props: {
+          title: "8-Bucket Table",
+          strategy: "chaining" as const,
+          bucketCount: 8,
+          keysToInsert: ["foo", "oof", "bar", "rab", "baz"],
+          interactive: true,
+        },
+      },
+    ],
+    Component: null as unknown as AnyEntry["Component"],
+  },
+
+  "leader-election": {
+    id: "leader-election",
+    name: "Leader Election",
+    category: "distributed" as ComponentCategory,
+    description: "Nodes elect a leader — bully or ring algorithm with priority-based winner",
+    schema: LeaderElectionSchema,
+    tags: ["leader-election", "distributed", "consensus", "bully", "ring", "cluster"],
+    interactive: true,
+    defaultProps: {
+      title: "Leader Election",
+      algorithm: "bully",
+      nodes: [
+        { id: "n1", name: "Node A", priority: 1 },
+        { id: "n2", name: "Node B", priority: 3 },
+        { id: "n3", name: "Node C", priority: 2 },
+        { id: "n4", name: "Node D", priority: 4 },
+        { id: "n5", name: "Node E", priority: 5 },
+      ],
+      interactive: true,
+    },
+    examples: [
+      {
+        label: "Ring algorithm",
+        props: {
+          title: "Ring Election",
+          algorithm: "ring" as const,
+          nodes: [
+            { id: "n1", name: "Node A", priority: 1 },
+            { id: "n2", name: "Node B", priority: 3 },
+            { id: "n3", name: "Node C", priority: 2 },
+            { id: "n4", name: "Node D", priority: 4 },
+            { id: "n5", name: "Node E", priority: 5 },
+          ],
+          interactive: true,
+        },
+      },
+      {
+        label: "Small cluster",
+        props: {
+          title: "3-Node Cluster",
+          algorithm: "bully" as const,
+          nodes: [
+            { id: "a", name: "Alpha", priority: 2 },
+            { id: "b", name: "Beta", priority: 5 },
+            { id: "c", name: "Gamma", priority: 3 },
+          ],
+          interactive: true,
+        },
+      },
+    ],
+    Component: null as unknown as AnyEntry["Component"],
+  },
+
+  "context-window-overflow": {
+    id: "context-window-overflow",
+    name: "Context Window Overflow",
+    category: "ai" as ComponentCategory,
+    description: "Interactive context limit demo — watch conversation turns fill the window and get evicted by truncation or summarization strategy",
+    schema: ContextWindowOverflowSchema,
+    tags: ["ai", "llm", "context-window", "overflow", "truncation", "tokens", "interactive"],
+    interactive: true,
+    defaultProps: {
+      title: "Context Window Overflow",
+      contextWindow: 4096,
+      strategy: "truncate-oldest",
+      systemTokens: 120,
+      interactive: true,
+    },
+    examples: [
+      {
+        label: "Summarize strategy",
+        props: {
+          title: "Summarize & Compress",
+          contextWindow: 4096,
+          strategy: "summarize" as const,
+          systemTokens: 120,
+          interactive: true,
+        },
+      },
+      {
+        label: "Small window",
+        props: {
+          title: "Tight 2K Window",
+          contextWindow: 2048,
+          strategy: "truncate-middle" as const,
+          systemTokens: 80,
+          interactive: true,
+        },
+      },
+    ],
+    Component: null as unknown as AnyEntry["Component"],
+  },
+
+  "hmac-signing": {
+    id: "hmac-signing",
+    name: "HMAC Request Signing",
+    category: "api" as ComponentCategory,
+    description: "Step-by-step HMAC-SHA256 signing pipeline — canonical string, signature, header attachment, and server verification with tamper simulation",
+    schema: HmacSigningSchema,
+    tags: ["hmac", "signing", "api", "authentication", "webhook", "sha256", "interactive"],
+    interactive: true,
+    defaultProps: {
+      name: "Payment API Signing",
+      algorithm: "HMAC-SHA256",
+      secretKey: "sk_live_a1b2c3d4e5f6",
+      method: "POST",
+      path: "/v1/payments",
+      body: '{"amount":4999,"currency":"usd"}',
+      timestamp: "1716239022",
+      interactive: true,
+    },
+    examples: [
+      {
+        label: "Webhook signing",
+        props: {
+          name: "Stripe Webhook",
+          algorithm: "HMAC-SHA512" as const,
+          method: "POST",
+          path: "/webhooks/stripe",
+          body: '{"type":"payment_intent.succeeded","amount":2500}',
+          secretKey: "whsec_test_abc123",
+          interactive: true,
+        },
+      },
+      {
+        label: "Signed GET",
+        props: {
+          name: "Account Lookup",
+          algorithm: "HMAC-SHA256" as const,
+          method: "GET" as const,
+          path: "/v1/accounts/me",
+          body: "",
+          timestamp: "1716239100",
+          interactive: true,
+        },
+      },
+    ],
+    Component: null as unknown as AnyEntry["Component"],
+  },
+
+  "rate-limit-headers": {
+    id: "rate-limit-headers",
+    name: "Rate Limit Headers",
+    category: "api" as ComponentCategory,
+    description: "Interactive X-RateLimit-* response headers — remaining quota gauge, 429 Retry-After, and request history dots",
+    schema: RateLimitHeadersSchema,
+    tags: ["rate-limit", "headers", "429", "retry-after", "api", "interactive"],
+    interactive: true,
+    defaultProps: {
+      name: "REST API Quota",
+      limit: 6,
+      windowSeconds: 30,
+      headerStyle: "standard",
+      interactive: true,
+    },
+    examples: [
+      {
+        label: "Draft-6 (GitHub)",
+        props: {
+          name: "GitHub API Headers",
+          limit: 5,
+          windowSeconds: 60,
+          headerStyle: "draft-6" as const,
+          interactive: true,
+        },
+      },
+      {
+        label: "Auth endpoint (tight)",
+        props: {
+          name: "Login Rate Limit",
+          limit: 3,
+          windowSeconds: 15,
+          headerStyle: "standard" as const,
+          interactive: true,
+        },
+      },
+    ],
+    Component: null as unknown as AnyEntry["Component"],
+  },
+
+  "two-phase-commit": {
+    id: "two-phase-commit",
+    name: "Two-Phase Commit",
+    category: "distributed" as ComponentCategory,
+    description: "Interactive 2PC coordinator flow — prepare, vote, commit or abort with participant state tracking and protocol log",
+    schema: TwoPhaseCommitSchema,
+    tags: ["2pc", "distributed", "transactions", "consensus", "commit", "abort", "interactive"],
+    interactive: true,
+    defaultProps: {
+      transactionName: "Transfer $500 (A → B)",
+      participants: [
+        { id: "db-a", label: "Account DB (Shard A)", color: "blue" as const },
+        { id: "db-b", label: "Ledger DB (Shard B)", color: "emerald" as const },
+      ],
+      simulateFailure: false,
+      failAtParticipant: 1,
+      interactive: true,
+    },
+    examples: [
+      {
+        label: "Abort on vote NO",
+        props: {
+          transactionName: "Cross-shard write",
+          participants: [
+            { id: "db-a", label: "Users DB", color: "blue" as const },
+            { id: "db-b", label: "Orders DB", color: "emerald" as const },
+          ],
+          simulateFailure: true,
+          failAtParticipant: 1,
+          interactive: true,
+        },
+      },
+      {
+        label: "Three participants",
+        props: {
+          transactionName: "Multi-DB inventory update",
+          participants: [
+            { id: "db-a", label: "Users DB", color: "blue" as const },
+            { id: "db-b", label: "Orders DB", color: "emerald" as const },
+            { id: "db-c", label: "Inventory DB", color: "violet" as const },
+          ],
+          simulateFailure: false,
+          interactive: true,
+        },
+      },
+    ],
+    Component: null as unknown as AnyEntry["Component"],
+  },
+
+  "graph-traversal-bfs-dfs": {
+    id: "graph-traversal-bfs-dfs",
+    name: "Graph Traversal (BFS / DFS)",
+    category: "edu" as ComponentCategory,
+    description: "Interactive BFS vs DFS walkthrough — graph canvas, visit order, queue/stack visualization, step and auto-play",
+    schema: GraphTraversalBfsDfsSchema,
+    tags: ["bfs", "dfs", "graph", "traversal", "algorithms", "queue", "stack", "interactive", "edu"],
+    interactive: true,
+    defaultProps: {
+      name: "Graph Traversal",
+      algorithm: "bfs",
+      startNode: "A",
+      interactive: true,
+    },
+    examples: [
+      {
+        label: "DFS deep dive",
+        props: {
+          name: "Depth-First Search",
+          algorithm: "dfs" as const,
+          startNode: "A",
+          interactive: true,
+        },
+      },
+      {
+        label: "Start from B",
+        props: {
+          name: "Subtree traversal",
+          algorithm: "bfs" as const,
+          startNode: "B",
+          interactive: true,
+        },
+      },
+    ],
+    Component: null as unknown as AnyEntry["Component"],
+  },
+
+  "read-repair": {
+    id: "read-repair",
+    name: "Read Repair",
+    category: "distributed" as ComponentCategory,
+    description: "Interactive quorum read with stale replica detection — version comparison, shake animation, and background repair sync",
+    schema: ReadRepairSchema,
+    tags: ["read-repair", "quorum", "consistency", "replication", "distributed", "eventual-consistency", "interactive"],
+    interactive: true,
+    defaultProps: {
+      name: "Dynamo-style Read Repair",
+      key: "user:42:profile",
+      quorum: 2,
+      replicaCount: 3,
+      staleReplica: 1,
+      interactive: true,
+    },
+    examples: [
+      {
+        label: "Strict quorum (3/3)",
+        props: {
+          name: "Strong consistency read",
+          key: "order:9001",
+          quorum: 3,
+          replicaCount: 3,
+          staleReplica: 2,
+          interactive: true,
+        },
+      },
+      {
+        label: "Two replicas",
+        props: {
+          name: "Minimal replication",
+          key: "session:abc123",
+          quorum: 2,
+          replicaCount: 2,
+          staleReplica: 0,
+          interactive: true,
+        },
+      },
+    ],
+    Component: null as unknown as AnyEntry["Component"],
+  },
+
+  "acid-vs-base": {
+    id: "acid-vs-base",
+    name: "ACID vs BASE",
+    category: "database" as ComponentCategory,
+    description: "Compare ACID strong consistency vs BASE eventual consistency — traits, examples, and animated simulations",
+    schema: AcidVsBaseSchema,
+    tags: ["database", "acid", "base", "consistency", "cap-theorem", "nosql"],
+    interactive: true,
+    defaultProps: { model: "acid" as const, interactive: true },
+    examples: [
+      { label: "BASE / Dynamo-style", props: { model: "base" as const, interactive: true } },
+      { label: "ACID / Postgres-style", props: { model: "acid" as const, interactive: true } },
+    ],
+    Component: null as unknown as AnyEntry["Component"],
+  },
+
+  "websocket-vs-sse": {
+    id: "websocket-vs-sse",
+    name: "WebSocket vs SSE",
+    category: "networking" as ComponentCategory,
+    description: "Bidirectional WebSocket vs server-sent events — compare direction, overhead, reconnect, and live message flow",
+    schema: WebSocketVsSseSchema,
+    tags: ["websocket", "sse", "realtime", "streaming", "http", "networking"],
+    interactive: true,
+    defaultProps: { protocol: "websocket" as const, interactive: true },
+    examples: [
+      { label: "SSE live feed", props: { protocol: "sse" as const, interactive: true } },
+      { label: "WebSocket chat", props: { protocol: "websocket" as const, interactive: true } },
     ],
     Component: null as unknown as AnyEntry["Component"],
   },

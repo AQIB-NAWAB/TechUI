@@ -83,7 +83,7 @@ function CopyButton({ text }: { text: string }) {
   return (
     <button
       onClick={() => { navigator.clipboard.writeText(text); setCopied(true); setTimeout(() => setCopied(false), 1500); }}
-      className="p-1 rounded text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors"
+      className="p-1 rounded text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300 transition-all duration-500"
     >
       {copied ? <Check className="size-3.5 text-emerald-500" /> : <Copy className="size-3.5" />}
     </button>
@@ -101,9 +101,9 @@ export function JwtViewer({ token, header, payload, showSignature = true }: JwtV
   const fullToken = token ?? `${encodedHeader}.${encodedPayload}.${signature}`;
 
   return (
-    <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 overflow-hidden">
+    <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden">
       {/* Token display */}
-      <div className="px-4 py-3 border-b border-zinc-100 dark:border-zinc-900 bg-zinc-50 dark:bg-zinc-900/50">
+      <div className="h-12 px-4 flex items-center gap-2 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50">
         <div className="flex items-center gap-2 mb-2">
           <Lock className="size-3.5 text-zinc-500" />
           <span className="text-[10px] font-semibold text-zinc-500 uppercase tracking-widest">JWT Token</span>

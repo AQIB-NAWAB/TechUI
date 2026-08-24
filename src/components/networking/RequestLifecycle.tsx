@@ -191,7 +191,7 @@ export function RequestLifecycle({
       </div>
 
       {/* Detail panel — FIXED height, never changes */}
-      <div className="px-4 py-4 min-h-[180px] flex flex-col gap-3">
+      <div className="px-4 py-4 min-h-[160px] flex flex-col gap-3">
         <div className="flex items-center gap-3">
           <div className="shrink-0 size-9 rounded-lg bg-blue-50 dark:bg-blue-950/30 text-blue-600 dark:text-blue-400 flex items-center justify-center">
             {active.icon}
@@ -202,7 +202,7 @@ export function RequestLifecycle({
           </div>
         </div>
         <p className="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed">{active.description}</p>
-        <pre className="text-[11px] font-mono bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-md p-3 text-zinc-700 dark:text-zinc-300 whitespace-pre overflow-x-auto leading-relaxed">
+        <pre className="text-[11px] font-mono bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-md p-3 text-zinc-700 dark:text-zinc-300 whitespace-pre overflow-x-auto leading-relaxed min-h-[72px]">
           {active.code}
         </pre>
       </div>

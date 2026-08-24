@@ -77,7 +77,7 @@ export function ApiRequest({
 
   async function sendRequest() {
     setSending(true);
-    await new Promise((r) => setTimeout(r, 800));
+    await new Promise((r) => setTimeout(r, 1200));
     setResponse({ status: 200, body: JSON.stringify({ message: "OK", data: [] }, null, 2) });
     setSending(false);
   }

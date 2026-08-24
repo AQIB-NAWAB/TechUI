@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { z } from "zod";
 import { cn } from "@/lib/utils";
-import { GitBranch } from "lucide-react";
+import { GitBranch, ChevronLeft, RotateCcw } from "lucide-react";
 
 export const RecursionSchema = z.object({
   example: z.enum(["factorial", "fibonacci", "countdown"]).default("factorial"),
@@ -155,7 +155,7 @@ export function Recursion({
           }
           return prev + 1;
         });
-      }, tab === "fibonacci" ? 200 : 600);
+      }, tab === "fibonacci" ? 1000 : 1200);
     } else {
       if (intervalRef.current) clearInterval(intervalRef.current);
     }
@@ -191,7 +191,7 @@ export function Recursion({
   return (
     <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden">
       {/* Header */}
-      <div className="flex items-center gap-3 px-4 h-12 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50">
+      <div className="flex items-center gap-3 px-4 h-12 border-b border-zinc-100 dark:border-zinc-800">
         <GitBranch className="size-4 text-emerald-500 shrink-0" />
         <span className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 flex-1">Recursion</span>
         <div className="flex gap-1">
@@ -200,7 +200,7 @@ export function Recursion({
               key={t}
               onClick={() => { setTab(t); setStepIndex(0); setPlaying(false); }}
               className={cn(
-                "px-2 py-1 rounded text-[11px] font-semibold transition-all duration-200",
+                "px-2 py-1 rounded text-[11px] font-semibold transition-all duration-500",
                 tab === t
                   ? "bg-zinc-900 dark:bg-white text-white dark:text-zinc-900"
                   : "text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800"
@@ -212,8 +212,11 @@ export function Recursion({
         </div>
       </div>
 
-      {/* Interactive area */}
-      <div className="min-h-[300px] px-4 pt-4 pb-3 flex flex-col gap-3">
+      <p className="text-sm text-zinc-500 dark:text-zinc-400 px-4 py-2 border-b border-zinc-100 dark:border-zinc-800">
+        A function that calls itself — stack grows until the base case, then unwinds.
+      </p>
+
+      <div className="min-h-[220px] px-4 pt-4 pb-3 flex flex-col gap-3">
 
         {/* Phase label */}
         <div className="flex items-center justify-between">
@@ -362,7 +365,7 @@ export function Recursion({
                         <span
                           key={node.id}
                           className={cn(
-                            "px-1.5 py-0.5 rounded border text-[11px] font-bold transition-all duration-300",
+                            "px-1.5 py-0.5 rounded border text-[11px] font-bold transition-all duration-500",
                             node.n <= 1
                               ? "bg-emerald-100 dark:bg-emerald-900/40 border-emerald-400 dark:border-emerald-600 text-emerald-700 dark:text-emerald-300"
                               : node.isDuplicate
@@ -400,56 +403,34 @@ export function Recursion({
           </div>
         )}
 
-        {/* Controls */}
-        <div className="flex items-center gap-2 flex-wrap">
-          <button
-            onClick={() => setStepIndex((p) => Math.max(0, p - 1))}
-            disabled={stepIndex === 0}
-            className="px-3 py-1.5 text-xs font-semibold rounded-lg border border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 disabled:opacity-30 transition-all duration-200 disabled:cursor-not-allowed"
-          >
-            ← Step
-          </button>
-          <button
-            onClick={() => setStepIndex((p) => Math.min(totalSteps - 1, p + 1))}
-            disabled={isDone}
-            className="px-3 py-1.5 text-xs font-semibold rounded-lg border border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 disabled:opacity-30 transition-all duration-200 disabled:cursor-not-allowed"
-          >
-            Step →
-          </button>
-          <button
-            onClick={handlePlayPause}
-            className="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-1.5 text-xs font-semibold hover:opacity-90 transition-opacity"
-          >
-            {playing ? "Pause" : isDone ? "Replay" : "▶ Auto-play"}
-          </button>
-          <button
-            onClick={() => { setStepIndex(0); setPlaying(false); }}
-            className="px-3 py-1.5 text-xs font-semibold rounded-lg border border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all duration-200"
-          >
-            Reset
-          </button>
-        </div>
+      </div>
 
-        {/* Key insight */}
-        <div className="text-[10px] text-zinc-400 dark:text-zinc-500 bg-zinc-50 dark:bg-zinc-800/40 rounded-lg px-3 py-2">
-          {tab === "fibonacci" ? (
-            <>
-              <strong className="text-red-500">fib(35) makes 29M calls!</strong> Each call duplicates work.{" "}
-              This is why we <strong className="text-zinc-600 dark:text-zinc-300">cache/memoize</strong> — store results to avoid redundant calls.
-            </>
-          ) : tab === "factorial" ? (
-            <>
-              Stack <strong className="text-blue-600 dark:text-blue-400">grows</strong> until base case, then{" "}
-              <strong className="text-amber-600 dark:text-amber-400">unwinds</strong> computing return values bottom-up.
-              Each frame holds its own copy of <code className="font-mono">n</code>.
-            </>
-          ) : (
-            <>
-              Each recursive call <strong className="text-blue-600 dark:text-blue-400">waits</strong> for the next one to finish.
-              Base case <code className="font-mono">(n=0)</code> breaks the chain — without it, you&apos;d get a stack overflow.
-            </>
+      <div className="px-4 py-3 border-t border-zinc-100 dark:border-zinc-800 flex items-center gap-2">
+        <button
+          onClick={() => setStepIndex((p) => Math.max(0, p - 1))}
+          disabled={stepIndex === 0}
+          className="p-2 rounded-lg border border-zinc-200 dark:border-zinc-700 text-zinc-500 hover:bg-zinc-50 dark:hover:bg-zinc-800 disabled:opacity-30 transition-all duration-500"
+        >
+          <ChevronLeft className="size-4" />
+        </button>
+        <button
+          onClick={() => { setStepIndex(0); setPlaying(false); }}
+          className="p-2 rounded-lg border border-zinc-200 dark:border-zinc-700 text-zinc-500 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all duration-500"
+        >
+          <RotateCcw className="size-3.5" />
+        </button>
+        <span className="text-sm text-zinc-500 dark:text-zinc-400 flex-1">
+          Step {stepIndex + 1}/{totalSteps}
+          {tab === "fibonacci" && duplicateCalls > 0 && (
+            <span className="text-red-500 ml-1">· {duplicateCalls} duplicate calls</span>
           )}
-        </div>
+        </span>
+        <button
+          onClick={handlePlayPause}
+          className="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-opacity shrink-0"
+        >
+          {playing ? "Pause" : isDone ? "Replay" : "Auto-play"}
+        </button>
       </div>
     </div>
   );

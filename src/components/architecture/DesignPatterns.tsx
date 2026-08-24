@@ -311,8 +311,6 @@ export function DesignPatterns({ pattern: initialPattern = "singleton" }: Design
   const [pattern, setPattern] = useState<PatternKey>(initialPattern);
   const [animStep, setAnimStep] = useState(0);
   const [running, setRunning] = useState(false);
-  const [showCode, setShowCode] = useState(false);
-
   const meta = PATTERN_META[pattern];
   const totalSteps = DIAGRAM_STEPS[pattern];
 
@@ -342,23 +340,25 @@ export function DesignPatterns({ pattern: initialPattern = "singleton" }: Design
 
   return (
     <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden">
-      {/* Header */}
-      <div className="flex items-center gap-2.5 px-4 py-2.5 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50">
-        <Boxes className="size-3.5 text-zinc-400 shrink-0" />
-        <span className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 flex-1">Design Patterns</span>
+      <div className="flex items-center gap-3 px-4 h-12 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50">
+        <Boxes className="size-4 text-zinc-400 shrink-0" />
+        <span className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 flex-1">Design Patterns</span>
         <span className={cn("text-[10px] font-semibold px-2 py-0.5 rounded-full", meta.typeColor)}>
           {meta.type}
         </span>
       </div>
 
-      {/* Tab row */}
+      <p className="text-sm text-zinc-500 dark:text-zinc-400 px-4 py-2 border-b border-zinc-100 dark:border-zinc-800">
+        Reusable blueprints for common coding problems — each pattern solves a specific design challenge.
+      </p>
+
       <div className="flex border-b border-zinc-100 dark:border-zinc-800 overflow-x-auto">
         {TABS.map((p) => (
           <button
             key={p}
             onClick={() => handlePatternChange(p)}
             className={cn(
-              "px-4 py-2 text-xs font-semibold whitespace-nowrap transition-all duration-200 border-b-2",
+              "px-4 py-2 text-xs font-semibold whitespace-nowrap transition-all duration-500 border-b-2",
               pattern === p
                 ? "border-zinc-900 dark:border-white text-zinc-900 dark:text-white bg-white dark:bg-zinc-900"
                 : "border-transparent text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
@@ -369,12 +369,10 @@ export function DesignPatterns({ pattern: initialPattern = "singleton" }: Design
         ))}
       </div>
 
-      {/* Body */}
-      <div className="min-h-[300px] grid grid-cols-1 md:grid-cols-2">
-        {/* Left: diagram */}
+      <div className="min-h-[220px] grid grid-cols-1 md:grid-cols-2">
         <div className="p-4 border-b md:border-b-0 md:border-r border-zinc-100 dark:border-zinc-800">
-          <div className="text-[10px] font-semibold uppercase tracking-wide text-zinc-400 mb-3">Visual Diagram</div>
-          <div className="min-h-[180px]">
+          <div className="text-[10px] font-semibold uppercase tracking-widest text-zinc-400 mb-3">Visual Diagram</div>
+          <div className="min-h-[160px] flex flex-col justify-center">
             {pattern === "singleton" && <SingletonDiagram step={animStep} />}
             {pattern === "observer" && <ObserverDiagram step={animStep} />}
             {pattern === "factory" && <FactoryDiagram step={animStep} />}
@@ -382,47 +380,31 @@ export function DesignPatterns({ pattern: initialPattern = "singleton" }: Design
           </div>
         </div>
 
-        {/* Right: code */}
         <div className="p-4 flex flex-col">
-          <div className="flex items-center justify-between mb-3">
-            <div className="text-[10px] font-semibold uppercase tracking-wide text-zinc-400">Code</div>
-            <button
-              onClick={() => setShowCode((v) => !v)}
-              className="text-[10px] text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 underline"
-            >
-              {showCode ? "hide" : "show"}
-            </button>
-          </div>
-          {showCode ? (
-            <pre className="text-[10px] font-mono text-zinc-600 dark:text-zinc-400 bg-zinc-50 dark:bg-zinc-800/50 rounded-lg p-3 overflow-x-auto leading-relaxed flex-1">
-              <code>{meta.code}</code>
-            </pre>
-          ) : (
-            <pre className="text-[10px] font-mono text-zinc-600 dark:text-zinc-400 bg-zinc-50 dark:bg-zinc-800/50 rounded-lg p-3 overflow-x-auto leading-relaxed flex-1 max-h-[180px] overflow-y-auto">
-              <code>{meta.code}</code>
-            </pre>
-          )}
+          <div className="text-[10px] font-semibold uppercase tracking-widest text-zinc-400 mb-3">Code</div>
+          <pre className="text-[10px] font-mono text-zinc-600 dark:text-zinc-400 bg-zinc-50 dark:bg-zinc-800/50 rounded-lg border border-zinc-100 dark:border-zinc-800 p-3 overflow-x-auto leading-relaxed flex-1 max-h-[160px] overflow-y-auto">
+            <code>{meta.code}</code>
+          </pre>
         </div>
       </div>
 
-      {/* Footer */}
-      <div className="border-t border-zinc-100 dark:border-zinc-800 px-4 py-2.5 flex items-center gap-3 bg-zinc-50/50 dark:bg-zinc-900/20">
+      <div className="border-t border-zinc-100 dark:border-zinc-800 px-4 py-3 flex items-center gap-3 bg-zinc-50 dark:bg-zinc-900/30">
+        <span className="text-sm text-zinc-500 dark:text-zinc-400 flex-1">
+          {running ? "Animating pattern…" : meta.useCase}
+        </span>
         <button
           onClick={runDemo}
           disabled={running}
           className={cn(
-            "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-300",
+            "flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-semibold transition-all duration-500",
             running
-              ? "bg-zinc-100 dark:bg-zinc-800 text-zinc-400 cursor-not-allowed"
+              ? "bg-zinc-200 dark:bg-zinc-800 text-zinc-400 cursor-not-allowed"
               : "bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 hover:opacity-90"
           )}
         >
           {running ? <RotateCcw className="size-3.5 animate-spin" /> : <Play className="size-3.5" />}
-          {running ? "Animating…" : "Demo"}
+          {running ? "Animating…" : "Run Demo"}
         </button>
-        <p className="text-[10px] text-zinc-400 flex-1">
-          <span className="font-semibold text-zinc-500 dark:text-zinc-400">Use case:</span> {meta.useCase}
-        </p>
       </div>
     </div>
   );

@@ -92,6 +92,7 @@ export function KafkaTopic({
 
   const [producing, setProducing] = useState(false);
   const [producingAnim, setProducingAnim] = useState(false);
+  const [consumingGroup, setConsumingGroup] = useState<string | null>(null);
 
   function produce() {
     if (producing) return;
@@ -119,6 +120,9 @@ export function KafkaTopic({
   }
 
   function consume(groupId: string) {
+    setConsumingGroup(groupId);
+    setTimeout(() => setConsumingGroup(null), 700);
+
     setGroupOffsets((prev) => {
       const offsets = [...(prev[groupId] ?? [])];
       let maxLag = 0;
@@ -168,7 +172,7 @@ export function KafkaTopic({
       </div>
 
       {/* Producer + Partition lanes */}
-      <div className="px-4 pt-4 pb-3">
+      <div className="px-4 pt-4 pb-3 min-h-[220px]">
         {/* Producer box with broadcast rings */}
         <div className="flex items-center gap-3 mb-4">
           <div className="relative flex items-center justify-center shrink-0">
@@ -197,30 +201,55 @@ export function KafkaTopic({
           {Array.from({ length: numPartitions }, (_, p) => {
             const pills = partPills[p] ?? [];
             const visible = pills.slice(-VISIBLE);
+            const writeHead = pills.length - 1;
+            const primaryGroup = groups[0];
+            const readHead = primaryGroup ? (groupOffsets[primaryGroup.id]?.[p] ?? 0) : 0;
+            const lag = Math.max(0, writeHead - readHead);
 
             return (
               <div key={p} className="flex items-center gap-2">
                 <span className="text-[10px] font-mono font-semibold text-zinc-400 w-6 shrink-0 text-right">P{p}</span>
-                <div className="flex-1 flex items-center gap-1.5 h-10 overflow-hidden bg-zinc-50 dark:bg-zinc-900/50 rounded-lg border border-zinc-200 dark:border-zinc-800 px-2">
-                  {pills.length === 0 ? (
-                    <span className="text-[10px] text-zinc-400 italic mx-auto">empty</span>
-                  ) : (
-                    <div className="flex items-center gap-1.5 ml-auto">
-                      {visible.map((pill) => (
-                        <div
-                          key={pill.id}
-                          className={cn(
-                            "flex items-center h-6 px-2 rounded-full border text-[9px] font-mono font-medium whitespace-nowrap shrink-0 transition-all duration-500",
-                            PILL_COLORS[pill.colorIdx % PILL_COLORS.length],
-                            pill.fresh && "translate-x-2 opacity-0"
-                          )}
-                          style={pill.fresh ? {} : { transform: "translateX(0)", opacity: 1 }}
-                        >
-                          {pill.label}
-                        </div>
-                      ))}
-                    </div>
-                  )}
+                <div className="flex-1 relative">
+                  <div className="flex items-center gap-1.5 h-10 overflow-hidden bg-zinc-50 dark:bg-zinc-900/50 rounded-lg border border-zinc-200 dark:border-zinc-800 px-2 relative">
+                    {pills.length === 0 ? (
+                      <span className="text-[10px] text-zinc-400 italic mx-auto">empty</span>
+                    ) : (
+                      <div className="flex items-center gap-1.5 ml-auto relative">
+                        {lag > 0 && (
+                          <div
+                            className="absolute top-1/2 -translate-y-1/2 h-6 rounded bg-amber-100/80 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 transition-all duration-700 pointer-events-none"
+                            style={{ right: `${Math.min(lag, VISIBLE) * 68}px`, width: `${Math.min(lag, VISIBLE) * 68 - 4}px` }}
+                          />
+                        )}
+                        {visible.map((pill, vi) => {
+                          const absIdx = pills.length - visible.length + vi;
+                          const isUnread = absIdx > readHead;
+                          const isReadHead = absIdx === readHead;
+                          return (
+                            <div
+                              key={pill.id}
+                              className={cn(
+                                "relative flex items-center h-6 px-2 rounded-full border text-[9px] font-mono font-medium whitespace-nowrap shrink-0 transition-all duration-500 z-10",
+                                PILL_COLORS[pill.colorIdx % PILL_COLORS.length],
+                                pill.fresh && "translate-x-2 opacity-0",
+                                isUnread && "opacity-90",
+                                isReadHead && consumingGroup && "ring-2 ring-blue-400 scale-105"
+                              )}
+                              style={pill.fresh ? {} : { transform: "translateX(0)", opacity: 1 }}
+                            >
+                              {pill.label}
+                              {isReadHead && (
+                                <span className="absolute -bottom-3 left-1/2 -translate-x-1/2 text-[8px] text-blue-500 font-bold transition-all duration-700">▼</span>
+                              )}
+                            </div>
+                          );
+                        })}
+                        {pills.length > 0 && (
+                          <span className="absolute -right-1 top-1/2 -translate-y-1/2 size-2 rounded-full bg-violet-500 animate-pulse z-20" title="Write head" />
+                        )}
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 {/* Consumer position indicators */}

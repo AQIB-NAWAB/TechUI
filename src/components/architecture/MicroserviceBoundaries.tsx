@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { z } from "zod";
 import { cn } from "@/lib/utils";
-import { Boxes, Database, ArrowRight } from "lucide-react";
+import { Database, ArrowRight, Server } from "lucide-react";
 
 export const MicroserviceBoundariesSchema = z.object({
   services: z
@@ -160,21 +160,19 @@ export function MicroserviceBoundaries({
 
   return (
     <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden">
-      {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-200 dark:border-zinc-800">
-        <div className="flex items-center gap-2">
-          <Boxes className="w-4 h-4 text-zinc-500 dark:text-zinc-400" />
-          <span className="text-sm font-semibold text-zinc-800 dark:text-zinc-100">
-            Microservice Boundaries
-          </span>
-        </div>
-        <span className="text-xs text-zinc-400 dark:text-zinc-500">
-          Click a service to inspect
+      <div className="flex items-center gap-3 px-4 h-12 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50">
+        <Server className="size-4 text-zinc-400 shrink-0" />
+        <span className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 flex-1">
+          Microservice Boundaries
         </span>
+        <span className="text-[10px] text-zinc-400">{services.length} services</span>
       </div>
 
-      {/* Service grid */}
-      <div className="p-4 min-h-[240px]">
+      <p className="text-sm text-zinc-500 dark:text-zinc-400 px-4 py-2 border-b border-zinc-100 dark:border-zinc-800">
+        Each service owns its data and API — no shared databases between services.
+      </p>
+
+      <div className="min-h-[220px] p-4">
         <div className="grid grid-cols-2 gap-3 mb-4">
           {services.map((svc) => {
             const c = COLOR_CLASSES[svc.color];
@@ -240,56 +238,53 @@ export function MicroserviceBoundaries({
           })}
         </div>
 
-        {/* API Contract Panel */}
-        <div className="transition-all duration-500">
+        {/* API Contract Panel — fixed height */}
+        <div className="min-h-[100px] transition-all duration-500">
           {selectedService ? (
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                <span className="text-xs font-semibold text-zinc-600 dark:text-zinc-400 uppercase tracking-wide">
-                  {selectedService.name}
-                </span>
-                <span className="text-xs text-zinc-400">— API Contract</span>
+            <div className="border border-zinc-100 dark:border-zinc-800 rounded-lg overflow-hidden bg-zinc-50 dark:bg-zinc-800/50">
+              <div className="px-3 py-1.5 text-[10px] font-semibold uppercase tracking-widest text-zinc-400 border-b border-zinc-100 dark:border-zinc-800">
+                {selectedService.name} — API Contract
               </div>
-              <div className="rounded-lg border border-zinc-200 dark:border-zinc-700 overflow-hidden">
-                {selectedService.endpoints.map((ep, i) => (
-                  <div
-                    key={i}
-                    className={cn(
-                      "flex items-center gap-3 px-3 py-2 text-xs transition-all duration-300",
-                      i !== 0 && "border-t border-zinc-100 dark:border-zinc-800"
-                    )}
-                  >
-                    <span
-                      className={cn(
-                        "font-mono font-bold px-1.5 py-0.5 rounded text-[10px] shrink-0 w-14 text-center",
-                        METHOD_COLORS[ep.method]
-                      )}
-                    >
-                      {ep.method}
-                    </span>
-                    <span className="font-mono text-zinc-700 dark:text-zinc-300 shrink-0">
-                      {ep.path}
-                    </span>
-                    <span className="text-zinc-400 dark:text-zinc-500 truncate">
-                      {ep.description}
-                    </span>
-                  </div>
-                ))}
-              </div>
+              {selectedService.endpoints.map((ep, i) => (
+                <div
+                  key={i}
+                  className={cn(
+                    "flex items-center gap-3 px-3 py-2 text-xs transition-all duration-500",
+                    i !== 0 && "border-t border-zinc-100 dark:border-zinc-800"
+                  )}
+                >
+                  <span className={cn("font-mono font-bold px-1.5 py-0.5 rounded text-[10px] shrink-0 w-14 text-center", METHOD_COLORS[ep.method])}>
+                    {ep.method}
+                  </span>
+                  <span className="font-mono text-zinc-700 dark:text-zinc-300 shrink-0">{ep.path}</span>
+                  <span className="text-zinc-400 truncate">{ep.description}</span>
+                </div>
+              ))}
             </div>
           ) : (
-            <div className="text-xs text-zinc-400 text-center py-4">
+            <div className="text-xs text-zinc-400 text-center py-4 border border-dashed border-zinc-200 dark:border-zinc-700 rounded-lg">
               Select a service to view its API contract
             </div>
           )}
         </div>
       </div>
 
-      {/* Footer insight */}
-      <div className="px-4 py-2.5 border-t border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50">
-        <p className="text-xs text-zinc-500 dark:text-zinc-400 text-center">
-          Each service owns its database — no shared tables
-        </p>
+      <div className="border-t border-zinc-100 dark:border-zinc-800 px-4 py-3 flex items-center gap-3 bg-zinc-50 dark:bg-zinc-900/30">
+        <span className="text-sm text-zinc-500 dark:text-zinc-400 flex-1">
+          {selectedService
+            ? `${selectedService.name} owns ${selectedService.dbLabel} — ${selectedService.endpoints.length} endpoints`
+            : "Click a service to explore its boundary and API"}
+        </span>
+        <button
+          onClick={() => {
+            const idx = services.findIndex((s) => s.id === selectedId);
+            const next = services[(idx + 1) % services.length];
+            if (next) setSelectedId(next.id);
+          }}
+          className="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-opacity"
+        >
+          Next Service
+        </button>
       </div>
     </div>
   );

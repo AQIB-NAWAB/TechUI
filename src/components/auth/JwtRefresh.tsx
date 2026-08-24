@@ -207,7 +207,7 @@ export function JwtRefresh({
       s++;
       if (s >= maxSteps) { stopAuto(); return; }
       setStep(s);
-    }, 1000);
+    }, 1200);
   }
 
   const scenarioData = SCENARIOS[scenario];
@@ -231,9 +231,9 @@ export function JwtRefresh({
   return (
     <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden">
       {/* Header */}
-      <div className="flex items-center gap-2.5 px-4 py-2.5 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/60">
+      <div className="h-12 px-4 flex items-center gap-2.5 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/60">
         <RefreshCw className="size-3.5 text-zinc-400 shrink-0" />
-        <span className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 flex-1">JWT Token Refresh</span>
+        <span className="text-sm font-semibold text-zinc-800 dark:text-zinc-200 flex-1">JWT Token Refresh</span>
         <span className="text-[10px] text-zinc-400">
           Access: {accessTokenTtl}min · Refresh: {refreshTokenTtl}d
         </span>
@@ -246,7 +246,7 @@ export function JwtRefresh({
             key={s}
             onClick={() => changeScenario(s)}
             className={cn(
-              "px-3 py-2 text-xs font-semibold whitespace-nowrap transition-all duration-200 capitalize",
+              "px-3 py-2 text-xs font-semibold whitespace-nowrap transition-all duration-500 capitalize",
               scenario === s
                 ? "border-b-2 border-zinc-900 dark:border-white text-zinc-900 dark:text-white"
                 : "text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"

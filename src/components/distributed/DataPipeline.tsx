@@ -95,7 +95,7 @@ export function DataPipeline({
         { id, colorIdx: spawnColor++ % PILL_COLORS.length, stageIdx: 0, progress: 0, failed: willFail },
       ]);
       setColorCycle((c) => c + 1);
-    }, 450);
+    }, 800);
 
     progressTimer.current = setInterval(() => {
       setPills((prev) => {
@@ -105,7 +105,7 @@ export function DataPipeline({
             setFailed((f) => f + 1);
             continue;
           }
-          const newProgress = p.progress + 20;
+          const newProgress = p.progress + 12;
           if (newProgress >= 100) {
             const nextStage = p.stageIdx + 1;
             if (nextStage >= stages.length) {
@@ -119,7 +119,7 @@ export function DataPipeline({
         }
         return next.slice(-30);
       });
-    }, 200);
+    }, 500);
   }
 
   function stopAnimation() {
@@ -185,27 +185,26 @@ export function DataPipeline({
         )}
       </div>
 
-      {/* Stats */}
-      {(processed > 0 || failed > 0) && (
-        <div className="flex items-center gap-6 px-4 py-2 border-b border-zinc-100 dark:border-zinc-900 bg-zinc-50/60 dark:bg-zinc-900/20 text-[10px]">
-          <div className="flex items-center gap-1.5">
-            <span className="size-1.5 rounded-full bg-emerald-500" />
-            <span className="text-zinc-500 dark:text-zinc-400">Processed: <span className="font-semibold font-mono text-zinc-700 dark:text-zinc-300">{processed}</span></span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <span className="size-1.5 rounded-full bg-red-500" />
-            <span className="text-zinc-500 dark:text-zinc-400">Failed: <span className="font-semibold font-mono text-red-600 dark:text-red-400">{failed}</span></span>
-          </div>
-          {running && (
-            <div className="flex items-center gap-1.5">
-              <span className="text-zinc-500 dark:text-zinc-400">~<span className="font-semibold font-mono text-zinc-700 dark:text-zinc-300">{throughput}</span> rec/s</span>
-            </div>
-          )}
+      {/* Stats — fixed height */}
+      <div className={cn(
+        "flex items-center gap-6 px-4 py-2 border-b border-zinc-100 dark:border-zinc-900 bg-zinc-50/60 dark:bg-zinc-900/20 text-[10px] min-h-[32px] transition-all duration-500",
+        processed === 0 && failed === 0 && !running && "opacity-40"
+      )}>
+        <div className="flex items-center gap-1.5">
+          <span className="size-1.5 rounded-full bg-emerald-500" />
+          <span className="text-zinc-500 dark:text-zinc-400">Processed: <span className="font-semibold font-mono text-zinc-700 dark:text-zinc-300">{processed}</span></span>
         </div>
-      )}
+        <div className="flex items-center gap-1.5">
+          <span className="size-1.5 rounded-full bg-red-500" />
+          <span className="text-zinc-500 dark:text-zinc-400">Failed: <span className="font-semibold font-mono text-red-600 dark:text-red-400">{failed}</span></span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <span className="text-zinc-500 dark:text-zinc-400">~<span className="font-semibold font-mono text-zinc-700 dark:text-zinc-300">{running ? throughput : 0}</span> rec/s</span>
+        </div>
+      </div>
 
       {/* Pipeline flow */}
-      <div className="px-4 py-5 overflow-x-auto min-h-[140px]">
+      <div className="px-4 py-5 overflow-x-auto min-h-[180px]">
         <div className="flex items-start gap-0 min-w-max">
           {stages.map((stage, i) => {
             const status = statuses[stage.id] ?? "idle";
@@ -271,14 +270,24 @@ export function DataPipeline({
 
                 {/* Arrow connector */}
                 {hasNext && (
-                  <div className="flex flex-col items-center mx-1">
-                    <div className="flex items-center gap-0">
+                  <div className="flex flex-col items-center mx-1 relative">
+                    <div className="flex items-center gap-0 relative">
                       <div className={cn(
                         "h-0.5 w-8 transition-all duration-500",
                         status === "running" ? "bg-blue-400 dark:bg-blue-500" :
                         status === "done" ? "bg-emerald-400 dark:bg-emerald-500" :
                         "bg-zinc-200 dark:bg-zinc-700"
                       )} />
+                      {running && stagePills.map((p) => (
+                        <div
+                          key={p.id}
+                          className={cn(
+                            "absolute top-1/2 -translate-y-1/2 size-2 rounded-full transition-all duration-500",
+                            p.failed ? "bg-red-400" : PILL_COLORS[p.colorIdx % PILL_COLORS.length]
+                          )}
+                          style={{ left: `${p.progress * 0.32}px` }}
+                        />
+                      ))}
                       <div className={cn(
                         "border-l-[6px] border-t-[3px] border-b-[3px] border-t-transparent border-b-transparent transition-all duration-500",
                         status === "running" ? "border-l-blue-400 dark:border-l-blue-500" :
@@ -296,16 +305,17 @@ export function DataPipeline({
           })}
         </div>
 
-        {/* Dead letter queue (when there are failures) */}
-        {failed > 0 && (
-          <div className="mt-4 flex items-center gap-2">
-            <div className="h-6 w-px bg-red-300 dark:bg-red-800 ml-[50px]" />
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/20">
-              <span className="text-[9px] font-semibold text-red-600 dark:text-red-400 uppercase tracking-wider">Dead Letter Queue</span>
-              <span className="text-[10px] font-mono font-bold text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-900/40 px-1.5 py-0.5 rounded">{failed}</span>
-            </div>
+        {/* Dead letter queue — reserved space */}
+        <div className={cn(
+          "mt-4 flex items-center gap-2 min-h-[36px] transition-all duration-500",
+          failed === 0 && "opacity-0"
+        )}>
+          <div className="h-6 w-px bg-red-300 dark:bg-red-800 ml-[50px]" />
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/20">
+            <span className="text-[9px] font-semibold text-red-600 dark:text-red-400 uppercase tracking-wider">Dead Letter Queue</span>
+            <span className="text-[10px] font-mono font-bold text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-900/40 px-1.5 py-0.5 rounded">{failed}</span>
           </div>
-        )}
+        </div>
       </div>
 
       {/* Selected stage detail / empty hint */}

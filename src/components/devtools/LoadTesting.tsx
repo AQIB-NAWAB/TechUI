@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { z } from "zod";
+import { cn } from "@/lib/utils";
 import { Activity, RefreshCw, AlertTriangle, CheckCircle } from "lucide-react";
 
 export const LoadTestingSchema = z.object({
@@ -29,11 +30,11 @@ function buildPolyline(points: RpsPoint[], maxRps: number, w: number, h: number)
 }
 
 const PHASE_LABELS: Record<Phase, string> = {
-  idle: "Ready",
-  ramping: "Ramp-up (0 → target RPS)",
-  sustained: "Sustained Load",
-  degrading: "Degrading",
-  complete: "Complete",
+  idle: "Ready to simulate traffic",
+  ramping: "Ramp-up — requests increasing",
+  sustained: "Sustained load at target RPS",
+  degrading: "Errors appearing under stress",
+  complete: "Test complete",
 };
 
 export function LoadTesting({
@@ -64,12 +65,10 @@ export function LoadTesting({
   useEffect(() => {
     if (phase === "idle" || phase === "complete") return;
 
-    // Each tick = 500ms
     const interval = setInterval(() => {
       tickRef.current += 1;
       const t = tickRef.current;
 
-      // Ramp: ~20 ticks to reach target
       const rampTicks = 20;
       const sustainedTicks = 10;
       const degradingTicks = 8;
@@ -78,30 +77,24 @@ export function LoadTesting({
       let nextPhase: Phase = phaseRef.current;
 
       if (t <= rampTicks) {
-        // Ramping phase
         nextPhase = "ramping";
         const progress = t / rampTicks;
-        // ease-in curve
         nextRps = targetRps * Math.pow(progress, 1.5);
-        // Latency climbs slowly with RPS
         const latencyProgress = progress * 0.5;
         setCurrentLatency(Math.round(20 + latencyProgress * (p99LatencyMs * 0.6)));
         setCurrentError(0);
       } else if (t <= rampTicks + sustainedTicks) {
-        // Sustained
         nextPhase = "sustained";
         nextRps = targetRps * (0.95 + Math.random() * 0.05);
         setCurrentLatency(Math.round(p99LatencyMs * 0.7 + Math.random() * 30));
         setCurrentError(errorRatePercent * 0.3);
       } else if (t <= rampTicks + sustainedTicks + degradingTicks) {
-        // Degrading
         nextPhase = "degrading";
         const deg = (t - rampTicks - sustainedTicks) / degradingTicks;
         nextRps = targetRps * (0.98 - deg * 0.15);
         setCurrentLatency(Math.round(p99LatencyMs * (0.8 + deg * 0.4)));
         setCurrentError(errorRatePercent * (0.5 + deg * 0.8));
       } else {
-        // Complete
         nextPhase = "complete";
         nextRps = 0;
         clearInterval(interval);
@@ -121,20 +114,17 @@ export function LoadTesting({
   }, [phase, targetRps, p99LatencyMs, errorRatePercent]);
 
   const startTest = () => {
-    if (phase !== "idle") return;
+    if (phase !== "idle" && phase !== "complete") return;
     reset();
-    // Small delay to reset state before starting
     setTimeout(() => {
       phaseRef.current = "ramping";
       setPhase("ramping");
-    }, 50);
+    }, 100);
   };
 
-  // Derived display values
   const latencyPct = Math.min(100, (currentLatency / (p99LatencyMs * 1.2)) * 100);
   const errorPct = Math.min(100, (currentError / (errorRatePercent * 1.5)) * 100);
   const throughputPct = Math.min(100, (currentRps / targetRps) * 100);
-
   const peakRps = Math.max(...rpsData.map((d) => d.rps));
 
   const W = 340;
@@ -151,36 +141,33 @@ export function LoadTesting({
 
   return (
     <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden w-full max-w-lg">
-      {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-100 dark:border-zinc-800">
-        <div className="flex items-center gap-2">
-          <Activity className="w-4 h-4 text-zinc-500 dark:text-zinc-400" />
-          <span className="font-semibold text-sm text-zinc-800 dark:text-zinc-100">Load Test</span>
-          <span className="text-xs text-zinc-400 dark:text-zinc-500 font-mono">{service}</span>
-        </div>
-        <div className="flex items-center gap-2">
-          {phase === "ramping" && (
-            <span className="flex items-center gap-1 text-xs font-medium text-blue-500 dark:text-blue-400">
-              <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" /> Running
-            </span>
-          )}
-          {phase === "degrading" && (
-            <span className="flex items-center gap-1 text-xs font-medium text-amber-500">
-              <AlertTriangle className="w-3 h-3" /> Errors found
-            </span>
-          )}
-          {phase === "complete" && (
-            <span className="flex items-center gap-1 text-xs font-medium text-emerald-600 dark:text-emerald-400">
-              <CheckCircle className="w-3 h-3" /> Done
-            </span>
-          )}
-        </div>
+      <div className="flex items-center gap-3 px-4 h-12 border-b border-zinc-100 dark:border-zinc-800">
+        <Activity className="size-4 text-zinc-400 shrink-0" />
+        <span className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 flex-1">Load Test</span>
+        {phase === "ramping" && (
+          <span className="flex items-center gap-1 text-[10px] font-semibold text-blue-500 dark:text-blue-400">
+            <span className="size-2 rounded-full bg-blue-500 animate-pulse" />
+            Running
+          </span>
+        )}
+        {phase === "degrading" && (
+          <span className="flex items-center gap-1 text-[10px] font-semibold text-amber-500">
+            <AlertTriangle className="size-3" /> Errors
+          </span>
+        )}
+        {phase === "complete" && (
+          <span className="flex items-center gap-1 text-[10px] font-semibold text-emerald-600 dark:text-emerald-400">
+            <CheckCircle className="size-3" /> Done
+          </span>
+        )}
       </div>
 
-      <div className="px-4 pt-4 min-h-[260px]">
-        {/* RPS Chart */}
+      <p className="text-sm text-zinc-500 dark:text-zinc-400 px-4 py-2 border-b border-zinc-100 dark:border-zinc-800">
+        Simulate heavy traffic against <span className="font-mono text-xs">{service}</span> — ramp {rampDurationSec}s to {targetRps} RPS.
+      </p>
+
+      <div className="px-4 py-4 min-h-[280px] flex flex-col">
         <div className="flex gap-2 mb-3">
-          {/* Y axis */}
           <div
             className="flex flex-col justify-between text-[10px] text-zinc-400 dark:text-zinc-500 font-mono w-10 text-right"
             style={{ height: H }}
@@ -190,8 +177,7 @@ export function LoadTesting({
             <span>0</span>
           </div>
 
-          {/* SVG */}
-          <div className="flex-1">
+          <div className="flex-1 border border-zinc-100 dark:border-zinc-800 rounded-lg p-1 bg-zinc-50 dark:bg-zinc-800/50">
             <svg
               viewBox={`0 0 ${W} ${H}`}
               width="100%"
@@ -199,16 +185,14 @@ export function LoadTesting({
               preserveAspectRatio="none"
               className="overflow-visible"
             >
-              {/* Grid */}
               {[0, 0.5, 1].map((f) => (
                 <line
                   key={f}
                   x1={0} y1={H * f} x2={W} y2={H * f}
                   stroke="currentColor" strokeWidth={0.5}
-                  className="text-zinc-100 dark:text-zinc-800"
+                  className="text-zinc-200 dark:text-zinc-700"
                 />
               ))}
-              {/* Phase fill regions */}
               {polyPoints && (
                 <>
                   <polyline
@@ -223,11 +207,10 @@ export function LoadTesting({
                     strokeWidth={2.5}
                     strokeLinecap="round"
                     strokeLinejoin="round"
-                    className="transition-all duration-300"
+                    className="transition-all duration-500"
                   />
                 </>
               )}
-              {/* Current dot */}
               {rpsData.length >= 2 && (() => {
                 const last = rpsData[rpsData.length - 1]!;
                 const x = W;
@@ -237,16 +220,14 @@ export function LoadTesting({
                 );
               })()}
             </svg>
-            <div className="flex justify-between text-[10px] text-zinc-400 dark:text-zinc-500 font-mono mt-1">
+            <div className="flex justify-between text-[10px] text-zinc-400 dark:text-zinc-500 font-mono mt-1 px-1">
               <span>0s</span>
               <span>now</span>
             </div>
           </div>
         </div>
 
-        {/* Metric bars */}
-        <div className="space-y-2 mt-2">
-          {/* Latency */}
+        <div className="space-y-2 mt-2 border border-zinc-100 dark:border-zinc-800 rounded-lg p-3">
           <div className="flex items-center gap-2">
             <span className="text-xs text-zinc-500 dark:text-zinc-400 w-28 shrink-0">Latency (p99)</span>
             <div className="flex-1 h-2 rounded-full bg-zinc-100 dark:bg-zinc-800 overflow-hidden">
@@ -260,7 +241,6 @@ export function LoadTesting({
             </span>
           </div>
 
-          {/* Error rate */}
           <div className="flex items-center gap-2">
             <span className="text-xs text-zinc-500 dark:text-zinc-400 w-28 shrink-0">Error Rate</span>
             <div className="flex-1 h-2 rounded-full bg-zinc-100 dark:bg-zinc-800 overflow-hidden">
@@ -274,7 +254,6 @@ export function LoadTesting({
             </span>
           </div>
 
-          {/* Throughput */}
           <div className="flex items-center gap-2">
             <span className="text-xs text-zinc-500 dark:text-zinc-400 w-28 shrink-0">Throughput</span>
             <div className="flex-1 h-2 rounded-full bg-zinc-100 dark:bg-zinc-800 overflow-hidden">
@@ -289,42 +268,43 @@ export function LoadTesting({
           </div>
         </div>
 
-        {/* Summary card (shown when complete) */}
-        {phase === "complete" && (
-          <div className="mt-3 bg-zinc-50 dark:bg-zinc-800 rounded-lg px-4 py-3 flex items-center gap-4 text-xs font-mono transition-all duration-500">
-            <span className="text-zinc-500 dark:text-zinc-400">Peak</span>
-            <span className="font-semibold text-zinc-800 dark:text-zinc-100">{peakRps} RPS</span>
-            <span className="text-zinc-400">·</span>
-            <span className="text-zinc-500 dark:text-zinc-400">p99</span>
-            <span className="font-semibold text-amber-600 dark:text-amber-400">{p99LatencyMs}ms</span>
-            <span className="text-zinc-400">·</span>
-            <span className="text-zinc-500 dark:text-zinc-400">Errors</span>
-            <span className="font-semibold text-red-500">{errorRatePercent}%</span>
-          </div>
-        )}
-
-        {/* Footer */}
-        <div className="flex items-center justify-between mt-3 mb-3">
-          <span className={`text-xs font-medium ${phaseColor[phase]}`}>
-            Phase: {PHASE_LABELS[phase]}
-          </span>
-          <div className="flex gap-2">
-            {(phase === "idle" || phase === "complete") && (
-              <button
-                onClick={startTest}
-                className="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-opacity"
-              >
-                Start Test
-              </button>
-            )}
-            <button
-              onClick={reset}
-              className="flex items-center gap-1 border border-zinc-200 dark:border-zinc-700 rounded-lg px-3 py-2 text-xs font-medium text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors"
-            >
-              <RefreshCw className="w-3 h-3" /> Reset
-            </button>
-          </div>
+        <div
+          className={cn(
+            "mt-3 h-12 rounded-lg px-4 flex items-center gap-4 text-xs font-mono transition-all duration-500 border",
+            phase === "complete"
+              ? "bg-zinc-50 dark:bg-zinc-800/50 border-zinc-200 dark:border-zinc-700 opacity-100"
+              : "bg-transparent border-transparent opacity-0"
+          )}
+        >
+          <span className="text-zinc-500 dark:text-zinc-400">Peak</span>
+          <span className="font-semibold text-zinc-800 dark:text-zinc-100">{peakRps} RPS</span>
+          <span className="text-zinc-400">·</span>
+          <span className="text-zinc-500 dark:text-zinc-400">p99</span>
+          <span className="font-semibold text-amber-600 dark:text-amber-400">{p99LatencyMs}ms</span>
+          <span className="text-zinc-400">·</span>
+          <span className="text-zinc-500 dark:text-zinc-400">Errors</span>
+          <span className="font-semibold text-red-500">{errorRatePercent}%</span>
         </div>
+      </div>
+
+      <div className="px-4 py-3 border-t border-zinc-100 dark:border-zinc-800 flex items-center gap-3">
+        <span className={cn("text-sm flex-1 transition-all duration-500", phaseColor[phase])}>
+          {PHASE_LABELS[phase]}
+        </span>
+        <button
+          onClick={reset}
+          className="flex items-center gap-1 border border-zinc-200 dark:border-zinc-700 rounded-lg px-3 py-2 text-xs font-medium text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all duration-500"
+        >
+          <RefreshCw className="size-3" /> Reset
+        </button>
+        {(phase === "idle" || phase === "complete") && (
+          <button
+            onClick={startTest}
+            className="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-opacity shrink-0"
+          >
+            Start Test
+          </button>
+        )}
       </div>
     </div>
   );

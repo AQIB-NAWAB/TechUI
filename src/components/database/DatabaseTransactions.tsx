@@ -138,7 +138,7 @@ export function DatabaseTransactions({
     }
     intervalRef.current = setTimeout(() => {
       setCurrentStep((s) => s + 1);
-    }, 900);
+    }, 1200);
     return () => { if (intervalRef.current) clearTimeout(intervalRef.current); };
   }, [running, currentStep, steps.length]);
 
@@ -157,14 +157,20 @@ export function DatabaseTransactions({
   return (
     <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden">
       {/* Header */}
-      <div className="flex items-center gap-2.5 px-4 py-2.5 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50">
-        <Database className="size-3.5 text-zinc-400 shrink-0" />
-        <span className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 flex-1">
+      <div className="flex items-center gap-2.5 px-4 h-12 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50">
+        <Database className="size-4 text-zinc-400 shrink-0" />
+        <span className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 flex-1">
           {tableName} — ACID Transactions
         </span>
-        <button onClick={reset} className="p-1 rounded text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors">
+        <button onClick={reset} className="p-1 rounded text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-all duration-500">
           <RefreshCw className="size-3.5" />
         </button>
+      </div>
+
+      <div className="px-4 py-2 border-b border-zinc-100 dark:border-zinc-800">
+        <p className="text-sm text-zinc-500 dark:text-zinc-400">
+          A transaction groups multiple changes into one unit — they all succeed together or none do.
+        </p>
       </div>
 
       {/* Scenario tabs */}
@@ -174,7 +180,7 @@ export function DatabaseTransactions({
             key={key}
             onClick={() => setScenario(key)}
             className={cn(
-              "px-3 py-1 rounded-md text-xs font-semibold transition-all duration-200",
+              "px-3 py-1 rounded-md text-xs font-semibold transition-all duration-500",
               scenario === key
                 ? key === "partial-failure"
                   ? "bg-red-600 text-white"
@@ -239,7 +245,7 @@ export function DatabaseTransactions({
             onClick={startRun}
             disabled={running}
             className={cn(
-              "flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200",
+              "flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-500",
               running
                 ? "bg-zinc-200 dark:bg-zinc-800 text-zinc-400 cursor-not-allowed"
                 : "bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 hover:opacity-90"
@@ -341,18 +347,20 @@ export function DatabaseTransactions({
               </div>
             </div>
 
-            {/* Outcome message */}
-            {currentStep === steps.length - 1 && (
-              <div className={cn("rounded-lg border px-3 py-2 text-xs font-semibold flex items-center gap-2 transition-all duration-500", finalOutcome.bg)}>
-                {scenario === "partial-failure"
-                  ? <AlertTriangle className="size-3.5 shrink-0 text-red-500" />
-                  : scenario === "rollback"
-                  ? <CheckCircle2 className="size-3.5 shrink-0 text-blue-500" />
-                  : <CheckCircle2 className="size-3.5 shrink-0 text-emerald-500" />
-                }
-                <span className={finalOutcome.color}>{finalOutcome.label}</span>
-              </div>
-            )}
+            {/* Outcome message — fixed height slot */}
+            <div className="min-h-[44px] flex items-center">
+              {currentStep === steps.length - 1 && (
+                <div className={cn("w-full rounded-lg border px-3 py-2 text-xs font-semibold flex items-center gap-2 transition-all duration-500", finalOutcome.bg)}>
+                  {scenario === "partial-failure"
+                    ? <AlertTriangle className="size-3.5 shrink-0 text-red-500" />
+                    : scenario === "rollback"
+                    ? <CheckCircle2 className="size-3.5 shrink-0 text-blue-500" />
+                    : <CheckCircle2 className="size-3.5 shrink-0 text-emerald-500" />
+                  }
+                  <span className={finalOutcome.color}>{finalOutcome.label}</span>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>

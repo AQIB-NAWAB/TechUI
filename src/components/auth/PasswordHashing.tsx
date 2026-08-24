@@ -161,10 +161,10 @@ export function PasswordHashing({
   return (
     <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden">
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-2.5 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/60">
+      <div className="h-12 px-4 flex items-center justify-between border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/60">
         <div className="flex items-center gap-2">
           <Lock className="size-3.5 text-zinc-500 dark:text-zinc-400 shrink-0" />
-          <span className="text-xs font-semibold text-zinc-700 dark:text-zinc-200">Password Hashing</span>
+          <span className="text-sm font-semibold text-zinc-800 dark:text-zinc-200">Password Hashing</span>
         </div>
         <span className="text-[10px] font-mono text-zinc-400 dark:text-zinc-500 bg-zinc-100 dark:bg-zinc-800 rounded px-1.5 py-0.5">
           {algorithm}
@@ -178,7 +178,7 @@ export function PasswordHashing({
             key={tab.id}
             onClick={() => handleAlgoChange(tab.id)}
             className={cn(
-              "px-4 py-2 text-xs font-semibold transition-all duration-200 border-b-2",
+              "px-4 py-2 text-xs font-semibold transition-all duration-500 border-b-2",
               algorithm === tab.id
                 ? "border-zinc-900 dark:border-white text-zinc-900 dark:text-white bg-white dark:bg-zinc-900"
                 : "border-transparent text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200"

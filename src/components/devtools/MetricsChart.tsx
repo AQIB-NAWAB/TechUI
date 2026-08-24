@@ -58,7 +58,6 @@ function buildPath(data: number[], min: number, max: number, w: number, h: numbe
     y: h - ((v - min) / range) * h,
   }));
 
-  // Smooth via bezier control points
   let d = `M ${pts[0]!.x},${pts[0]!.y}`;
   for (let i = 1; i < pts.length; i++) {
     const prev = pts[i - 1]!;
@@ -101,47 +100,48 @@ export function MetricsChart({
 
   const W = 400;
   const H = height;
-
   const gridLines = 4;
-  const gridYs = Array.from({ length: gridLines }, (_, i) =>
-    H - (i / (gridLines - 1)) * H
-  );
+  const gridYs = Array.from({ length: gridLines }, (_, i) => H - (i / (gridLines - 1)) * H);
+
+  if (compact) {
+    return (
+      <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden">
+        <div className={cn("flex items-center gap-1.5 text-xs font-semibold px-3 py-2", COLOR_CFG[defaultColor].text)}>
+          {trendIcon}
+          <span className="font-mono">{primaryStats.last.toFixed(1)}{unit}</span>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 overflow-hidden">
-      {/* Header */}
-      {!compact && (
-        <div className="flex items-center gap-3 px-4 py-2.5 border-b border-zinc-100 dark:border-zinc-900 bg-zinc-50 dark:bg-zinc-900/50">
-          <Activity className="size-3.5 text-zinc-400 shrink-0" />
-          <span className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 flex-1">{title}</span>
-          {showStats && (
-            <div className={cn("flex items-center gap-1.5 text-xs font-semibold", COLOR_CFG[defaultColor].text)}>
-              {trendIcon}
-              <span className="font-mono">{primaryStats.last.toFixed(1)}{unit}</span>
-            </div>
-          )}
-        </div>
-      )}
+    <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden">
+      <div className="flex items-center gap-3 px-4 h-12 border-b border-zinc-100 dark:border-zinc-800">
+        <Activity className="size-4 text-zinc-400 shrink-0" />
+        <span className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 flex-1">{title}</span>
+        {showStats && (
+          <div className={cn("flex items-center gap-1.5 text-xs font-semibold", COLOR_CFG[defaultColor].text)}>
+            {trendIcon}
+            <span className="font-mono">{primaryStats.last.toFixed(1)}{unit}</span>
+          </div>
+        )}
+      </div>
 
-      {/* Chart */}
-      <div className="relative px-4 pt-3 pb-2">
+      <p className="text-sm text-zinc-500 px-4 py-2 border-b border-zinc-100 dark:border-zinc-800">
+        Time-series metrics — track latency, throughput, or any numeric signal over time.
+      </p>
+
+      <div className="min-h-[220px] relative px-4 pt-3 pb-2">
         <svg
-          viewBox={`0 0 ${W} ${H}`}
+          viewBox={`0 0 ${W} ${H + 40}`}
           className="w-full overflow-visible"
-          style={{ height }}
+          style={{ height: height + 40 }}
           preserveAspectRatio="none"
         >
-          {/* Grid lines */}
           {showGrid && gridYs.map((y, i) => (
-            <line
-              key={i}
-              x1={0} y1={y} x2={W} y2={y}
-              className="stroke-zinc-100 dark:stroke-zinc-900"
-              strokeWidth={1}
-            />
+            <line key={i} x1={0} y1={y} x2={W} y2={y} className="stroke-zinc-100 dark:stroke-zinc-800" strokeWidth={1} />
           ))}
 
-          {/* Series */}
           {series.map((s, si) => {
             const col = COLOR_CFG[(s.color ?? defaultColor) as ColorKey];
             const linePath = buildPath(s.data, yMin, yMax, W, H);
@@ -151,9 +151,7 @@ export function MetricsChart({
 
             return (
               <g key={si}>
-                {/* Area fill */}
                 <path d={areaPath} className={col.fill} />
-                {/* Line */}
                 <path
                   d={linePath}
                   fill="none"
@@ -163,7 +161,6 @@ export function MetricsChart({
                   strokeLinejoin="round"
                   opacity={si === 0 ? 1 : 0.7}
                 />
-                {/* Dots */}
                 {showDots && s.data.map((v, i) => (
                   <circle
                     key={i}
@@ -178,7 +175,6 @@ export function MetricsChart({
           })}
         </svg>
 
-        {/* Y-axis labels */}
         <div className="absolute left-0 inset-y-3 flex flex-col justify-between pointer-events-none pl-1">
           {[yMax, (yMax + yMin) / 2, yMin].map((v, i) => (
             <span key={i} className="text-[9px] font-mono text-zinc-300 dark:text-zinc-700">
@@ -188,7 +184,6 @@ export function MetricsChart({
         </div>
       </div>
 
-      {/* X labels */}
       {labels && labels.length > 0 && (
         <div className="flex justify-between px-4 pb-2">
           {[labels[0], labels[Math.floor(labels.length / 2)], labels[labels.length - 1]].map((l, i) => (
@@ -197,9 +192,8 @@ export function MetricsChart({
         </div>
       )}
 
-      {/* Stats + Legend */}
-      {(showStats || showLegend) && !compact && (
-        <div className="border-t border-zinc-50 dark:border-zinc-900 px-4 py-2.5 flex items-center gap-4 flex-wrap">
+      {(showStats || showLegend) && (
+        <div className="border-t border-zinc-100 dark:border-zinc-800 px-4 py-3 flex items-center gap-4 flex-wrap">
           {showStats && (
             <>
               <StatPill label="avg" value={`${primaryStats.avg.toFixed(1)}${unit}`} />
@@ -229,8 +223,8 @@ export function MetricsChart({
 
 function StatPill({ label, value }: { label: string; value: string }) {
   return (
-    <div className="text-[10px]">
-      <span className="text-zinc-400 dark:text-zinc-600">{label} </span>
+    <div className="text-[10px] bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-100 dark:border-zinc-800 rounded-md px-2 py-1">
+      <span className="text-zinc-400 font-semibold uppercase tracking-widest">{label} </span>
       <span className="font-mono font-semibold text-zinc-600 dark:text-zinc-400">{value}</span>
     </div>
   );

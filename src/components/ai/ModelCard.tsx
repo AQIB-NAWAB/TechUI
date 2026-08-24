@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { z } from "zod";
 import { cn } from "@/lib/utils";
-import { ArrowRight, ChevronDown } from "lucide-react";
+import { ArrowRight, ChevronDown, Brain } from "lucide-react";
 
 const MetricSchema = z.object({
   name: z.string(),
@@ -74,17 +74,20 @@ export function ModelCard({
   metrics,
   inputModalities = ["text"],
   outputModalities = ["text"],
+  intendedUse,
+  limitations,
 }: ModelCardProps) {
   const [showDetails, setShowDetails] = useState(false);
   const tc = TASK_CFG[task] ?? TASK_CFG["text-generation"]!;
   const numBlocks = parameters ? paramToBlocks(parameters) : 3;
+  const typicalPromptPct = contextLength ? Math.min(100, (2000 / contextLength) * 100) : 0;
 
   return (
-    <div className="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 overflow-hidden text-sm">
+    <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden text-sm">
 
-      {/* Header */}
-      <div className="px-4 py-3 border-b border-zinc-100 dark:border-zinc-900">
+      <div className="px-4 py-3 border-b border-zinc-100 dark:border-zinc-800">
         <div className="flex items-center gap-2 flex-wrap">
+          <Brain className="size-4 text-violet-500 shrink-0" />
           <h2 className="text-sm font-semibold font-mono text-zinc-900 dark:text-zinc-100 flex-1 truncate">{name}</h2>
           {version && (
             <span className="text-[10px] font-mono text-zinc-400 border border-zinc-200 dark:border-zinc-700 px-1.5 py-0.5 rounded shrink-0">
@@ -109,14 +112,12 @@ export function ModelCard({
         </div>
       </div>
 
-      {/* Architecture visual */}
-      <div className="px-4 py-4 border-b border-zinc-100 dark:border-zinc-900">
-        <div className="text-[10px] font-semibold text-zinc-400 uppercase tracking-widest mb-3">Architecture</div>
-        <div className="flex items-center gap-2 flex-wrap">
-          {/* Input */}
+      <div className="px-4 py-4 border-b border-zinc-100 dark:border-zinc-800 min-h-[140px]">
+        <div className="text-[10px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500 mb-3">Architecture</div>
+        <div className="flex items-center justify-center gap-2 flex-wrap border border-zinc-100 dark:border-zinc-800 rounded-lg p-4 bg-zinc-50 dark:bg-zinc-800/50">
           <div className="flex flex-col items-center gap-1">
-            <div className="px-2 py-1.5 rounded-lg border border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-950/30 text-[10px] font-semibold text-blue-700 dark:text-blue-400">
-              Input tokens
+            <div className="px-2.5 py-2 rounded-lg border border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-950/30 text-[10px] font-semibold text-blue-700 dark:text-blue-400">
+              Input
             </div>
             <div className="flex gap-0.5">
               {inputModalities.map((m) => (
@@ -127,28 +128,28 @@ export function ModelCard({
 
           <ArrowRight className="size-4 text-zinc-300 dark:text-zinc-600 shrink-0" />
 
-          {/* Transformer blocks */}
-          <div className="flex items-center gap-1">
-            {Array.from({ length: numBlocks }).map((_, i) => (
-              <div
-                key={i}
-                className="flex flex-col items-center gap-0.5"
-                style={{ opacity: 1 - i * (0.08) }}
-              >
-                <div className="w-8 h-10 rounded border-2 border-violet-300 dark:border-violet-700 bg-violet-50 dark:bg-violet-950/40 flex items-center justify-center">
-                  <span className="text-[8px] font-bold text-violet-600 dark:text-violet-400 rotate-90 whitespace-nowrap">Layer</span>
+          <div className="flex flex-col items-center gap-1">
+            <div className="flex items-end gap-0.5">
+              {Array.from({ length: numBlocks }).map((_, i) => (
+                <div
+                  key={i}
+                  className="w-6 rounded-sm border border-violet-300 dark:border-violet-700 bg-violet-100 dark:bg-violet-950/50 flex flex-col items-center justify-end overflow-hidden"
+                  style={{ height: `${28 + i * 4}px`, opacity: 1 - i * 0.08 }}
+                >
+                  <div className="w-full h-1 bg-violet-400/40 dark:bg-violet-600/40" />
+                  <div className="w-full h-1 bg-violet-300/30 dark:bg-violet-700/30 mt-px" />
+                  <span className="text-[7px] font-bold text-violet-600 dark:text-violet-400 py-0.5">T</span>
                 </div>
-              </div>
-            ))}
-            <span className="text-[10px] text-zinc-400 ml-1">×{numBlocks > 3 ? "32+" : "12+"}</span>
+              ))}
+            </div>
+            <span className="text-[9px] text-zinc-400 font-mono">×{numBlocks > 3 ? "32" : "12"} layers</span>
           </div>
 
           <ArrowRight className="size-4 text-zinc-300 dark:text-zinc-600 shrink-0" />
 
-          {/* Output */}
           <div className="flex flex-col items-center gap-1">
-            <div className="px-2 py-1.5 rounded-lg border border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/30 text-[10px] font-semibold text-emerald-700 dark:text-emerald-400">
-              Output tokens
+            <div className="px-2.5 py-2 rounded-lg border border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/30 text-[10px] font-semibold text-emerald-700 dark:text-emerald-400">
+              Output
             </div>
             <div className="flex gap-0.5">
               {outputModalities.map((m) => (
@@ -157,34 +158,39 @@ export function ModelCard({
             </div>
           </div>
         </div>
-
-        <div className="mt-2 text-[10px] text-zinc-400 font-mono">{architecture}</div>
+        <div className="mt-2 text-[10px] text-zinc-400 font-mono text-center">{architecture}</div>
       </div>
 
-      {/* Context window */}
-      {showDetails && contextLength && (
-        <div className="px-4 py-3 border-b border-zinc-100 dark:border-zinc-900 transition-all duration-500">
-          <div className="text-[10px] font-semibold text-zinc-400 uppercase tracking-widest mb-2">Context Window</div>
-          <div className="h-3 rounded-full bg-zinc-100 dark:bg-zinc-800 overflow-hidden relative">
-            {/* Your typical prompt (~2K tokens) */}
+      {contextLength && (
+        <div className="px-4 py-3 border-b border-zinc-100 dark:border-zinc-800">
+          <div className="text-[10px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500 mb-2">Context Window</div>
+          <div className="relative h-4 rounded-full bg-zinc-100 dark:bg-zinc-800 overflow-hidden border border-zinc-200 dark:border-zinc-700">
+            <div className="absolute inset-0 flex">
+              {[...Array(8)].map((_, i) => (
+                <div key={i} className="flex-1 border-r border-zinc-200/50 dark:border-zinc-700/50 last:border-r-0" />
+              ))}
+            </div>
             <div
-              className="absolute h-full rounded-full bg-blue-500"
-              style={{ width: `${Math.min(100, (2000 / contextLength) * 100)}%` }}
+              className="absolute h-full rounded-full bg-blue-500 transition-all duration-700"
+              style={{ width: `${typicalPromptPct}%` }}
+            />
+            <div
+              className="absolute top-0 bottom-0 w-px bg-blue-700 dark:bg-blue-300 transition-all duration-700"
+              style={{ left: `${typicalPromptPct}%` }}
             />
           </div>
           <div className="flex items-center justify-between mt-1.5 text-[10px]">
             <span className="text-blue-500 dark:text-blue-400">Typical prompt (~2K tokens)</span>
-            <span className="font-mono font-semibold text-zinc-600 dark:text-zinc-400">{contextLength.toLocaleString()} tokens max</span>
+            <span className="font-mono font-semibold text-zinc-600 dark:text-zinc-400">{contextLength.toLocaleString()} max</span>
           </div>
         </div>
       )}
 
-      {/* Benchmark bars */}
-      {showDetails && metrics && metrics.length > 0 && (
-        <div className="px-4 py-3 border-b border-zinc-100 dark:border-zinc-900 transition-all duration-500">
-          <div className="text-[10px] font-semibold text-zinc-400 uppercase tracking-widest mb-3">Benchmarks</div>
+      {metrics && metrics.length > 0 && (
+        <div className="px-4 py-3 border-b border-zinc-100 dark:border-zinc-800">
+          <div className="text-[10px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500 mb-3">Benchmarks</div>
           <div className="space-y-2.5">
-            {metrics.map((m, i) => {
+            {metrics.slice(0, showDetails ? metrics.length : 3).map((m, i) => {
               const pct = parseMetricValue(m.value);
               return (
                 <div key={i}>
@@ -195,7 +201,7 @@ export function ModelCard({
                     </div>
                     <span className="text-[11px] font-semibold font-mono text-zinc-800 dark:text-zinc-200">{m.value}</span>
                   </div>
-                  <div className="h-1.5 rounded-full bg-zinc-100 dark:bg-zinc-800 overflow-hidden">
+                  <div className="h-2 rounded-full bg-zinc-100 dark:bg-zinc-800 overflow-hidden">
                     <div
                       className="h-full rounded-full bg-violet-500 transition-all duration-700"
                       style={{ width: `${pct}%` }}
@@ -208,8 +214,18 @@ export function ModelCard({
         </div>
       )}
 
-      {/* Footer */}
-      <div className="px-4 py-2 flex items-center gap-3 text-[10px] text-zinc-400 flex-wrap">
+      {showDetails && (intendedUse || limitations) && (
+        <div className="px-4 py-3 border-b border-zinc-100 dark:border-zinc-800 space-y-2 transition-all duration-500">
+          {intendedUse && (
+            <p className="text-[11px] text-zinc-600 dark:text-zinc-400 leading-relaxed">{intendedUse}</p>
+          )}
+          {limitations && (
+            <p className="text-[11px] text-amber-700 dark:text-amber-400 leading-relaxed">{limitations}</p>
+          )}
+        </div>
+      )}
+
+      <div className="px-4 py-3 flex items-center gap-3 text-[10px] text-zinc-400 flex-wrap">
         {languages && languages.length > 0 && (
           <span>Languages: {languages.slice(0, 3).join(", ")}{languages.length > 3 ? ` +${languages.length - 3}` : ""}</span>
         )}

@@ -179,7 +179,7 @@ export function JwtFlow({
         <button
           onClick={() => setStepIdx((s) => Math.max(0, s - 1))}
           disabled={stepIdx === 0}
-          className="text-[11px] px-2.5 py-1.5 rounded-lg border border-zinc-200 dark:border-zinc-700 text-zinc-500 disabled:opacity-30 hover:border-zinc-300 dark:hover:border-zinc-600 transition-all duration-300"
+          className="text-[11px] px-2.5 py-1.5 rounded-lg border border-zinc-200 dark:border-zinc-700 text-zinc-500 disabled:opacity-30 hover:border-zinc-300 dark:hover:border-zinc-600 transition-all duration-500"
         >
           Back
         </button>
@@ -200,14 +200,14 @@ export function JwtFlow({
         {!isLastStep ? (
           <button
             onClick={() => setStepIdx((s) => Math.min(STEPS.length - 1, s + 1))}
-            className="text-[11px] px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium transition-all duration-300 flex items-center gap-1"
+            className="text-[11px] px-3 py-1.5 rounded-lg bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 font-semibold hover:opacity-90 transition-all duration-500 flex items-center gap-1"
           >
             Next <ArrowRight className="size-3" />
           </button>
         ) : (
           <button
             onClick={() => setStepIdx(0)}
-            className="text-[11px] px-3 py-1.5 rounded-lg bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 font-semibold transition-all duration-300 flex items-center gap-1"
+            className="text-[11px] px-3 py-1.5 rounded-lg bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 font-semibold transition-all duration-500 flex items-center gap-1"
           >
             <CheckCircle2 className="size-3" /> Restart
           </button>

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { z } from "zod";
-import { Shield, CheckCircle, XCircle, AlertTriangle } from "lucide-react";
+import { Shield, CheckCircle, XCircle, AlertTriangle, Monitor, Lock } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export const CspHeadersSchema = z.object({
@@ -77,98 +77,96 @@ export function CspHeaders({
       setXssFlash(false);
       setXssDone(true);
     }, 1500);
-    setTimeout(() => setXssDone(false), 4000);
+    setTimeout(() => setXssDone(false), 5000);
   }
 
-  // Build formatted policy lines
-  const policyLines = policy
-    .split(";")
-    .map((s) => s.trim())
-    .filter(Boolean);
+  const policyLines = policy.split(";").map((s) => s.trim()).filter(Boolean);
 
   return (
     <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden">
-      {/* Header */}
-      <div className="flex items-center gap-2.5 px-4 h-11 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/60">
-        <Shield className="size-3.5 text-zinc-400 shrink-0" />
-        <span className="text-xs font-semibold text-zinc-800 dark:text-zinc-200 flex-1">
-          Content Security Policy
-        </span>
-        <span className="text-[10px] font-mono text-zinc-500 bg-zinc-100 dark:bg-zinc-800 px-2 py-0.5 rounded">
-          CSP Level 3
-        </span>
+      <div className="flex items-center gap-2.5 px-4 h-12 border-b border-zinc-100 dark:border-zinc-800">
+        <Shield className="size-4 text-zinc-400 shrink-0" />
+        <span className="text-sm font-semibold text-zinc-800 dark:text-zinc-200 flex-1">Content Security Policy</span>
+        <span className="text-[10px] font-mono text-zinc-500 bg-zinc-100 dark:bg-zinc-800 px-2 py-0.5 rounded">CSP Level 3</span>
       </div>
 
-      {/* Policy code box */}
-      <div className="px-4 pt-3 pb-2">
-        <div className="rounded-lg bg-zinc-950 dark:bg-zinc-950 border border-zinc-800 px-3 py-2.5 font-mono text-[11px] leading-relaxed">
-          <span className="text-zinc-500">Content-Security-Policy:</span>
-          {policyLines.map((line, i) => (
-            <div key={i} className="text-emerald-400 pl-4">
-              {line}
-              {i < policyLines.length - 1 ? ";" : ""}
-            </div>
-          ))}
+      <div className="text-sm text-zinc-500 dark:text-zinc-400 px-4 py-2 border-b border-zinc-100 dark:border-zinc-800">
+        CSP tells the browser which scripts, styles, and resources are allowed to load.
+      </div>
+
+      <div className="min-h-[280px] flex flex-col">
+        <div className="px-4 pt-3 pb-2">
+          <div className="rounded-lg bg-zinc-950 border border-zinc-800 px-3 py-2.5 font-mono text-[11px] leading-relaxed">
+            <span className="text-zinc-500">Content-Security-Policy:</span>
+            {policyLines.map((line, i) => (
+              <div key={i} className="text-emerald-400 pl-4">{line}{i < policyLines.length - 1 ? ";" : ""}</div>
+            ))}
+          </div>
         </div>
-      </div>
 
-      {/* Directive pills */}
-      <div className="px-4 pt-1 pb-2">
-        <p className="text-[10px] text-zinc-400 mb-2">Click a directive to see what it controls</p>
-        <div className="flex flex-wrap gap-1.5">
-          {directives.map((d, i) => (
-            <button
-              key={d.name}
-              onClick={() => setSelected(i)}
-              className={cn(
-                "px-2.5 py-1 rounded-md text-[11px] font-mono font-medium transition-all duration-500 border",
-                selected === i
-                  ? "bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 border-zinc-900 dark:border-white"
-                  : "bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 border-zinc-200 dark:border-zinc-700 hover:border-zinc-400 dark:hover:border-zinc-500"
-              )}
-            >
-              {d.name}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Selected directive detail — fixed height, no layout shift */}
-      <div className="px-4 pb-3 min-h-[148px]">
-        {activeDirective && (
-          <div className="rounded-lg border border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/40 p-3 transition-all duration-500">
-            <div className="flex items-start justify-between gap-2 mb-2">
-              <div>
-                <span className="font-mono text-xs font-bold text-zinc-800 dark:text-zinc-100">
-                  {activeDirective.name}
-                </span>
-                <span className="font-mono text-xs text-blue-600 dark:text-blue-400 ml-2">
-                  {activeDirective.value}
-                </span>
-              </div>
-            </div>
-            <p className="text-xs text-zinc-500 dark:text-zinc-400 mb-2">{activeDirective.description}</p>
-            <div className="flex gap-4">
-              <div className="flex-1 space-y-1">
-                {activeDirective.allows?.map((a) => (
-                  <div key={a} className="flex items-center gap-1.5 text-[11px] text-emerald-700 dark:text-emerald-400">
-                    <CheckCircle className="size-3 shrink-0" />
-                    {a}
-                  </div>
-                ))}
-                {(!activeDirective.allows || activeDirective.allows.length === 0) && (
-                  <div className="text-[11px] text-zinc-400 italic">No explicit allows</div>
+        <div className="px-4 pb-2">
+          <p className="text-[10px] text-zinc-400 mb-2">Click a directive to see what it controls</p>
+          <div className="flex flex-wrap gap-1.5">
+            {directives.map((d, i) => (
+              <button
+                key={d.name}
+                onClick={() => setSelected(i)}
+                className={cn(
+                  "px-2.5 py-1 rounded-md text-[11px] font-mono font-medium transition-all duration-500 border",
+                  selected === i
+                    ? "bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 border-zinc-900 dark:border-white"
+                    : "bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 border-zinc-200 dark:border-zinc-700"
                 )}
+              >
+                {d.name}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="px-4 pb-3 flex-1">
+          {activeDirective && (
+            <div className="rounded-lg border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800/40 p-3 min-h-[120px] transition-all duration-500">
+              <div className="mb-2">
+                <span className="font-mono text-xs font-bold text-zinc-800 dark:text-zinc-100">{activeDirective.name}</span>
+                <span className="font-mono text-xs text-blue-600 dark:text-blue-400 ml-2">{activeDirective.value}</span>
               </div>
-              <div className="flex-1 space-y-1">
-                {activeDirective.blocks?.map((b) => (
-                  <div key={b} className="flex items-center gap-1.5 text-[11px] text-red-600 dark:text-red-400">
-                    <XCircle className="size-3 shrink-0" />
-                    {b}
-                  </div>
-                ))}
-                {(!activeDirective.blocks || activeDirective.blocks.length === 0) && (
-                  <div className="text-[11px] text-zinc-400 italic">Nothing explicitly blocked</div>
+              <p className="text-xs text-zinc-500 dark:text-zinc-400 mb-2">{activeDirective.description}</p>
+              <div className="flex gap-4">
+                <div className="flex-1 space-y-1">
+                  {activeDirective.allows?.map((a) => (
+                    <div key={a} className="flex items-center gap-1.5 text-[11px] text-emerald-700 dark:text-emerald-400">
+                      <CheckCircle className="size-3 shrink-0" />{a}
+                    </div>
+                  ))}
+                </div>
+                <div className="flex-1 space-y-1">
+                  {activeDirective.blocks?.map((b) => (
+                    <div key={b} className="flex items-center gap-1.5 text-[11px] text-red-600 dark:text-red-400">
+                      <XCircle className="size-3 shrink-0" />{b}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {(xssFlash || xssDone) && (
+          <div className="px-4 pb-3">
+            <div className={cn(
+              "rounded-lg border px-3 py-2 flex items-center gap-2 transition-all duration-500",
+              xssFlash ? "bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-800" : "bg-emerald-50 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-800"
+            )}>
+              <Monitor className={cn("size-4 shrink-0", xssFlash ? "text-red-500" : "text-emerald-500")} />
+              <div className="font-mono text-[11px]">
+                {xssFlash ? (
+                  <span className="text-red-600 dark:text-red-400">
+                    <Lock className="size-3 inline mr-1" />
+                    Refused inline script — violates script-src
+                  </span>
+                ) : (
+                  <span className="text-emerald-600 dark:text-emerald-400">✓ CSP blocked the XSS attack</span>
                 )}
               </div>
             </div>
@@ -176,38 +174,21 @@ export function CspHeaders({
         )}
       </div>
 
-      {/* XSS simulation footer */}
-      <div className="px-4 pb-4 border-t border-zinc-100 dark:border-zinc-800 pt-3 flex items-center gap-3 min-h-[56px]">
+      <div className="px-4 py-3 border-t border-zinc-100 dark:border-zinc-800 flex items-center gap-3">
+        <span className="text-sm text-zinc-500 dark:text-zinc-400 flex-1">
+          {xssDone ? "Attack blocked — inline script never executed" : "Test whether CSP blocks a malicious inline script"}
+        </span>
         <button
           onClick={simulateXss}
           disabled={xssFlash}
           className={cn(
-            "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-500",
-            xssFlash
-              ? "bg-red-600 text-white opacity-90 cursor-wait"
-              : "bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 hover:opacity-90"
+            "flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-500",
+            xssFlash ? "bg-red-600 text-white opacity-90" : "bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 hover:opacity-90"
           )}
         >
-          <AlertTriangle className="size-3" />
-          {xssFlash ? "Blocked by CSP" : "Simulate XSS Attack"}
+          <AlertTriangle className="size-3.5" />
+          {xssFlash ? "Blocked!" : "Simulate XSS"}
         </button>
-
-        <div
-          className={cn(
-            "flex-1 font-mono text-[11px] transition-all duration-500",
-            xssFlash
-              ? "text-red-600 dark:text-red-400 opacity-100"
-              : xssDone
-              ? "text-emerald-600 dark:text-emerald-400 opacity-100"
-              : "opacity-0"
-          )}
-        >
-          {xssFlash
-            ? "Refused to execute inline script. Violates CSP directive: script-src 'self' cdn.example.com"
-            : xssDone
-            ? "✓ CSP blocked the attack — attacker's inline script was never executed"
-            : ""}
-        </div>
       </div>
     </div>
   );

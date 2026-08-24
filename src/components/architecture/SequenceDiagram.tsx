@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { z } from "zod";
 import { cn } from "@/lib/utils";
-import { Play, RotateCcw, Monitor, Server, Database, Globe, Mail } from "lucide-react";
+import { Play, RotateCcw, Monitor, Server, Database, Zap, Globe } from "lucide-react";
 
 export const SequenceDiagramSchema = z.object({
   title: z.string().optional(),
@@ -48,9 +48,8 @@ const PARTICIPANT_ICON: Record<string, React.ElementType> = {
   client:   Monitor,
   server:   Server,
   database: Database,
-  service:  Globe,
+  service:  Zap,
   external: Globe,
-  queue:    Mail,
 };
 
 export function SequenceDiagram({
@@ -84,7 +83,7 @@ export function SequenceDiagram({
       if (i < messages.length) setTimeout(tick, 1200);
       else setPlaying(false);
     };
-    setTimeout(tick, 400);
+    setTimeout(tick, 1200);
   }
 
   function reset() {

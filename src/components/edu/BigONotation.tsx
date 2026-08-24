@@ -90,13 +90,16 @@ export function BigONotation({
   return (
     <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden">
       {/* Header */}
-      <div className="flex items-center gap-3 px-4 h-12 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50">
+      <div className="flex items-center gap-3 px-4 h-12 border-b border-zinc-100 dark:border-zinc-800">
         <TrendingUp className="size-4 text-zinc-400 shrink-0" />
         <span className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 flex-1">Big-O Notation</span>
-        <span className="text-[10px] font-mono text-zinc-400">n = {inputSize}</span>
+        <span className="text-[10px] font-mono text-zinc-400 border border-zinc-200 dark:border-zinc-700 px-2 py-0.5 rounded">n = {inputSize}</span>
       </div>
 
-      {/* Complexity tabs */}
+      <p className="text-sm text-zinc-500 dark:text-zinc-400 px-4 py-2 border-b border-zinc-100 dark:border-zinc-800">
+        How runtime grows as input size increases — pick a complexity to compare.
+      </p>
+
       <div className="px-4 pt-3 pb-2 flex flex-wrap gap-1.5">
         {COMPLEXITIES.map((c) => {
           const colors = COLOR_CLASSES[c.color];
@@ -106,7 +109,7 @@ export function BigONotation({
               key={c.key}
               onClick={() => setSelected(c.key)}
               className={cn(
-                "px-2.5 py-1 rounded-lg border text-[11px] font-mono transition-all duration-300 cursor-pointer",
+                "px-2.5 py-1 rounded-lg border text-[11px] font-mono transition-all duration-500 cursor-pointer",
                 isActive ? colors.tabActive : colors.tab
               )}
             >
@@ -125,7 +128,7 @@ export function BigONotation({
               key={s}
               onClick={() => setInputSize(s)}
               className={cn(
-                "px-2.5 py-1 rounded-lg border text-[11px] font-mono transition-all duration-300 cursor-pointer",
+                "px-2.5 py-1 rounded-lg border text-[11px] font-mono transition-all duration-500 cursor-pointer",
                 inputSize === s
                   ? "bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 border-zinc-900 dark:border-white"
                   : "border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 hover:border-zinc-400 dark:hover:border-zinc-500"
@@ -138,7 +141,7 @@ export function BigONotation({
       </div>
 
       {/* Bar chart */}
-      <div className="min-h-[300px] px-4 pb-3 space-y-2">
+      <div className="min-h-[220px] px-4 pb-3 space-y-2">
         {COMPLEXITIES.map((c) => {
           const { ops: opCount } = ops.find((o) => o.key === c.key) ?? { ops: 1 };
           const colors = COLOR_CLASSES[c.color];
@@ -154,7 +157,7 @@ export function BigONotation({
               key={c.key}
               onClick={() => setSelected(c.key)}
               className={cn(
-                "cursor-pointer rounded-lg p-2.5 transition-all duration-300",
+                "cursor-pointer rounded-lg p-2.5 transition-all duration-500",
                 isSelected
                   ? "bg-zinc-50 dark:bg-zinc-800/60 ring-1 ring-zinc-200 dark:ring-zinc-700"
                   : "hover:bg-zinc-50 dark:hover:bg-zinc-800/30"
@@ -199,13 +202,18 @@ export function BigONotation({
             ))}
           </ul>
         </div>
+      </div>
 
-        {/* Key insight */}
-        <div className="text-[10px] text-zinc-400 dark:text-zinc-500 bg-zinc-50 dark:bg-zinc-800/40 rounded-lg px-3 py-2">
-          At n={inputSize.toLocaleString()}: O(1) always does <strong className="text-zinc-600 dark:text-zinc-400">1 op</strong>{" "}
-          while O(n²) does <strong className="text-red-500">{formatOps(inputSize * inputSize)} ops</strong>
-          {inputSize >= 1000 && " — 1,000,000x more work!"}
-        </div>
+      <div className="px-4 py-3 border-t border-zinc-100 dark:border-zinc-800 flex items-center gap-3">
+        <span className="text-sm text-zinc-500 dark:text-zinc-400 flex-1">
+          {selectedDef.label} — {selectedDef.desc}
+        </span>
+        <button
+          onClick={() => setInputSize(inputSize >= 1000 ? 10 : inputSize >= 100 ? 1000 : 100)}
+          className="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-opacity shrink-0"
+        >
+          Try n={inputSize >= 1000 ? 10 : inputSize >= 100 ? 1000 : 100}
+        </button>
       </div>
     </div>
   );

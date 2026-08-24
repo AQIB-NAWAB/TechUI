@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { z } from "zod";
 import { cn } from "@/lib/utils";
-import { ChevronRight, ChevronDown, Folder, FolderOpen, FileText } from "lucide-react";
+import { ChevronRight, ChevronDown, Folder, FolderOpen, FileText, FolderTree } from "lucide-react";
 
 type FileNode = {
   name: string;
@@ -40,7 +40,7 @@ function TreeNode({ node, depth, defaultExpanded }: { node: FileNode; depth: num
     <div>
       <div
         className={cn(
-          "flex items-center gap-1.5 py-[3px] rounded-md text-xs cursor-pointer select-none hover:bg-zinc-50 dark:hover:bg-zinc-900 transition-colors",
+          "flex items-center gap-1.5 py-[3px] rounded-md text-xs cursor-pointer select-none hover:bg-zinc-50 dark:hover:bg-zinc-900 transition-all duration-500",
           node.highlighted && "bg-blue-50 dark:bg-blue-950/20"
         )}
         style={{ paddingLeft: `${depth * 16 + 8}px`, paddingRight: 8 }}
@@ -86,15 +86,35 @@ function TreeNode({ node, depth, defaultExpanded }: { node: FileNode; depth: num
 }
 
 export function FileTree({ title = "Project Structure", nodes, defaultExpanded = true }: FileTreeProps) {
+  const [expanded, setExpanded] = useState(defaultExpanded);
+
   return (
-    <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 overflow-hidden">
-      <div className="px-4 py-2.5 border-b border-zinc-100 dark:border-zinc-900 bg-zinc-50 dark:bg-zinc-900/50">
-        <span className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">{title}</span>
+    <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden">
+      <div className="flex items-center gap-3 px-4 h-12 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50">
+        <FolderTree className="size-4 text-zinc-400 shrink-0" />
+        <span className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 flex-1">{title}</span>
       </div>
-      <div className="py-2 font-mono">
+
+      <p className="text-sm text-zinc-500 dark:text-zinc-400 px-4 py-2 border-b border-zinc-100 dark:border-zinc-800">
+        Folders and files in a project — click folders to expand or collapse the tree.
+      </p>
+
+      <div className="min-h-[220px] py-2 px-2 font-mono overflow-auto">
         {nodes.map((node, i) => (
-          <TreeNode key={i} node={node} depth={0} defaultExpanded={defaultExpanded} />
+          <TreeNode key={`${i}-${expanded}`} node={node} depth={0} defaultExpanded={expanded} />
         ))}
+      </div>
+
+      <div className="border-t border-zinc-100 dark:border-zinc-800 px-4 py-3 flex items-center gap-3 bg-zinc-50 dark:bg-zinc-900/30">
+        <span className="text-sm text-zinc-500 dark:text-zinc-400 flex-1">
+          {expanded ? "All folders expanded" : "Folders collapsed — expand to browse files"}
+        </span>
+        <button
+          onClick={() => setExpanded((v) => !v)}
+          className="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-opacity"
+        >
+          {expanded ? "Collapse All" : "Expand All"}
+        </button>
       </div>
     </div>
   );

@@ -3,7 +3,7 @@
 import { useState, useCallback, useRef } from "react";
 import { z } from "zod";
 import { cn } from "@/lib/utils";
-import { Network, Lock, Globe, ChevronRight, X } from "lucide-react";
+import { Layers, Lock, Globe, ChevronRight, X, Network } from "lucide-react";
 
 export const KubernetesIngressSchema = z.object({
   ingressName: z.string().default("freshmarket-ingress"),
@@ -132,11 +132,10 @@ export function KubernetesIngress({
 
   return (
     <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden">
-      {/* Header */}
-      <div className="flex items-center gap-2.5 px-4 py-2.5 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/70">
-        <Network className="size-3.5 text-blue-500 shrink-0" />
-        <span className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 flex-1">Kubernetes Ingress</span>
-        <code className="text-[10px] font-mono text-zinc-400 dark:text-zinc-500 bg-zinc-100 dark:bg-zinc-800 px-2 py-0.5 rounded">
+      <div className="flex items-center gap-3 px-4 h-12 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50">
+        <Layers className="size-4 text-zinc-400 shrink-0" />
+        <span className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 flex-1">Kubernetes Ingress</span>
+        <code className="text-[10px] font-mono text-zinc-400 bg-zinc-100 dark:bg-zinc-800 px-2 py-0.5 rounded">
           {ingressName}
         </code>
         {tls && (
@@ -146,8 +145,11 @@ export function KubernetesIngress({
         )}
       </div>
 
-      {/* Main content */}
-      <div className="min-h-[280px] p-4 flex flex-col gap-3">
+      <p className="text-sm text-zinc-500 dark:text-zinc-400 px-4 py-2 border-b border-zinc-100 dark:border-zinc-800">
+        One front door for your cluster — routes incoming URLs to the right internal service.
+      </p>
+
+      <div className="min-h-[220px] p-4 flex flex-col gap-3">
 
         {/* Ingress controller box */}
         <div className="flex items-center gap-3">
@@ -162,7 +164,7 @@ export function KubernetesIngress({
               ? "bg-blue-50 dark:bg-blue-950/20 border-blue-300 dark:border-blue-700"
               : "bg-zinc-50 dark:bg-zinc-800/50 border-zinc-200 dark:border-zinc-700"
           )}>
-            <Network className={cn("size-3.5 transition-colors duration-300", anim.phase !== "idle" ? "text-blue-500" : "text-zinc-400")} />
+            <Network className={cn("size-3.5 transition-all duration-500", anim.phase !== "idle" ? "text-blue-500" : "text-zinc-400")} />
             <div>
               <p className="text-[11px] font-semibold text-zinc-700 dark:text-zinc-300">Ingress Controller</p>
               <p className="text-[9px] text-zinc-400 dark:text-zinc-500">nginx · routes by path/host</p>
@@ -226,7 +228,7 @@ export function KubernetesIngress({
                 <div
                   key={i}
                   className={cn(
-                    "flex items-center gap-3 px-3 py-2 border-l-2 cursor-pointer transition-all duration-300",
+                    "flex items-center gap-3 px-3 py-2 border-l-2 cursor-pointer transition-all duration-500",
                     i > 0 ? "border-t border-zinc-50 dark:border-zinc-800/60" : "",
                     colors.border,
                     isMatched || isSelected
@@ -259,69 +261,43 @@ export function KubernetesIngress({
                     <span className="text-[10px] font-mono text-zinc-400 dark:text-zinc-500">:{rule.servicePort}</span>
                   </div>
 
-                  {/* Route button */}
-                  <button
-                    onClick={(e) => { e.stopPropagation(); animateRequest(i); }}
-                    className={cn(
-                      "text-[9px] font-semibold px-2 py-0.5 rounded transition-all duration-200 shrink-0",
-                      colors.badge,
-                      "hover:opacity-80 border"
-                    )}
-                  >
-                    Route
-                  </button>
+                  {/* Route button removed — use footer action */}
                 </div>
               );
             })}
           </div>
         </div>
 
-        {/* Selected rule — path examples */}
-        {selectedRule !== null && rules[selectedRule] && (
-          <div className={cn(
-            "rounded-lg border px-3 py-2 transition-all duration-300",
-            COLOR_MAP[(rules[selectedRule]!.color ?? "blue") as Color].badge
-          )}>
-            <p className="text-[10px] font-semibold mb-1">
-              Example URLs matching <code className="font-mono">{rules[selectedRule]!.path}</code>{" "}
-              ({rules[selectedRule]!.pathType}):
-            </p>
-            <div className="space-y-0.5">
-              {rules[selectedRule]!.pathType === "Exact"
-                ? (
-                  <code className="block text-[10px] font-mono text-emerald-700 dark:text-emerald-300">
-                    ✓ {rules[selectedRule]!.path} (exact match only)
-                  </code>
-                )
-                : (
-                  <>
-                    <code className="block text-[10px] font-mono text-emerald-700 dark:text-emerald-300">
-                      ✓ {rules[selectedRule]!.path}
-                    </code>
-                    {rules[selectedRule]!.path !== "/" && (
-                      <code className="block text-[10px] font-mono text-emerald-700 dark:text-emerald-300">
-                        ✓ {rules[selectedRule]!.path}/anything/nested
-                      </code>
-                    )}
-                    {selectedRule > 0 && (
-                      <code className="block text-[10px] font-mono text-red-500 dark:text-red-400">
-                        ✗ /other/path (does not match)
-                      </code>
-                    )}
-                  </>
-                )
-              }
+        {/* Selected rule examples — fixed height slot */}
+        <div className="min-h-[60px]">
+          {selectedRule !== null && rules[selectedRule] && (
+            <div className={cn(
+              "rounded-lg border px-3 py-2 transition-all duration-500",
+              COLOR_MAP[(rules[selectedRule]!.color ?? "blue") as Color].badge
+            )}>
+              <p className="text-[10px] font-semibold">
+                URLs matching <code className="font-mono">{rules[selectedRule]!.path}</code>:
+              </p>
+              <code className="block text-[10px] font-mono text-emerald-700 dark:text-emerald-300 mt-0.5">
+                ✓ {rules[selectedRule]!.path}/…
+              </code>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
 
-      {/* Footer insight */}
-      <div className="border-t border-zinc-100 dark:border-zinc-800 px-4 py-2.5 bg-zinc-50/50 dark:bg-zinc-900/30">
-        <p className="text-[10px] text-zinc-500 dark:text-zinc-400 leading-relaxed">
-          <span className="font-bold text-blue-500">KEY </span>
-          Ingress is a reverse proxy inside Kubernetes — one external IP, many internal services.
-        </p>
+      <div className="border-t border-zinc-100 dark:border-zinc-800 px-4 py-3 flex items-center gap-3 bg-zinc-50 dark:bg-zinc-900/30">
+        <span className="text-sm text-zinc-500 dark:text-zinc-400 flex-1">
+          {anim.phase === "done" && matchedRule
+            ? `✓ Routed to ${matchedRule.serviceName}:${matchedRule.servicePort}`
+            : "Select a rule and route a test request through the ingress"}
+        </span>
+        <button
+          onClick={() => animateRequest(selectedRule ?? 0)}
+          className="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-opacity"
+        >
+          Route Request
+        </button>
       </div>
     </div>
   );

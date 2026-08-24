@@ -351,7 +351,7 @@ export function IndexTypes({
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
               className={cn(
-                "px-2.5 py-1 rounded-md text-xs font-medium transition-all duration-300",
+                "px-2.5 py-1 rounded-md text-xs font-medium transition-all duration-500",
                 activeTab === tab.id
                   ? "bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900"
                   : "text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800"

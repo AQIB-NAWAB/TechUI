@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { z } from "zod";
 import { cn } from "@/lib/utils";
-import { MessageCircle } from "lucide-react";
+import { MessageCircle, Cpu, Mail, ArrowRight } from "lucide-react";
 
 export const ActorModelSchema = z.object({
   actors: z.array(z.object({
@@ -68,6 +68,7 @@ export function ActorModel({ actors }: ActorModelProps) {
   const [processingActor, setProcessingActor] = useState<string | null>(null);
   const [animatingDots, setAnimatingDots] = useState<AnimatingDot[]>([]);
   const [lastReply, setLastReply] = useState<string | null>(null);
+  const [templateIdx, setTemplateIdx] = useState(0);
   const msgCounterRef = useRef(0);
   const dotCounterRef = useRef(0);
   const animFrameRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -136,22 +137,33 @@ export function ActorModel({ actors }: ActorModelProps) {
     }, 1400);
   }
 
-  const selectedActorData = clampedActors.find((a) => a.id === selectedActor);
+  function sendNextMessage() {
+    sendMessage(templateIdx);
+    setTemplateIdx((i) => (i + 1) % MESSAGE_TEMPLATES.length);
+  }
+
+  const nextTemplate = MESSAGE_TEMPLATES[templateIdx % MESSAGE_TEMPLATES.length];
 
   // Layout: 2×2 grid positions (or linear for <4)
   const gridCols = clampedActors.length <= 2 ? clampedActors.length : 2;
 
+  const selectedActorData = clampedActors.find((a) => a.id === selectedActor);
+
   return (
     <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden">
-      {/* Header */}
-      <div className="flex items-center gap-3 px-4 h-12 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50">
+      <div className="flex items-center gap-3 px-4 h-12 border-b border-zinc-100 dark:border-zinc-800">
         <MessageCircle className="size-4 text-violet-500 shrink-0" />
         <span className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 flex-1">Actor Model</span>
-        <span className="text-[10px] text-zinc-400 dark:text-zinc-500">{clampedActors.length} actors</span>
+        <span className="text-[10px] text-zinc-400 dark:text-zinc-500 border border-zinc-200 dark:border-zinc-700 px-2 py-0.5 rounded">
+          {clampedActors.length} actors
+        </span>
       </div>
 
-      {/* Main area */}
-      <div className="min-h-[300px] px-4 pt-4 pb-3 flex flex-col gap-3">
+      <p className="text-sm text-zinc-500 dark:text-zinc-400 px-4 py-2 border-b border-zinc-100 dark:border-zinc-800">
+        Isolated workers communicate only by passing messages — no shared memory.
+      </p>
+
+      <div className="min-h-[220px] px-4 pt-4 pb-3 flex flex-col gap-3">
 
         {/* Actor grid */}
         <div
@@ -169,19 +181,20 @@ export function ActorModel({ actors }: ActorModelProps) {
                 key={actor.id}
                 onClick={() => setSelectedActor(isSelected ? null : actor.id)}
                 className={cn(
-                  "relative border-2 rounded-xl p-3 text-left transition-all duration-300 cursor-pointer",
+                  "relative border-2 rounded-xl p-3 text-left transition-all duration-500 cursor-pointer",
                   colors.border,
                   isSelected
                     ? `${colors.bg} ring-2 ring-offset-1 ring-offset-white dark:ring-offset-zinc-900 ring-zinc-400 dark:ring-zinc-500`
                     : "bg-white dark:bg-zinc-900 hover:bg-zinc-50 dark:hover:bg-zinc-800/50"
                 )}
               >
-                {/* Actor name */}
-                <div className={cn("text-xs font-bold truncate", colors.text)}>{actor.name}</div>
+                <div className="flex items-center gap-1.5">
+                  <Cpu className={cn("size-3.5", colors.text)} />
+                  <div className={cn("text-xs font-bold truncate", colors.text)}>{actor.name}</div>
+                </div>
 
-                {/* Mailbox badge */}
                 <div className="flex items-center gap-1 mt-1">
-                  <span className="text-[11px]">📬</span>
+                  <Mail className="size-3 text-zinc-400" />
                   <span className={cn(
                     "text-[11px] font-bold px-1.5 py-0.5 rounded",
                     colors.badge
@@ -218,7 +231,7 @@ export function ActorModel({ actors }: ActorModelProps) {
 
         {/* Selected actor mailbox */}
         {selectedActorData && (
-          <div className="bg-zinc-50 dark:bg-zinc-800/40 rounded-lg p-2">
+          <div className="border border-zinc-100 dark:border-zinc-800 rounded-lg p-2 bg-zinc-50 dark:bg-zinc-800/40">
             <div className="flex items-center justify-between mb-1">
               <span className={cn("text-[11px] font-bold", COLOR_MAP[selectedActorData.color].text)}>
                 {selectedActorData.name} — Mailbox
@@ -239,7 +252,7 @@ export function ActorModel({ actors }: ActorModelProps) {
               <div className="flex flex-col gap-1 max-h-[80px] overflow-y-auto">
                 {mailboxes[selectedActorData.id].map((msg, i) => (
                   <div key={msg.id} className={cn(
-                    "text-[10px] font-mono rounded px-2 py-1 border transition-all duration-300",
+                    "text-[10px] font-mono rounded px-2 py-1 border transition-all duration-500",
                     i === 0
                       ? "bg-white dark:bg-zinc-900 border-zinc-300 dark:border-zinc-600"
                       : "bg-zinc-100 dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 opacity-70"
@@ -261,28 +274,26 @@ export function ActorModel({ actors }: ActorModelProps) {
           </div>
         )}
 
-        {/* Send buttons */}
-        <div className="flex flex-wrap gap-1.5">
-          {MESSAGE_TEMPLATES.slice(0, Math.min(4, clampedActors.length > 1 ? 4 : 1)).map((tmpl, i) => {
-            const fromIdx = Math.min(tmpl.from, clampedActors.length - 1);
-            const toIdx = Math.min(tmpl.to, clampedActors.length - 1);
-            if (fromIdx === toIdx) return null;
-            return (
-              <button
-                key={i}
-                onClick={() => sendMessage(i)}
-                className="px-2 py-1 text-[10px] font-semibold rounded-lg border border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all duration-200"
-              >
-                Send: {tmpl.type}
-              </button>
-            );
-          })}
-        </div>
+      </div>
 
-        {/* Key insight */}
-        <div className="text-[10px] text-zinc-400 dark:text-zinc-500 bg-zinc-50 dark:bg-zinc-800/40 rounded-lg px-3 py-2 mt-auto">
-          <strong className="text-zinc-600 dark:text-zinc-300">Actors never share memory</strong> — they can only communicate by sending messages. This eliminates race conditions. Each actor processes one message at a time from its own mailbox.
-        </div>
+      <div className="px-4 py-3 border-t border-zinc-100 dark:border-zinc-800 flex items-center gap-3">
+        <span className="text-sm text-zinc-500 dark:text-zinc-400 flex-1 truncate">
+          {lastReply ? (
+            <span className="text-emerald-600 dark:text-emerald-400">{lastReply}</span>
+          ) : animatingDots.length > 0 ? (
+            <span className="flex items-center gap-1"><ArrowRight className="size-3.5" /> Message in flight…</span>
+          ) : nextTemplate ? (
+            <>Next: <strong className="text-zinc-700 dark:text-zinc-300">{nextTemplate.type}</strong></>
+          ) : (
+            "Click an actor to inspect its mailbox"
+          )}
+        </span>
+        <button
+          onClick={sendNextMessage}
+          className="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-opacity shrink-0"
+        >
+          Send Message
+        </button>
       </div>
     </div>
   );

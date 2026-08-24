@@ -59,6 +59,7 @@ export function DatabaseTable({
   const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
   const [search, setSearch] = useState("");
   const [showData, setShowData] = useState(true);
+  const [hoveredColumn, setHoveredColumn] = useState<string | null>(null);
 
   const displayRows = (() => {
     let r = rows ?? [];
@@ -199,7 +200,12 @@ export function DatabaseTable({
                       <th
                         key={col.name}
                         onClick={() => toggleSort(col.name)}
-                        className="text-left px-4 py-2 text-[10px] font-semibold text-zinc-400 uppercase tracking-wider border-b border-zinc-100 dark:border-zinc-900 cursor-pointer hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors font-sans select-none"
+                        onMouseEnter={() => setHoveredColumn(col.name)}
+                        onMouseLeave={() => setHoveredColumn(null)}
+                        className={cn(
+                          "text-left px-4 py-2 text-[10px] font-semibold text-zinc-400 uppercase tracking-wider border-b border-zinc-100 dark:border-zinc-900 cursor-pointer hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors font-sans select-none",
+                          hoveredColumn === col.name && "bg-zinc-50 dark:bg-zinc-800/50"
+                        )}
                       >
                         <span className="flex items-center gap-1">
                           {col.name}
@@ -215,7 +221,13 @@ export function DatabaseTable({
                   {displayRows.map((row, i) => (
                     <tr key={i} className="border-b border-zinc-50 dark:border-zinc-900/50 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors cursor-default">
                       {columns.map((col) => (
-                        <td key={col.name} className="px-4 py-2">
+                        <td
+                          key={col.name}
+                          className={cn(
+                            "px-4 py-2 transition-colors duration-500",
+                            hoveredColumn === col.name && "bg-zinc-50 dark:bg-zinc-800/50"
+                          )}
+                        >
                           <CellValue value={row[col.name]} />
                         </td>
                       ))}

@@ -137,7 +137,7 @@ export function AbTest({
         <div className="flex flex-col items-center gap-1.5">
           <div className="flex items-center gap-1 text-[11px] text-zinc-500">
             {[...Array(5)].map((_, i) => (
-              <span key={i} className={cn("transition-all duration-300", animating ? "scale-110 opacity-100" : "opacity-70")}>👤</span>
+              <span key={i} className={cn("transition-all duration-500", animating ? "scale-110 opacity-100" : "opacity-70")}>👤</span>
             ))}
             <span className="ml-1 font-semibold text-zinc-600 dark:text-zinc-400">Users</span>
           </div>

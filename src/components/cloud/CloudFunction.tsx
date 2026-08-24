@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { z } from "zod";
 import { cn } from "@/lib/utils";
-import { Zap, Globe, CheckCircle, AlertTriangle, Clock, ChevronDown, ChevronRight } from "lucide-react";
+import { Zap, Monitor, CheckCircle, AlertTriangle, Clock, ChevronDown, ChevronRight, Cloud } from "lucide-react";
 
 const ProviderEnum = z.enum(["aws", "gcp", "azure"]);
 const RuntimeEnum = z.enum([
@@ -94,17 +94,28 @@ export function CloudFunction({
 
     if (willCold) {
       setInvokeState("cold-start");
-      await delay(80);
-      setColdBarWidth(100);   // fills over 1.2s via CSS transition-all duration-[1200ms]
-      await delay(1300);
+      await delay(100);
+      setColdBarWidth(100);
+      for (let i = 0; i <= 50; i++) {
+        setDotPos(i);
+        await delay(24);
+      }
+      await delay(500);
+    } else {
+      for (let i = 0; i <= 50; i++) {
+        setDotPos(i);
+        await delay(12);
+      }
     }
 
     setInvokeState("executing");
-    setDotPos(50);
-    await delay(80);
-    setExecBarWidth(100);    // fills over 0.5s via CSS transition-all duration-500
-    setDotPos(100);
-    await delay(600);
+    await delay(100);
+    setExecBarWidth(100);
+    for (let i = 50; i <= 100; i++) {
+      setDotPos(i);
+      await delay(10);
+    }
+    await delay(800);
 
     const success = status !== "error" && status !== "timeout";
     setInvokeState(success ? "done-success" : "done-error");
@@ -125,22 +136,21 @@ export function CloudFunction({
   useEffect(() => () => clearAnim(), []);
 
   const arrowBarColor =
-    invokeState === "cold-start" ? "bg-blue-300 dark:bg-blue-700" :
+    invokeState === "cold-start" ? "bg-blue-400 dark:bg-blue-600" :
     invokeState === "executing" || invokeState === "done-success" ? "bg-emerald-500" :
     invokeState === "done-error" ? "bg-red-500" : "bg-zinc-300 dark:bg-zinc-700";
 
   const statusLabel =
-    invokeState === "cold-start" ? "❄️ Cold start..." :
-    invokeState === "executing" ? "⚡ Executing..." :
-    invokeState === "done-success" ? "✓ Success" :
-    invokeState === "done-error" ? "✗ Error" : "";
+    invokeState === "cold-start" ? "Cold start…" :
+    invokeState === "executing" ? "Executing…" :
+    invokeState === "done-success" ? "Success" :
+    invokeState === "done-error" ? "Error" : "Execution timeline";
 
   const showColdBar = isFirstInvoke || invokeState === "cold-start" || (coldBarWidth > 0 && invokeState !== "idle");
 
   return (
-    <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 overflow-hidden">
-      {/* Header */}
-      <div className={cn("flex items-center gap-3 px-4 py-3 border-b border-zinc-100 dark:border-zinc-900", pc.bg)}>
+    <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden">
+      <div className={cn("flex items-center gap-3 h-12 px-4 border-b border-zinc-100 dark:border-zinc-800", pc.bg)}>
         <Zap className={cn("size-4 shrink-0", pc.color)} />
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
@@ -155,38 +165,40 @@ export function CloudFunction({
           onClick={invoke}
           disabled={invokeState !== "idle"}
           className={cn(
-            "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-500",
+            "flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-500",
             invokeState === "idle"
               ? "bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 hover:opacity-90"
               : "bg-zinc-200 dark:bg-zinc-800 text-zinc-400 cursor-not-allowed"
           )}
         >
-          <span>▶</span> Invoke
+          Invoke
         </button>
       </div>
 
-      {/* Trigger flow */}
-      <div className="px-4 py-4 border-b border-zinc-100 dark:border-zinc-900">
+      <div className="px-4 py-4 border-b border-zinc-100 dark:border-zinc-800 min-h-[220px]">
         <div className="flex items-center gap-2 relative">
-          {/* HTTP Client */}
           <div className={cn(
             "flex flex-col items-center gap-1 transition-all duration-500",
             invokeState !== "idle" ? "text-blue-600 dark:text-blue-400" : "text-zinc-400"
           )}>
-            <Globe className="size-5" />
+            <Monitor className="size-5" />
             <span className="text-[9px] font-semibold">HTTP</span>
           </div>
 
-          {/* Arrow 1 */}
-          <div className="flex-1 relative h-2 flex items-center">
+          <div className="flex-1 relative h-3 flex items-center">
             <div className="w-full h-0.5 bg-zinc-200 dark:bg-zinc-700 rounded-full" />
             <div
               className={cn("absolute h-0.5 rounded-full transition-all duration-700", arrowBarColor)}
-              style={{ width: dotPos >= 50 ? "100%" : `${dotPos * 2}%`, left: 0 }}
+              style={{ width: `${Math.min(100, dotPos * 2)}%`, left: 0 }}
             />
+            {dotPos > 0 && dotPos <= 50 && (
+              <div
+                className="absolute size-2.5 rounded-full bg-blue-500 -translate-x-1/2 transition-all duration-500 shadow-sm"
+                style={{ left: `${dotPos * 2}%` }}
+              />
+            )}
           </div>
 
-          {/* Lambda */}
           <div className={cn(
             "flex flex-col items-center gap-1 transition-all duration-500",
             invokeState === "executing" || invokeState === "done-success" || invokeState === "done-error"
@@ -194,20 +206,27 @@ export function CloudFunction({
               : invokeState === "cold-start" ? "text-blue-500 animate-pulse"
               : "text-zinc-400"
           )}>
-            <Zap className="size-5" />
+            <Cloud className="size-5" />
             <span className="text-[9px] font-semibold">Lambda</span>
           </div>
 
-          {/* Arrow 2 */}
-          <div className="flex-1 relative h-2 flex items-center">
+          <div className="flex-1 relative h-3 flex items-center">
             <div className="w-full h-0.5 bg-zinc-200 dark:bg-zinc-700 rounded-full" />
             <div
               className={cn("absolute h-0.5 rounded-full transition-all duration-700", arrowBarColor)}
-              style={{ width: dotPos === 100 ? "100%" : "0%", left: 0 }}
+              style={{ width: dotPos > 50 ? `${(dotPos - 50) * 2}%` : "0%", left: 0 }}
             />
+            {dotPos > 50 && (
+              <div
+                className={cn(
+                  "absolute size-2.5 rounded-full -translate-x-1/2 transition-all duration-500 shadow-sm",
+                  invokeState === "done-error" ? "bg-red-500" : "bg-emerald-500"
+                )}
+                style={{ left: `${(dotPos - 50) * 2}%` }}
+              />
+            )}
           </div>
 
-          {/* Response */}
           <div className={cn(
             "flex flex-col items-center gap-1 transition-all duration-500",
             invokeState === "done-success" ? "text-emerald-500" :
@@ -218,31 +237,29 @@ export function CloudFunction({
           </div>
         </div>
 
-        {/* Execution timeline — two bars */}
         <div className="mt-4 space-y-2.5">
           <div className="flex items-center justify-between text-[10px] text-zinc-400 mb-1">
             <span className={cn(
-              "text-[10px] font-semibold uppercase tracking-widest transition-all duration-300",
+              "text-[10px] font-semibold uppercase tracking-widest transition-all duration-500",
               invokeState === "cold-start" ? "text-blue-500" :
               invokeState === "executing" ? "text-amber-500 dark:text-amber-400" :
               invokeState === "done-success" ? "text-emerald-600 dark:text-emerald-400" :
               invokeState === "done-error" ? "text-red-600 dark:text-red-400" :
               "text-zinc-400"
             )}>
-              {statusLabel || "Execution timeline"}
+              {statusLabel}
             </span>
           </div>
 
-          {/* Cold Start bar — only shown for first invocation */}
           <div className={cn(
             "transition-all duration-500",
-            showColdBar ? "opacity-100" : "opacity-0 pointer-events-none"
+            showColdBar ? "opacity-100" : "opacity-0 h-0 overflow-hidden"
           )}>
             <div className="flex items-center gap-3">
               <span className="text-[10px] text-zinc-500 dark:text-zinc-400 w-20 shrink-0">Cold Start</span>
               <div className="flex-1 h-2 rounded-full bg-zinc-100 dark:bg-zinc-800 overflow-hidden">
                 <div
-                  className="h-full rounded-full bg-blue-300 dark:bg-blue-600 transition-all duration-[1200ms]"
+                  className="h-full rounded-full bg-blue-400 dark:bg-blue-600 transition-all duration-[1200ms]"
                   style={{ width: `${coldBarWidth}%` }}
                 />
               </div>
@@ -252,7 +269,6 @@ export function CloudFunction({
             </div>
           </div>
 
-          {/* Execution bar */}
           <div className="flex items-center gap-3">
             <span className="text-[10px] text-zinc-500 dark:text-zinc-400 w-20 shrink-0">Execution</span>
             <div className="flex-1 h-2 rounded-full bg-zinc-100 dark:bg-zinc-800 overflow-hidden">
@@ -271,28 +287,23 @@ export function CloudFunction({
 
           {isFirstInvoke && invokeState === "idle" && (
             <div className="text-[10px] text-blue-500 dark:text-blue-400">
-              ❄️ First invocation will trigger a cold start (~{coldStartMs}ms)
+              First invocation will trigger a cold start (~{coldStartMs}ms)
             </div>
           )}
         </div>
       </div>
 
-      {/* Stats grid */}
-      <div className="grid grid-cols-4 divide-x divide-zinc-100 dark:divide-zinc-900 border-b border-zinc-100 dark:border-zinc-900">
+      <div className="grid grid-cols-4 divide-x divide-zinc-100 dark:divide-zinc-800 border-b border-zinc-100 dark:border-zinc-800">
         {[
           { label: "Duration", value: `${duration}ms` },
           { label: "Memory", value: `${memory} MB` },
-          {
-            label: "Invocations",
-            value: invocationCount.toLocaleString(),
-            accent: true,
-          },
+          { label: "Invocations", value: invocationCount.toLocaleString(), accent: true },
           { label: "Error Rate", value: `${errorRate}%` },
         ].map((s) => (
           <div key={s.label} className="flex flex-col gap-0.5 px-3 py-2.5">
             <span className="text-[10px] text-zinc-400">{s.label}</span>
             <span className={cn(
-              "text-xs font-semibold font-mono text-zinc-700 dark:text-zinc-300 transition-transform duration-300",
+              "text-xs font-semibold font-mono text-zinc-700 dark:text-zinc-300 transition-transform duration-500",
               s.accent && counterScale ? "scale-110 text-emerald-600 dark:text-emerald-400" : ""
             )}>
               {s.value}
@@ -301,12 +312,11 @@ export function CloudFunction({
         ))}
       </div>
 
-      {/* Env vars (collapsible) */}
       {env && env.length > 0 && (
-        <div className="border-b border-zinc-100 dark:border-zinc-900">
+        <div className="border-b border-zinc-100 dark:border-zinc-800">
           <button
             onClick={() => setEnvOpen((v) => !v)}
-            className="w-full flex items-center gap-2 px-4 py-2.5 text-left text-[11px] text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors"
+            className="w-full flex items-center gap-2 px-4 py-2.5 text-left text-[11px] text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-all duration-500"
           >
             {envOpen ? <ChevronDown className="size-3 shrink-0" /> : <ChevronRight className="size-3 shrink-0" />}
             <span className="text-[10px] font-semibold uppercase tracking-widest">Environment</span>
@@ -325,10 +335,11 @@ export function CloudFunction({
         </div>
       )}
 
-      {/* Footer */}
-      <div className="px-4 py-2 flex items-center gap-2 text-[10px] text-zinc-400">
+      <div className="px-4 py-3 flex items-center gap-2 text-[10px] text-zinc-400 border-t border-zinc-100 dark:border-zinc-800">
         {invokeState === "done-success" && (
-          <span className="text-emerald-600 dark:text-emerald-400 font-semibold">✓ Invocation complete</span>
+          <span className="text-emerald-600 dark:text-emerald-400 font-semibold flex items-center gap-1">
+            <CheckCircle className="size-3" /> Invocation complete
+          </span>
         )}
         {invokeState === "done-error" && (
           <span className="text-red-600 dark:text-red-400 font-semibold flex items-center gap-1">
@@ -338,7 +349,7 @@ export function CloudFunction({
         {invokeState === "idle" && (
           <>
             <Clock className="size-3" />
-            <span>{timeout}s timeout · {memory} MB allocated</span>
+            <span>{trigger.toUpperCase()} trigger · {timeout}s timeout · {memory} MB allocated</span>
           </>
         )}
       </div>

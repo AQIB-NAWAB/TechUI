@@ -60,7 +60,7 @@ function ContainerBox({
     <button
       onClick={onClick}
       className={cn(
-        "rounded-lg border-2 p-2 text-left transition-all duration-300 w-full",
+        "rounded-lg border-2 p-2 text-left transition-all duration-500 w-full",
         selected
           ? `${cfg.ring} ring-2 border-transparent bg-white dark:bg-zinc-800`
           : "border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-600"
@@ -137,17 +137,17 @@ export function ContainerNetworking({
 
   return (
     <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden text-sm">
-      {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-100 dark:border-zinc-800">
-        <div className="flex items-center gap-2">
-          <Network className="size-4 text-zinc-600 dark:text-zinc-400" />
-          <span className="font-semibold text-zinc-800 dark:text-zinc-200">Container Networking</span>
-        </div>
-        <span className="text-xs font-mono text-zinc-400 dark:text-zinc-500">{networkName}</span>
+      <div className="flex items-center gap-3 px-4 h-12 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50">
+        <Network className="size-4 text-zinc-400 shrink-0" />
+        <span className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 flex-1">Container Networking</span>
+        <span className="text-[10px] font-mono text-zinc-400">{networkName}</span>
       </div>
 
-      {/* Body */}
-      <div className="min-h-[280px] p-3 space-y-3">
+      <p className="text-sm text-zinc-500 dark:text-zinc-400 px-4 py-2 border-b border-zinc-100 dark:border-zinc-800">
+        Containers on the same network talk to each other by name — ports can be exposed to the host.
+      </p>
+
+      <div className="min-h-[220px] p-3 space-y-3">
         {/* Host machine outer box */}
         <div className="rounded-lg border-2 border-dashed border-zinc-300 dark:border-zinc-600 p-3">
           <p className="text-[11px] font-semibold text-zinc-500 dark:text-zinc-400 mb-2">
@@ -201,69 +201,60 @@ export function ContainerNetworking({
           </div>
         </div>
 
-        {/* Detail panel */}
-        {selected !== null && selectedIdx !== null && (
-          <div className="rounded-lg border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800/50 p-3 space-y-2 transition-all duration-500">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-zinc-700 dark:text-zinc-300 font-mono">{selected.name}</span>
-              <span className="text-[11px] font-mono text-zinc-400 dark:text-zinc-500">{containerIp(selectedIdx)}</span>
-            </div>
-            <p className="text-[11px] text-zinc-500 dark:text-zinc-400 font-mono">{selected.image}</p>
-
-            {(selected.ports ?? []).length > 0 && (
-              <div className="flex gap-1.5 flex-wrap">
-                <span className="text-[11px] text-zinc-500 dark:text-zinc-400">Exposed:</span>
-                {(selected.ports ?? []).map((p) => (
-                  <span key={p.host} className="text-[11px] font-mono bg-zinc-200 dark:bg-zinc-700 text-zinc-700 dark:text-zinc-300 px-1.5 py-0.5 rounded">
-                    {p.host}→{p.container}
-                  </span>
-                ))}
+        {/* Detail panel — fixed height slot */}
+        <div className="min-h-[100px]">
+          {selected !== null && selectedIdx !== null && (
+            <div className="rounded-lg border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800/50 p-3 space-y-2 transition-all duration-500">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-zinc-700 dark:text-zinc-300 font-mono">{selected.name}</span>
+                <span className="text-[11px] font-mono text-zinc-400">{containerIp(selectedIdx)}</span>
               </div>
-            )}
-
-            <div>
-              <p className="text-[11px] text-zinc-500 dark:text-zinc-400 mb-1">
-                Can reach by name:
-              </p>
-              <div className="flex gap-1.5 flex-wrap">
-                {typedContainers
-                  .filter((_, i) => i !== selectedIdx)
-                  .map((c) => (
-                    <button
-                      key={c.name}
-                      onClick={() => handlePing(typedContainers.indexOf(c))}
-                      className={cn(
-                        "text-[11px] font-mono px-2 py-0.5 rounded border transition-all duration-300",
-                        "border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300",
-                        "hover:border-blue-400 dark:hover:border-blue-500 hover:text-blue-600 dark:hover:text-blue-400"
-                      )}
-                    >
-                      ping {c.name}
-                    </button>
+              {(selected.ports ?? []).length > 0 && (
+                <div className="flex gap-1.5 flex-wrap">
+                  {(selected.ports ?? []).map((p) => (
+                    <span key={p.host} className="text-[11px] font-mono bg-zinc-200 dark:bg-zinc-700 text-zinc-700 dark:text-zinc-300 px-1.5 py-0.5 rounded">
+                      {p.host}→{p.container}
+                    </span>
                   ))}
-              </div>
-            </div>
-
-            {pingTarget !== null && (
-              <div className="flex items-center gap-2 text-[11px] text-blue-600 dark:text-blue-400">
-                <span className="font-mono">{selected.name}</span>
-                <div className="flex items-center gap-1 relative">
-                  <span className="h-px w-12 bg-blue-400 dark:bg-blue-600" />
-                  <PingAnimation active={pinging} />
                 </div>
-                <span className="font-mono">{typedContainers[pingTarget]?.name}</span>
-                {!pinging && <span className="text-emerald-500 font-semibold">PONG ✓</span>}
-              </div>
-            )}
-          </div>
-        )}
+              )}
+              {pingTarget !== null && (
+                <div className="flex items-center gap-2 text-[11px] text-blue-600 dark:text-blue-400">
+                  <span className="font-mono">{selected.name}</span>
+                  <div className="flex items-center gap-1">
+                    <span className="h-px w-12 bg-blue-400" />
+                    <PingAnimation active={pinging} />
+                  </div>
+                  <span className="font-mono">{typedContainers[pingTarget]?.name}</span>
+                  {!pinging && <span className="text-emerald-500 font-semibold">PONG ✓</span>}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
       </div>
 
-      {/* Footer */}
-      <div className="px-4 py-2 border-t border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/50">
-        <p className="text-[11px] text-zinc-400 dark:text-zinc-500 text-center">
-          Containers talk by name · isolated bridge network · ports exposed to host only if mapped
-        </p>
+      <div className="border-t border-zinc-100 dark:border-zinc-800 px-4 py-3 flex items-center gap-3 bg-zinc-50 dark:bg-zinc-900/30">
+        <span className="text-sm text-zinc-500 dark:text-zinc-400 flex-1">
+          {selected
+            ? pinging
+              ? `Pinging ${typedContainers[pingTarget ?? 0]?.name}…`
+              : `Selected ${selected.name} — ping another container by name`
+            : "Click a container, then ping another on the same network"}
+        </span>
+        <button
+          onClick={() => {
+            if (selectedIdx === null) setSelectedIdx(0);
+            else {
+              const target = typedContainers.findIndex((_, i) => i !== selectedIdx);
+              if (target >= 0) handlePing(target);
+            }
+          }}
+          disabled={pinging}
+          className="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-40"
+        >
+          Ping Network
+        </button>
       </div>
     </div>
   );

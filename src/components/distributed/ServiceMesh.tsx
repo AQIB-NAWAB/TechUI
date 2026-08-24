@@ -64,6 +64,8 @@ export function ServiceMesh({
   const [selected, setSelected] = useState<string | null>(null);
   const [log, setLog] = useState<TrafficEntry[]>([]);
   const [simulating, setSimulating] = useState(false);
+  const [activeFlowIdx, setActiveFlowIdx] = useState<number | null>(null);
+  const [dotProgress, setDotProgress] = useState(0);
   const boxRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const containerRef = useRef<HTMLDivElement>(null);
   const [lines, setLines] = useState<{ from: string; to: string; x1: number; y1: number; x2: number; y2: number }[]>([]);
@@ -103,7 +105,15 @@ export function ServiceMesh({
   async function simulate() {
     if (simulating) return;
     setSimulating(true);
-    for (const flow of flows) {
+    for (let i = 0; i < flows.length; i++) {
+      const flow = flows[i]!;
+      setActiveFlowIdx(i);
+      setDotProgress(0);
+      await new Promise((r) => setTimeout(r, 100));
+      setDotProgress(50);
+      await new Promise((r) => setTimeout(r, 1200));
+      setDotProgress(100);
+
       const errorRate = flow.errorRate ?? 0;
       const ok = Math.random() > errorRate;
       const latency = flow.latencyMs
@@ -113,8 +123,10 @@ export function ServiceMesh({
         { id: uid(), from: flow.from, to: flow.to, ok, ms: latency },
         ...prev,
       ].slice(0, 16));
-      await new Promise((r) => setTimeout(r, 200));
+      await new Promise((r) => setTimeout(r, 1200));
     }
+    setActiveFlowIdx(null);
+    setDotProgress(0);
     setSimulating(false);
   }
 
@@ -153,7 +165,7 @@ export function ServiceMesh({
 
       <div className="grid grid-cols-[1fr_auto] divide-x divide-zinc-100 dark:divide-zinc-900">
         {/* Service grid + SVG overlay */}
-        <div className="p-4 relative" ref={containerRef}>
+        <div className="p-4 relative min-h-[240px]" ref={containerRef}>
           {/* SVG connection lines */}
           {lines.length > 0 && (
             <svg
@@ -180,27 +192,43 @@ export function ServiceMesh({
                 const toSvc = svc(flow.to);
                 const isUnhealthy = !fromSvc?.healthy || !toSvc?.healthy;
                 const isSelected = selected && (flow.from === selected || flow.to === selected);
+                const isActive = activeFlowIdx === i;
                 const strokeW = rpsToStroke(flow.rps);
                 const cx1 = line.x1 + (line.x2 - line.x1) * 0.4;
                 const cx2 = line.x1 + (line.x2 - line.x1) * 0.6;
+                const pathD = `M ${line.x1} ${line.y1} C ${cx1} ${line.y1} ${cx2} ${line.y2} ${line.x2} ${line.y2}`;
+                const t = dotProgress / 100;
+                const dotX = (1 - t) ** 3 * line.x1 + 3 * (1 - t) ** 2 * t * cx1 + 3 * (1 - t) * t ** 2 * cx2 + t ** 3 * line.x2;
+                const dotY = (1 - t) ** 3 * line.y1 + 3 * (1 - t) ** 2 * t * line.y1 + 3 * (1 - t) * t ** 2 * line.y2 + t ** 3 * line.y2;
 
                 return (
-                  <path
-                    key={i}
-                    d={`M ${line.x1} ${line.y1} C ${cx1} ${line.y1} ${cx2} ${line.y2} ${line.x2} ${line.y2}`}
-                    fill="none"
-                    strokeWidth={strokeW}
-                    strokeDasharray={isUnhealthy ? "4 3" : undefined}
-                    className={cn(
-                      "transition-all duration-500",
-                      isSelected
-                        ? "stroke-blue-400 dark:stroke-blue-500"
-                        : isUnhealthy
-                        ? "stroke-red-300 dark:stroke-red-700"
-                        : !selected ? "stroke-zinc-300 dark:stroke-zinc-700" : "stroke-zinc-200 dark:stroke-zinc-800 opacity-30"
+                  <g key={i}>
+                    <path
+                      d={pathD}
+                      fill="none"
+                      strokeWidth={strokeW}
+                      strokeDasharray={isUnhealthy ? "4 3" : undefined}
+                      className={cn(
+                        "transition-all duration-500",
+                        isActive
+                          ? "stroke-blue-400 dark:stroke-blue-500"
+                          : isSelected
+                          ? "stroke-blue-400 dark:stroke-blue-500"
+                          : isUnhealthy
+                          ? "stroke-red-300 dark:stroke-red-700"
+                          : mtls
+                          ? "stroke-amber-400 dark:stroke-amber-600"
+                          : !selected ? "stroke-zinc-300 dark:stroke-zinc-700" : "stroke-zinc-200 dark:stroke-zinc-800 opacity-30"
+                      )}
+                      markerEnd={isActive || isSelected ? "url(#arrow-active)" : isUnhealthy ? "url(#arrow-unhealthy)" : "url(#arrow)"}
+                    />
+                    {isActive && (
+                      <circle cx={dotX} cy={dotY} r="4" className="fill-blue-500 transition-all duration-500" />
                     )}
-                    markerEnd={isSelected ? "url(#arrow-active)" : isUnhealthy ? "url(#arrow-unhealthy)" : "url(#arrow)"}
-                  />
+                    {mtls && !isUnhealthy && (
+                      <circle cx={(line.x1 + line.x2) / 2} cy={(line.y1 + line.y2) / 2 - 8} r="6" className="fill-white dark:fill-zinc-950 stroke-amber-400" strokeWidth="1" />
+                    )}
+                  </g>
                 );
               })}
             </svg>

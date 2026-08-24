@@ -91,14 +91,17 @@ export function DependencyInjection({
         <span className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 flex-1">Dependency Injection</span>
       </div>
 
-      {/* Tab bar */}
-      <div className="flex border-b border-zinc-100 dark:border-zinc-800 px-4 pt-3 gap-1">
+      <p className="text-sm text-zinc-500 dark:text-zinc-400 px-4 py-2 border-b border-zinc-100 dark:border-zinc-800">
+        Pass dependencies in from the outside instead of creating them inside — makes code testable and flexible.
+      </p>
+
+      <div className="flex border-b border-zinc-100 dark:border-zinc-800 px-4 pt-2 gap-1">
         {TABS.map((tab) => (
           <button
             key={tab.key}
             onClick={() => { setActiveTab(tab.key); resetTest(); }}
             className={cn(
-              "px-3 py-1.5 rounded-t-lg text-xs font-semibold transition-all duration-300 cursor-pointer border-b-2 -mb-px",
+              "px-3 py-1.5 rounded-t-lg text-xs font-semibold transition-all duration-500 cursor-pointer border-b-2 -mb-px",
               activeTab === tab.key
                 ? "border-zinc-900 dark:border-white text-zinc-900 dark:text-white bg-zinc-50 dark:bg-zinc-800"
                 : "border-transparent text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300"
@@ -110,7 +113,7 @@ export function DependencyInjection({
       </div>
 
       {/* Content — fixed height */}
-      <div className="min-h-[280px] px-4 pt-4 pb-3 flex flex-col gap-3">
+      <div className="min-h-[220px] px-4 pt-4 pb-3 flex flex-col gap-3">
 
         {/* WITHOUT DI */}
         {activeTab === "without-di" && (
@@ -196,20 +199,7 @@ export function DependencyInjection({
             </div>
 
             {/* Test demo */}
-            <div className="flex items-center gap-3">
-              <button
-                onClick={handleTest}
-                className={cn(
-                  "flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg transition-all duration-300 cursor-pointer",
-                  testPassing
-                    ? "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700"
-                    : "bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 hover:opacity-90"
-                )}
-              >
-                <FlaskConical className="size-3.5" />
-                {testPassing ? "Tests pass ✓" : "Run Tests"}
-              </button>
-
+            <div className="flex items-center gap-3 min-h-[32px]">
               {testMode && (
                 <div className="flex items-center gap-2 text-[11px] font-mono transition-all duration-500">
                   <span className={cn(
@@ -218,9 +208,8 @@ export function DependencyInjection({
                       ? "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300"
                       : "bg-zinc-100 dark:bg-zinc-800 text-zinc-500 animate-pulse"
                   )}>
-                    {testPassing ? "MockDB" : "PostgresDB → MockDB..."}
+                    {testPassing ? "MockDB injected ✓" : "PostgresDB → MockDB..."}
                   </span>
-                  {testPassing && <span className="text-emerald-600 dark:text-emerald-400 font-semibold">injected ✓</span>}
                 </div>
               )}
             </div>
@@ -282,12 +271,36 @@ export function DependencyInjection({
           </>
         )}
 
-        {/* Key insight (shared) */}
         {activeTab !== "container" && (
-          <div className="text-[10px] text-zinc-400 dark:text-zinc-500 bg-zinc-50 dark:bg-zinc-800/40 rounded-lg px-3 py-2 mt-auto">
-            DI inverts control — a class <strong className="text-zinc-600 dark:text-zinc-300">declares what it needs</strong>, the container <strong className="text-zinc-600 dark:text-zinc-300">provides it</strong>
+          <div className="text-[10px] text-zinc-400 dark:text-zinc-500 bg-zinc-50 dark:bg-zinc-800/40 rounded-lg border border-zinc-100 dark:border-zinc-800 px-3 py-2 mt-auto">
+            DI inverts control — a class declares what it needs, the container provides it
           </div>
         )}
+      </div>
+
+      <div className="border-t border-zinc-100 dark:border-zinc-800 px-4 py-3 flex items-center gap-3 bg-zinc-50 dark:bg-zinc-900/30">
+        <span className="text-sm text-zinc-500 dark:text-zinc-400 flex-1">
+          {activeTab === "without-di"
+            ? "Hard-coded dependencies — hard to test or swap"
+            : activeTab === "with-di"
+            ? testPassing ? "Mock injected — tests pass ✓" : "Inject mocks to test without real databases"
+            : "Container resolves and injects all dependencies automatically"}
+        </span>
+        <button
+          onClick={() => {
+            if (activeTab === "with-di") handleTest();
+            else if (activeTab === "without-di") setActiveTab("with-di");
+            else setActiveTab("without-di");
+          }}
+          className="flex items-center gap-1.5 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-opacity"
+        >
+          {activeTab === "with-di" ? (
+            <>
+              <FlaskConical className="size-3.5" />
+              {testPassing ? "Tests Pass" : "Run Tests"}
+            </>
+          ) : activeTab === "without-di" ? "See With DI" : "Compare Without DI"}
+        </button>
       </div>
     </div>
   );

@@ -56,11 +56,9 @@ export function ErrorBoundary({
         }
       `}</style>
       <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden">
-        {/* Header */}
-        <div className="flex items-center gap-3 px-4 py-2.5 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/60">
-          <ShieldAlert className="size-3.5 text-zinc-400 shrink-0" />
-          <span className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 flex-1">Error Boundary</span>
-          <span className="text-[10px] font-mono text-zinc-400">React error isolation pattern</span>
+        <div className="flex items-center gap-3 px-4 h-12 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50">
+          <ShieldAlert className="size-4 text-zinc-400 shrink-0" />
+          <span className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 flex-1">Error Boundary</span>
           <span className={cn(
             "text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide transition-all duration-500",
             isError
@@ -71,7 +69,11 @@ export function ErrorBoundary({
           </span>
         </div>
 
-        <div className="p-4 space-y-4 min-h-[260px]">
+        <p className="text-sm text-zinc-500 dark:text-zinc-400 px-4 py-2 border-b border-zinc-100 dark:border-zinc-800">
+          Catches crashes in one component so the rest of your app keeps working.
+        </p>
+
+        <div className="min-h-[220px] p-4 space-y-3">
           {/* Visual nesting: App > Error Boundary > Component */}
           <div className="border border-dashed border-zinc-300 dark:border-zinc-700 rounded-xl p-3 relative">
             {/* App label */}
@@ -137,13 +139,6 @@ export function ErrorBoundary({
                       <div className="flex-1">
                         <div className="text-xs font-semibold text-zinc-700 dark:text-zinc-200">{fallbackMessage}</div>
                         <div className="text-[10px] text-zinc-400 dark:text-zinc-500 mt-0.5">Only this component shows the fallback</div>
-                        <button
-                          onClick={handleReset}
-                          className="mt-2 flex items-center gap-1.5 text-[10px] font-semibold text-blue-600 dark:text-blue-400 hover:underline transition-all duration-300"
-                        >
-                          <RefreshCw className="size-3" />
-                          Try again
-                        </button>
                       </div>
                     </div>
                   </div>
@@ -152,27 +147,27 @@ export function ErrorBoundary({
             </div>
           </div>
 
-          {/* Error detail — only in error state */}
-          {isError && (
-            <div className="rounded-lg bg-zinc-950 border border-zinc-800 overflow-hidden transition-all duration-500">
-              <div className="px-3 py-1.5 text-[10px] font-semibold text-red-400 uppercase tracking-wide border-b border-zinc-800 bg-zinc-900/80">
-                Error caught by boundary
-              </div>
-              <div className="px-3 py-2 font-mono text-[11px] leading-relaxed">
-                <div className="text-red-400">{errorLabel}: {errorMessage}</div>
-                <div className="text-zinc-500 mt-1">
-                  <div>  at {componentName} ({componentName}.tsx:42)</div>
-                  <div>  at ErrorBoundary (react-dom.js:1234)</div>
-                  <div>  at App (App.tsx:8)</div>
+          {/* Error detail — fixed height slot */}
+          <div className="min-h-[80px]">
+            {isError && (
+              <div className="rounded-lg bg-zinc-950 border border-zinc-800 overflow-hidden transition-all duration-500">
+                <div className="px-3 py-1.5 text-[10px] font-semibold text-red-400 uppercase tracking-wide border-b border-zinc-800 bg-zinc-900/80">
+                  Error caught by boundary
+                </div>
+                <div className="px-3 py-2 font-mono text-[11px] leading-relaxed">
+                  <div className="text-red-400">{errorLabel}: {errorMessage}</div>
+                  <div className="text-zinc-500 mt-1">
+                    <div>  at {componentName} ({componentName}.tsx:42)</div>
+                    <div>  at ErrorBoundary (react-dom.js:1234)</div>
+                  </div>
                 </div>
               </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
 
-        {/* Controls */}
-        <div className="border-t border-zinc-100 dark:border-zinc-800 px-4 py-2.5 bg-zinc-50 dark:bg-zinc-900/40 flex items-center gap-3">
-          <span className="text-[10px] text-zinc-400 flex-1">
+        <div className="border-t border-zinc-100 dark:border-zinc-800 px-4 py-3 flex items-center gap-3 bg-zinc-50 dark:bg-zinc-900/30">
+          <span className="text-sm text-zinc-500 dark:text-zinc-400 flex-1">
             {isError
               ? "Error isolated — boundary caught the crash. App is still usable."
               : "Component renders normally. Click to simulate a crash."}
@@ -188,7 +183,7 @@ export function ErrorBoundary({
           ) : (
             <button
               onClick={handleReset}
-              className="flex items-center gap-1.5 border border-zinc-200 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 rounded-lg px-4 py-2 text-sm font-semibold hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all duration-500"
+              className="flex items-center gap-1.5 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-opacity"
             >
               <RefreshCw className="size-3.5" />
               Reset

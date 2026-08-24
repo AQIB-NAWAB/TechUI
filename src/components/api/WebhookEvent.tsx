@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { z } from "zod";
 import { cn } from "@/lib/utils";
-import { Webhook, Server, Zap, CheckCircle2, XCircle, RefreshCw, Clock } from "lucide-react";
+import { Webhook, Server, CheckCircle2, XCircle, RefreshCw, Clock } from "lucide-react";
 
 const DeliveryStatusEnum = z.enum(["delivered", "failed", "pending", "retrying"]);
 
@@ -128,8 +128,9 @@ export function WebhookEvent({
       {/* Header */}
       <div className="flex items-center gap-3 px-4 h-12 border-b border-zinc-100 dark:border-zinc-800">
         <Webhook className="size-4 text-violet-500 shrink-0" />
+        <span className="text-sm font-semibold text-zinc-800 dark:text-zinc-200 shrink-0">Webhook Event</span>
         <div className="flex-1 min-w-0">
-          <code className="text-sm font-mono font-semibold text-zinc-800 dark:text-zinc-100">{event}</code>
+          <code className="text-sm font-mono font-semibold text-zinc-800 dark:text-zinc-100 truncate block">{event}</code>
         </div>
         <span className={cn("px-2 py-0.5 rounded text-[10px] font-bold tracking-wide flex items-center gap-1.5", sc.badge)}>
           <span className={cn("size-1.5 rounded-full", sc.dot)} />
@@ -140,8 +141,14 @@ export function WebhookEvent({
         </span>
       </div>
 
+      <div className="px-4 py-2 border-b border-zinc-100 dark:border-zinc-800">
+        <p className="text-sm text-zinc-500 dark:text-zinc-400">
+          An external service sends an HTTP POST to your endpoint when something happens.
+        </p>
+      </div>
+
       {/* Delivery flow */}
-      <div className="px-4 py-4 min-h-[120px] flex flex-col gap-3">
+      <div className="px-4 py-4 min-h-[220px] flex flex-col justify-center gap-3">
         <div className="flex items-center gap-2">
           {/* Sender */}
           <div className="flex flex-col items-center gap-1.5 shrink-0">
@@ -170,7 +177,7 @@ export function WebhookEvent({
           {/* Receiver */}
           <div className="flex flex-col items-center gap-1.5 shrink-0">
             <div className="w-16 h-12 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 flex flex-col items-center justify-center gap-0.5">
-              <Zap className="size-4 text-violet-500" />
+              <Server className="size-4 text-emerald-500" />
               <span className="text-[9px] font-semibold text-zinc-500 text-center">Your API</span>
             </div>
           </div>
@@ -185,10 +192,13 @@ export function WebhookEvent({
               : "bg-red-50 dark:bg-red-950 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-800"
           )}>
             {verified
-              ? <><CheckCircle2 className="size-3" /> {signatureHeader}: Verified</>
-              : <><XCircle className="size-3" /> {signatureHeader}: Invalid</>
+              ? <><CheckCircle2 className="size-3" /> Signature verified</>
+              : <><XCircle className="size-3" /> Invalid signature</>
             }
           </div>
+          {verified && (
+            <span className="text-[10px] font-mono text-zinc-400">t=1716239022</span>
+          )}
           <button
             onClick={replay}
             className="ml-auto p-1.5 rounded-lg text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all duration-500"
@@ -202,13 +212,13 @@ export function WebhookEvent({
       {/* Payload section */}
       <div className="border-t border-zinc-100 dark:border-zinc-800 px-4 py-3">
         <div className="text-[10px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500 mb-2">Payload</div>
-        <div className="bg-zinc-950 dark:bg-zinc-950 rounded-lg p-3 max-h-36 overflow-y-auto">
+        <div className="bg-zinc-950 dark:bg-zinc-950 rounded-lg border border-zinc-800 p-3 h-36 overflow-y-auto">
           <SyntaxJson obj={displayPayload} />
         </div>
       </div>
 
       {/* Footer */}
-      <div className="border-t border-zinc-100 dark:border-zinc-800 px-4 py-2.5 flex items-center justify-between bg-zinc-50/50 dark:bg-zinc-900/30">
+      <div className="border-t border-zinc-100 dark:border-zinc-800 px-4 py-3 flex items-center justify-between bg-zinc-50/50 dark:bg-zinc-900/30">
         <div className="flex items-center gap-3 text-xs text-zinc-500">
           <span>Response:</span>
           <span className={cn("font-mono font-bold", responseColor)}>{responseCode}</span>

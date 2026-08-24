@@ -123,16 +123,16 @@ function RollingView({
         </span>
       </div>
 
-      {/* Status + button */}
-      <div className="flex items-center justify-between pt-1">
+      {/* Status + button — fixed height footer slot inside view */}
+      <div className="flex items-center justify-between pt-1 min-h-[40px]">
         <span className="text-[10px] text-zinc-400">
           {done
-            ? ""
+            ? "All pods updated successfully"
             : deploying
             ? `Updating pod ${updatedCount + 1}/${replicas}…`
             : updatedCount === 0
             ? "Ready to deploy"
-            : "Paused"}
+            : "In progress…"}
         </span>
         {done ? (
           <div className="flex items-center gap-2">
@@ -394,7 +394,7 @@ function CanaryView({
     setTimeout(() => {
       setCanaryStep((s) => Math.min(3, s + 1));
       setDeploying(false);
-    }, 800);
+    }, 1200);
   }
 
   function reset() {
@@ -529,31 +529,39 @@ export function DeploymentStrategy({
   return (
     <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden">
       {/* Header */}
-      <div className="flex items-center gap-2 px-4 py-2.5 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/60">
-        <Rocket className="size-3.5 text-zinc-400 shrink-0" />
-        <span className="text-xs font-bold text-zinc-700 dark:text-zinc-200 flex-1">
+      <div className="flex items-center gap-2 px-4 h-12 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/60">
+        <Rocket className="size-4 text-zinc-400 shrink-0" />
+        <span className="text-sm font-semibold text-zinc-700 dark:text-zinc-200 flex-1">
           Deployment Strategy
         </span>
-        <div className="flex gap-1">
-          {TAB_LABELS.map((tab) => (
-            <button
-              key={tab.key}
-              onClick={() => setActiveTab(tab.key)}
-              className={cn(
-                "text-[10px] font-semibold px-2.5 py-1 rounded-md transition-all duration-300",
-                activeTab === tab.key
-                  ? "bg-zinc-900 dark:bg-white text-white dark:text-zinc-900"
-                  : "text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800"
-              )}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
+      </div>
+
+      {/* Tabs */}
+      <div className="flex border-b border-zinc-100 dark:border-zinc-800 px-4 pt-2 gap-1">
+        {TAB_LABELS.map((tab) => (
+          <button
+            key={tab.key}
+            onClick={() => setActiveTab(tab.key)}
+            className={cn(
+              "text-[10px] font-semibold px-2.5 py-1.5 rounded-t-md transition-all duration-500",
+              activeTab === tab.key
+                ? "bg-zinc-900 dark:bg-white text-white dark:text-zinc-900"
+                : "text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+            )}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
+      <div className="px-4 py-2 border-b border-zinc-100 dark:border-zinc-800">
+        <p className="text-sm text-zinc-500 dark:text-zinc-400">
+          Different ways to roll out a new version without breaking production for your users.
+        </p>
       </div>
 
       {/* Content */}
-      <div className="min-h-[240px] px-4 py-4">
+      <div className="min-h-[280px] px-4 py-4">
         {activeTab === "rolling" && (
           <RollingView
             key="rolling"

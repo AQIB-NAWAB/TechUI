@@ -92,6 +92,37 @@ function SyntaxJson({ text }: { text: string }) {
   );
 }
 
+function VariablesEditor({ variables }: { variables: string }) {
+  let entries: [string, unknown][] = [];
+  try {
+    const parsed = JSON.parse(variables) as Record<string, unknown>;
+    entries = Object.entries(parsed);
+  } catch {
+    return (
+      <p className="text-xs text-red-500 dark:text-red-400">Invalid JSON variables</p>
+    );
+  }
+
+  return (
+    <div className="space-y-2">
+      {entries.map(([key, val]) => (
+        <div
+          key={key}
+          className="flex items-center gap-3 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3 py-2.5"
+        >
+          <span className="text-[11px] font-mono font-semibold text-blue-600 dark:text-blue-400 shrink-0">{key}</span>
+          <span className="text-zinc-300 dark:text-zinc-600">=</span>
+          <input
+            readOnly
+            value={typeof val === "string" ? val : JSON.stringify(val)}
+            className="flex-1 min-w-0 bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded-md px-2.5 py-1 font-mono text-xs text-emerald-700 dark:text-emerald-400"
+          />
+        </div>
+      ))}
+    </div>
+  );
+}
+
 type Tab = "query" | "variables" | "response";
 
 export function GraphQLQuery({
@@ -142,7 +173,7 @@ export function GraphQLQuery({
       )}
 
       {/* Tab bar */}
-      <div className="flex border-b border-zinc-100 dark:border-zinc-800">
+      <div className="flex border-b border-zinc-100 dark:border-zinc-800 mt-1">
         {tabs.map(({ id, label }) => (
           <button
             key={id}
@@ -165,12 +196,14 @@ export function GraphQLQuery({
       {/* Content */}
       <div className="relative">
         <div className={cn(
-          "p-4 bg-zinc-50/50 dark:bg-zinc-900/20 overflow-auto min-h-[180px] transition-opacity duration-500",
+          "p-4 bg-zinc-50/50 dark:bg-zinc-900/20 overflow-auto min-h-[220px] transition-opacity duration-500",
           running ? "opacity-50" : "opacity-100"
         )}>
           {tab === "query" && query && (
-            <div className="relative">
-              <HighlightedQuery query={query} />
+            <div className="relative pb-12">
+              <div className="rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 p-4">
+                <HighlightedQuery query={query} />
+              </div>
               <button
                 onClick={runQuery}
                 disabled={running}
@@ -187,10 +220,13 @@ export function GraphQLQuery({
             </div>
           )}
           {tab === "variables" && variables && (
-            <SyntaxJson text={variables} />
+            <VariablesEditor variables={variables} />
           )}
           {tab === "response" && response && (
-            <div className={cn("transition-opacity duration-500", ran ? "opacity-100" : "opacity-60")}>
+            <div className={cn(
+              "rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 p-4 transition-opacity duration-500",
+              ran ? "opacity-100" : "opacity-60"
+            )}>
               <SyntaxJson text={response} />
             </div>
           )}

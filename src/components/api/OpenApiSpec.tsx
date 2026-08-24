@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { z } from "zod";
-import { FileText, ChevronDown, ChevronRight, Check, AlertTriangle, X } from "lucide-react";
+import { FileText, Check, AlertTriangle, X, Monitor, Server, ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export const OpenApiSpecSchema = z.object({
@@ -53,7 +53,6 @@ export const OpenApiSpecSchema = z.object({
         responses: [
           { code: 201, description: "Product created" },
           { code: 400, description: "Validation error" },
-          { code: 401, description: "Not authenticated" },
         ],
       },
       {
@@ -64,30 +63,6 @@ export const OpenApiSpecSchema = z.object({
         responses: [
           { code: 200, description: "Order object" },
           { code: 404, description: "Order not found" },
-        ],
-      },
-      {
-        method: "POST",
-        path: "/orders",
-        summary: "Place an order",
-        tag: "Orders",
-        requestBody: {
-          contentType: "application/json",
-          example: { cartId: "cart_abc", paymentIntentId: "pi_xyz" },
-        },
-        responses: [
-          { code: 201, description: "Order created" },
-          { code: 402, description: "Payment failed" },
-        ],
-      },
-      {
-        method: "DELETE",
-        path: "/products/:id",
-        summary: "Delete a product",
-        tag: "Products",
-        responses: [
-          { code: 204, description: "Deleted" },
-          { code: 404, description: "Not found" },
         ],
       },
     ]),
@@ -119,107 +94,19 @@ function getResponseIcon(code: number) {
 
 type Endpoint = OpenApiSpecProps["endpoints"][number];
 
-function EndpointRow({
-  endpoint,
-  isExpanded,
-  onToggle,
-}: {
-  endpoint: Endpoint;
-  isExpanded: boolean;
-  onToggle: () => void;
-}) {
-  const methodStyle = METHOD_STYLES[endpoint.method] ?? METHOD_STYLES.GET;
-
-  return (
-    <div>
-      {/* Row */}
-      <button
-        onClick={onToggle}
-        className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors text-left"
-      >
-        <span
-          className={cn(
-            "inline-block text-[10px] font-bold font-mono px-1.5 py-0.5 rounded shrink-0 w-14 text-center",
-            methodStyle
-          )}
-        >
-          {endpoint.method}
-        </span>
-        <span className="font-mono text-xs text-zinc-700 dark:text-zinc-300 flex-1 truncate">
-          {endpoint.path}
-        </span>
-        <span className="text-xs text-zinc-400 dark:text-zinc-500 truncate hidden sm:block max-w-[160px]">
-          {endpoint.summary}
-        </span>
-        <span className="shrink-0 text-zinc-400">
-          {isExpanded ? (
-            <ChevronDown className="size-3.5" />
-          ) : (
-            <ChevronRight className="size-3.5" />
-          )}
-        </span>
-      </button>
-
-      {/* Expanded detail */}
-      <div
-        className={cn(
-          "overflow-hidden transition-all duration-500",
-          isExpanded ? "max-h-[500px]" : "max-h-0"
-        )}
-      >
-        <div className="mx-3 mb-2 rounded-lg border border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/40 text-xs">
-          {/* Summary line */}
-          <div className="px-3 py-2 border-b border-zinc-100 dark:border-zinc-800 text-zinc-500 dark:text-zinc-400 font-medium">
-            {endpoint.summary}
-          </div>
-
-          {/* Request body */}
-          {endpoint.requestBody && (
-            <div className="px-3 py-2 border-b border-zinc-100 dark:border-zinc-800">
-              <div className="text-zinc-500 dark:text-zinc-400 mb-1.5 font-semibold">
-                Request Body{" "}
-                <span className="font-normal text-zinc-400 dark:text-zinc-500">
-                  ({endpoint.requestBody.contentType})
-                </span>
-              </div>
-              <pre className="font-mono text-[11px] text-zinc-700 dark:text-zinc-300 whitespace-pre-wrap break-all">
-                {JSON.stringify(endpoint.requestBody.example, null, 2)}
-              </pre>
-            </div>
-          )}
-
-          {/* Responses */}
-          <div className="px-3 py-2">
-            <div className="text-zinc-500 dark:text-zinc-400 mb-1.5 font-semibold">Responses</div>
-            <div className="space-y-1">
-              {endpoint.responses.map((r) => (
-                <div key={r.code} className="flex items-center gap-2">
-                  <span className={cn("flex items-center gap-1 font-mono font-bold shrink-0", getResponseColor(r.code))}>
-                    {getResponseIcon(r.code)}
-                    {r.code}
-                  </span>
-                  <span className="text-zinc-500 dark:text-zinc-400">{r.description}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 export function OpenApiSpec({
   title = "FreshMarket API",
   version = "2.0.0",
   baseUrl = "https://api.freshmarket.com",
   endpoints = [],
 }: OpenApiSpecProps) {
-  const [expandedEndpoints, setExpandedEndpoints] = useState<Set<string>>(new Set());
-  const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set());
-  const [allExpanded, setAllExpanded] = useState(false);
+  const [selectedIdx, setSelectedIdx] = useState(0);
+  const [phase, setPhase] = useState<"idle" | "sending" | "done">("idle");
+  const [responseCode, setResponseCode] = useState<number | null>(null);
 
-  // Group endpoints by tag
+  const selected = endpoints[selectedIdx] ?? endpoints[0];
+  const displayBaseUrl = baseUrl ? baseUrl.replace(/^https?:\/\//, "") : "";
+
   const groups = useMemo(() => {
     const map = new Map<string, Endpoint[]>();
     endpoints.forEach((ep) => {
@@ -234,121 +121,140 @@ export function OpenApiSpec({
     return `${ep.method}:${ep.path}`;
   }
 
-  function toggleEndpoint(ep: Endpoint) {
-    const key = endpointKey(ep);
-    setExpandedEndpoints((prev) => {
-      const next = new Set(prev);
-      next.has(key) ? next.delete(key) : next.add(key);
-      return next;
-    });
+  function tryEndpoint() {
+    if (phase === "sending" || !selected) return;
+    setPhase("sending");
+    setResponseCode(null);
+    setTimeout(() => {
+      const success = selected.responses.find((r) => r.code >= 200 && r.code < 300);
+      setResponseCode(success?.code ?? selected.responses[0]?.code ?? 200);
+      setPhase("done");
+    }, 1200);
   }
-
-  function toggleGroup(tag: string) {
-    setCollapsedGroups((prev) => {
-      const next = new Set(prev);
-      next.has(tag) ? next.delete(tag) : next.add(tag);
-      return next;
-    });
-  }
-
-  function handleExpandAll() {
-    if (allExpanded) {
-      setExpandedEndpoints(new Set());
-      setAllExpanded(false);
-    } else {
-      setExpandedEndpoints(new Set(endpoints.map(endpointKey)));
-      setCollapsedGroups(new Set());
-      setAllExpanded(true);
-    }
-  }
-
-  const displayBaseUrl = baseUrl ? baseUrl.replace(/^https?:\/\//, "") : "";
 
   return (
     <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden">
-      {/* Header */}
-      <div className="flex items-center gap-2 px-4 py-3 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50">
+      <div className="flex items-center gap-2 px-4 h-12 border-b border-zinc-100 dark:border-zinc-800">
         <FileText className="size-4 text-zinc-500 dark:text-zinc-400 shrink-0" />
-        <span className="text-sm font-semibold text-zinc-800 dark:text-zinc-200 flex-1">
-          OpenAPI Spec
+        <span className="text-sm font-semibold text-zinc-800 dark:text-zinc-200 flex-1">OpenAPI Spec</span>
+        <span className="text-xs text-zinc-500 font-medium">
+          {title} <span className="font-mono text-zinc-400">v{version}</span>
         </span>
-        <span className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">
-          {title}{" "}
-          <span className="font-mono text-zinc-400 dark:text-zinc-500">v{version}</span>
-        </span>
-        <button
-          onClick={handleExpandAll}
-          className="ml-2 px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 hover:opacity-90 transition-opacity"
-        >
-          {allExpanded ? "Collapse" : "Expand"}
-        </button>
       </div>
 
-      {/* Base URL */}
-      {displayBaseUrl && (
-        <div className="px-4 py-1.5 border-b border-zinc-50 dark:border-zinc-800/50 bg-zinc-50/50 dark:bg-zinc-900/30">
-          <span className="font-mono text-[11px] text-zinc-400 dark:text-zinc-500">{displayBaseUrl}</span>
+      <div className="text-sm text-zinc-500 dark:text-zinc-400 px-4 py-2 border-b border-zinc-100 dark:border-zinc-800">
+        A machine-readable contract describing every endpoint, request, and response.
+      </div>
+
+      <div className="min-h-[280px] flex flex-col">
+        <div className="px-4 py-2 border-b border-zinc-100 dark:border-zinc-800 flex flex-wrap gap-1 max-h-[100px] overflow-y-auto">
+          {Array.from(groups.entries()).flatMap(([, tagEndpoints]) =>
+            tagEndpoints.map((ep) => {
+              const idx = endpoints.indexOf(ep);
+              const isSelected = idx === selectedIdx;
+              return (
+                <button
+                  key={endpointKey(ep)}
+                  onClick={() => { setSelectedIdx(idx); setPhase("idle"); setResponseCode(null); }}
+                  className={cn(
+                    "flex items-center gap-1.5 px-2 py-1 rounded-lg border text-[10px] font-mono transition-all duration-500",
+                    isSelected
+                      ? "border-zinc-900 dark:border-white bg-zinc-900 dark:bg-white text-white dark:text-zinc-900"
+                      : "border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 hover:border-zinc-400"
+                  )}
+                >
+                  <span className={cn("px-1 rounded font-bold", isSelected ? "bg-white/20 dark:bg-zinc-900/20" : METHOD_STYLES[ep.method])}>
+                    {ep.method}
+                  </span>
+                  {ep.path}
+                </button>
+              );
+            })
+          )}
         </div>
-      )}
 
-      {/* Endpoint groups */}
-      <div className="max-h-[320px] overflow-y-auto">
-        {Array.from(groups.entries()).map(([tag, tagEndpoints]) => {
-          const isGroupCollapsed = collapsedGroups.has(tag);
-          return (
-            <div key={tag} className="border-b border-zinc-50 dark:border-zinc-800/50 last:border-b-0">
-              {/* Group header */}
-              <button
-                onClick={() => toggleGroup(tag)}
-                className="w-full flex items-center gap-2 px-4 py-2 hover:bg-zinc-50 dark:hover:bg-zinc-800/30 transition-colors text-left"
-              >
-                <span className="text-xs font-bold text-zinc-700 dark:text-zinc-300 flex-1">
-                  {tag}
-                </span>
-                <span className="text-[10px] text-zinc-400 dark:text-zinc-500 tabular-nums">
-                  {tagEndpoints.length} endpoint{tagEndpoints.length !== 1 ? "s" : ""}
-                </span>
-                {isGroupCollapsed ? (
-                  <ChevronRight className="size-3.5 text-zinc-400" />
-                ) : (
-                  <ChevronDown className="size-3.5 text-zinc-400" />
+        {selected && (
+          <div className="flex-1 px-4 py-4 flex flex-col justify-center gap-3">
+            <div className="flex items-center gap-3">
+              <div className="flex flex-col items-center gap-1">
+                <Monitor className="size-5 text-blue-500" />
+                <span className="text-[9px] text-zinc-400">Client</span>
+              </div>
+              <div className="flex-1 relative h-6 flex items-center">
+                <div className={cn(
+                  "absolute inset-y-1/2 h-0.5 transition-all duration-700 origin-left",
+                  phase !== "idle" ? "w-full bg-blue-400" : "w-0 bg-zinc-200"
+                )} />
+                {phase === "sending" && (
+                  <div className="absolute top-1/2 -translate-y-1/2 size-2 rounded-full bg-blue-500 animate-pulse" style={{ left: "50%" }} />
                 )}
-              </button>
-
-              {/* Group endpoints */}
-              <div
-                className={cn(
-                  "overflow-hidden transition-all duration-500",
-                  isGroupCollapsed ? "max-h-0" : "max-h-[500px]"
-                )}
-              >
-                <div className="mx-3 mb-2 rounded-lg border border-zinc-100 dark:border-zinc-800 overflow-hidden divide-y divide-zinc-50 dark:divide-zinc-800/50">
-                  {tagEndpoints.map((ep) => (
-                    <EndpointRow
-                      key={endpointKey(ep)}
-                      endpoint={ep}
-                      isExpanded={expandedEndpoints.has(endpointKey(ep))}
-                      onToggle={() => toggleEndpoint(ep)}
-                    />
-                  ))}
-                </div>
+                <ArrowRight className={cn("absolute right-0 size-3.5 transition-all duration-500", phase === "done" ? "text-emerald-500" : "text-zinc-300")} />
+              </div>
+              <div className="flex flex-col items-center gap-1">
+                <Server className={cn("size-5 transition-colors duration-500", phase === "done" ? "text-emerald-500" : "text-zinc-400")} />
+                <span className="text-[9px] text-zinc-400">Server</span>
               </div>
             </div>
-          );
-        })}
 
-        {endpoints.length === 0 && (
-          <div className="px-4 py-8 text-center text-sm text-zinc-400 dark:text-zinc-500">
-            No endpoints configured.
+            <div className="rounded-lg border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800/40 p-3 space-y-2">
+              <div className="font-mono text-xs">
+                <span className={cn("px-1.5 py-0.5 rounded font-bold mr-2", METHOD_STYLES[selected.method])}>{selected.method}</span>
+                <span className="text-zinc-600 dark:text-zinc-300">{displayBaseUrl}{selected.path}</span>
+              </div>
+              <p className="text-xs text-zinc-500">{selected.summary}</p>
+              {selected.requestBody && (
+                <pre className="font-mono text-[10px] text-zinc-600 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-900 rounded px-2 py-1.5 overflow-x-auto">
+                  {JSON.stringify(selected.requestBody.example, null, 2)}
+                </pre>
+              )}
+            </div>
+
+            <div className="min-h-[72px] rounded-lg border border-zinc-200 dark:border-zinc-700 p-3 transition-all duration-500">
+              {phase === "idle" && (
+                <p className="text-xs text-zinc-400 text-center py-2">Click Try Endpoint to simulate the request</p>
+              )}
+              {phase === "sending" && (
+                <p className="text-xs text-blue-600 dark:text-blue-400 text-center py-2 animate-pulse">Sending request…</p>
+              )}
+              {phase === "done" && responseCode !== null && (
+                <div className="space-y-1 transition-all duration-500">
+                  {selected.responses.map((r) => (
+                    <div
+                      key={r.code}
+                      className={cn(
+                        "flex items-center gap-2 text-xs transition-all duration-500",
+                        r.code === responseCode ? "opacity-100" : "opacity-40"
+                      )}
+                    >
+                      <span className={cn("flex items-center gap-1 font-mono font-bold", getResponseColor(r.code))}>
+                        {getResponseIcon(r.code)}
+                        {r.code}
+                      </span>
+                      <span className="text-zinc-500">{r.description}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         )}
       </div>
 
-      {/* Footer */}
-      <div className="px-4 py-2.5 border-t border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50">
-        <span className="text-[11px] text-zinc-400 dark:text-zinc-500">
-          Click any endpoint to see request / response schema
+      <div className="px-4 py-3 border-t border-zinc-100 dark:border-zinc-800 flex items-center gap-3">
+        <span className="text-sm text-zinc-500 dark:text-zinc-400 flex-1">
+          {phase === "done" && responseCode
+            ? `Response: ${responseCode} — ${selected?.responses.find((r) => r.code === responseCode)?.description ?? "OK"}`
+            : selected
+            ? `${selected.method} ${selected.path}`
+            : "Select an endpoint"}
         </span>
+        <button
+          onClick={tryEndpoint}
+          disabled={phase === "sending" || !selected}
+          className="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-50"
+        >
+          Try Endpoint
+        </button>
       </div>
     </div>
   );

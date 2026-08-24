@@ -87,7 +87,9 @@ function TableCard({
   selected,
   highlighted,
   dimmed,
-  onClick,
+  onTableClick,
+  onFkClick,
+  selectedRel,
   relationships,
   cellRefs,
 }: {
@@ -95,7 +97,9 @@ function TableCard({
   selected: boolean;
   highlighted: boolean;
   dimmed: boolean;
-  onClick: () => void;
+  onTableClick: () => void;
+  onFkClick: (refKey: string) => void;
+  selectedRel: string | null;
   relationships: Relationship[];
   cellRefs: React.MutableRefObject<Map<string, HTMLElement>>;
 }) {
@@ -106,8 +110,7 @@ function TableCard({
   );
 
   return (
-    <button
-      onClick={onClick}
+    <div
       className={cn(
         "text-left rounded-lg border overflow-hidden transition-all duration-500 font-mono text-[12px]",
         selected
@@ -118,14 +121,18 @@ function TableCard({
         dimmed && "opacity-30"
       )}
     >
-      <div className={cn(
-        "px-3 py-2 border-b font-semibold text-[13px] text-left",
-        selected
-          ? "bg-blue-600 text-white border-blue-500"
-          : "bg-zinc-50 dark:bg-zinc-900 text-zinc-800 dark:text-zinc-200 border-zinc-100 dark:border-zinc-800"
-      )}>
+      <button
+        type="button"
+        onClick={onTableClick}
+        className={cn(
+          "w-full px-3 py-2 border-b font-semibold text-[13px] text-left transition-colors duration-500",
+          selected
+            ? "bg-blue-600 text-white border-blue-500"
+            : "bg-zinc-50 dark:bg-zinc-900 text-zinc-800 dark:text-zinc-200 border-zinc-100 dark:border-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+        )}
+      >
         {table.name}
-      </div>
+      </button>
 
       <div className="bg-white dark:bg-zinc-950 divide-y divide-zinc-50 dark:divide-zinc-900/50">
         {table.columns.map((col) => {
@@ -133,6 +140,7 @@ function TableCard({
           const isFK = !!col.foreignKey;
           const isReferenced = referencedCols.has(col.name);
           const refKey = `${table.name}.${col.name}`;
+          const isRelSelected = selectedRel === refKey;
           return (
             <div
               key={col.name}
@@ -140,10 +148,15 @@ function TableCard({
                 if (el) cellRefs.current.set(refKey, el);
                 else cellRefs.current.delete(refKey);
               }}
+              role={isFK ? "button" : undefined}
+              tabIndex={isFK ? 0 : undefined}
+              onClick={isFK ? (e) => { e.stopPropagation(); onFkClick(refKey); } : undefined}
+              onKeyDown={isFK ? (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onFkClick(refKey); } } : undefined}
               className={cn(
-                "flex items-center gap-2 px-3 py-1.5",
-                isPK && "bg-amber-50/50 dark:bg-amber-950/10",
-                isFK && !isPK && "bg-blue-50/30 dark:bg-blue-950/10"
+                "flex items-center gap-2 px-3 py-1.5 transition-all duration-500",
+                isPK && "bg-amber-50/50 dark:bg-amber-950/10 border-l-2 border-l-amber-400",
+                isFK && !isPK && "bg-blue-50/30 dark:bg-blue-950/10 cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-950/20",
+                isRelSelected && "ring-1 ring-inset ring-blue-400 bg-blue-50 dark:bg-blue-950/30"
               )}
             >
               <span className="shrink-0 w-3">
@@ -169,7 +182,7 @@ function TableCard({
           );
         })}
       </div>
-    </button>
+    </div>
   );
 }
 
@@ -231,7 +244,7 @@ export function ERDiagram({
     : new Set<string>();
 
   function isRelActive(p: PathInfo): boolean {
-    if (selectedRel) return p.rel.from === selectedRel || p.rel.to === selectedRel;
+    if (selectedRel) return p.rel.from === selectedRel;
     if (selectedTable) return p.rel.fromTable === selectedTable || p.rel.toTable === selectedTable;
     return true;
   }
@@ -344,9 +357,14 @@ export function ERDiagram({
               selected={selectedTable === table.name}
               highlighted={relatedTables.has(table.name) && selectedTable !== table.name}
               dimmed={isTableDimmed(table.name)}
-              onClick={() => {
+              selectedRel={selectedRel}
+              onTableClick={() => {
                 setSelectedRel(null);
                 setSelectedTable(selectedTable === table.name ? null : table.name);
+              }}
+              onFkClick={(refKey) => {
+                setSelectedTable(null);
+                setSelectedRel(selectedRel === refKey ? null : refKey);
               }}
               relationships={relationships}
               cellRefs={cellRefs}
@@ -369,7 +387,7 @@ export function ERDiagram({
                 key={r.from}
                 onClick={() => setSelectedRel(isActive ? null : r.from)}
                 className={cn(
-                  "flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-mono transition-all duration-300",
+                  "flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-mono transition-all duration-500",
                   isActive
                     ? "bg-blue-50 dark:bg-blue-950 text-blue-700 dark:text-blue-300 ring-1 ring-blue-300"
                     : "hover:bg-zinc-50 dark:hover:bg-zinc-900 text-zinc-500 dark:text-zinc-400"

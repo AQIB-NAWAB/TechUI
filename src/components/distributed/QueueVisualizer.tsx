@@ -161,7 +161,7 @@ export function QueueVisualizer({
       </div>
 
       {/* Flow diagram */}
-      <div className="flex items-stretch gap-3 px-4 py-4">
+      <div className="flex items-stretch gap-3 px-4 py-4 min-h-[120px]">
         {/* Producer */}
         <div className="flex flex-col items-center gap-1.5 shrink-0">
           <div className="size-12 flex items-center justify-center rounded-xl bg-blue-50 dark:bg-blue-950/30 border-2 border-blue-200 dark:border-blue-900">

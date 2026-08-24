@@ -120,6 +120,13 @@ export function CacheVisualizer({
         setEntries((prev) => prev.map((e) => ({ ...e, flashHit: false, hitsAnimating: false })));
       }, 800);
     } else {
+      setEntries((prev) =>
+        prev.map((e) => ({ ...e, flashMiss: e.key === key ? true : e.flashMiss }))
+      );
+      setTimeout(() => {
+        setEntries((prev) => prev.map((e) => ({ ...e, flashMiss: false })));
+      }, 600);
+
       const newEntry: Entry = {
         key,
         value: `<computed at ${new Date().toLocaleTimeString()}>`,
@@ -142,15 +149,15 @@ export function CacheVisualizer({
               });
               setTimeout(() => {
                 setEntries((p) => p.map((e) => e.key === key ? { ...e, animateIn: false } : e));
-              }, 400);
-            }, 600);
+              }, 1200);
+            }, 1200);
             return prev;
           }
           return [...remaining, newEntry];
         }
         setTimeout(() => {
           setEntries((p) => p.map((e) => e.key === key ? { ...e, animateIn: false } : e));
-        }, 400);
+        }, 1200);
         return [...prev, newEntry];
       });
     }
@@ -188,9 +195,11 @@ export function CacheVisualizer({
         )}
       </div>
 
-      {/* Stats bar */}
-      {total > 0 && (
-        <div className="flex items-center gap-4 px-4 py-2 border-b border-zinc-50 dark:border-zinc-900 bg-zinc-50/50 dark:bg-zinc-900/20">
+      {/* Stats bar — always reserved height */}
+      <div className={cn(
+        "flex items-center gap-4 px-4 py-2 border-b border-zinc-50 dark:border-zinc-900 bg-zinc-50/50 dark:bg-zinc-900/20 min-h-[36px] transition-all duration-500",
+        total === 0 && "opacity-0"
+      )}>
           <div className="flex items-center gap-1.5">
             <span className="size-1.5 rounded-full bg-emerald-500" />
             <span className="text-[10px] font-medium text-zinc-500 dark:text-zinc-400">{stats.hits} hits</span>
@@ -210,31 +219,36 @@ export function CacheVisualizer({
               <span className="text-[10px] font-semibold text-zinc-500 dark:text-zinc-400">{hitRate}% hit</span>
             </div>
           )}
-        </div>
-      )}
+      </div>
 
-      {/* Last access banner */}
-      {lastAccess && (
-        <div className={cn(
-          "flex items-center gap-2 px-4 py-2 border-b text-[11px] font-medium transition-all duration-500",
-          lastAccess.hit
-            ? "bg-emerald-50 dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-900/50 text-emerald-700 dark:text-emerald-400"
-            : "bg-red-50 dark:bg-red-950/20 border-red-200 dark:border-red-900/50 text-red-700 dark:text-red-400"
-        )}>
-          <span className={cn(
-            "font-bold text-[10px] px-1.5 py-0.5 rounded",
-            lastAccess.hit
-              ? "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300"
-              : "bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300"
-          )}>
-            {lastAccess.hit ? "✓ HIT" : "✗ MISS"}
-          </span>
-          <code className="font-mono text-[11px]">{lastAccess.key}</code>
-          {!lastAccess.hit && (
-            <span className="text-[10px] font-normal opacity-70">— fetching from DB and caching</span>
-          )}
-        </div>
-      )}
+      {/* Last access banner — always reserved height */}
+      <div className={cn(
+        "flex items-center gap-2 px-4 py-2 border-b text-[11px] font-medium min-h-[36px] transition-all duration-500",
+        lastAccess?.hit
+          ? "bg-emerald-50 dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-900/50 text-emerald-700 dark:text-emerald-400"
+          : lastAccess && !lastAccess.hit
+          ? "bg-red-50 dark:bg-red-950/20 border-red-200 dark:border-red-900/50 text-red-700 dark:text-red-400"
+          : "bg-transparent border-transparent text-transparent"
+      )}>
+        {lastAccess ? (
+          <>
+            <span className={cn(
+              "font-bold text-[10px] px-1.5 py-0.5 rounded",
+              lastAccess.hit
+                ? "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300"
+                : "bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300"
+            )}>
+              {lastAccess.hit ? "✓ HIT" : "✗ MISS"}
+            </span>
+            <code className="font-mono text-[11px]">{lastAccess.key}</code>
+            {!lastAccess.hit && (
+              <span className="text-[10px] font-normal opacity-70">— fetching from DB and caching</span>
+            )}
+          </>
+        ) : (
+          <span>—</span>
+        )}
+      </div>
 
       {/* Entries list */}
       <div className="min-h-[160px] divide-y divide-zinc-50 dark:divide-zinc-900/60">
@@ -253,10 +267,10 @@ export function CacheVisualizer({
               key={entry.key}
               className={cn(
                 "group flex items-start gap-3 px-4 py-2.5 transition-all duration-500 relative overflow-hidden",
-                entry.flashHit && "ring-2 ring-inset ring-emerald-400 bg-emerald-50/50 dark:bg-emerald-950/10",
+                entry.flashHit && "ring-2 ring-inset ring-emerald-400 bg-emerald-50/50 dark:bg-emerald-950/10 scale-105",
                 entry.flashMiss && "ring-2 ring-inset ring-red-400 bg-red-50/50 dark:bg-red-950/10",
-                entry.animateIn && "-translate-y-2 opacity-0",
-                !entry.animateIn && "translate-y-0 opacity-100",
+                entry.animateIn && "translate-x-4 opacity-0",
+                !entry.animateIn && "translate-x-0 opacity-100",
                 entry.evicting && "-translate-x-full opacity-0",
               )}
             >
@@ -290,8 +304,8 @@ export function CacheVisualizer({
 
               <div className="flex items-center gap-2 shrink-0">
                 <span className={cn(
-                  "text-[10px] text-zinc-400 tabular-nums transition-transform duration-200",
-                  entry.hitsAnimating && "scale-125 text-emerald-500"
+                  "text-[10px] text-zinc-400 tabular-nums transition-transform duration-500",
+                  entry.hitsAnimating && "scale-110 text-emerald-500"
                 )}>
                   {entry.hits}×
                 </span>

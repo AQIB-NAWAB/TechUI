@@ -97,15 +97,17 @@ function HopBox({ hop, active, done, index }: { hop: Hop; active: boolean; done:
   );
 }
 
-function Arrow({ active, done, hopMs }: { active: boolean; done: boolean; hopMs?: number }) {
+function Arrow({ active, done, direction }: { active: boolean; done: boolean; direction?: "forward" | "back" }) {
   return (
-    <div className="flex flex-col items-center justify-center gap-0.5 shrink-0 w-8 relative">
-      <div className={cn("h-px w-full transition-all duration-500", active ? "bg-blue-400" : done ? "bg-emerald-300 dark:bg-emerald-700" : "bg-zinc-200 dark:bg-zinc-700")} />
-      {active && (
-        <span className="absolute -top-3 text-[9px] font-mono text-blue-500 whitespace-nowrap animate-pulse">
-          {hopMs !== undefined ? `${hopMs}ms` : "…"}
-        </span>
-      )}
+    <div className="flex flex-col items-center justify-center gap-0.5 shrink-0 w-10 relative h-8">
+      <div className={cn("h-px w-full transition-all duration-500 relative overflow-visible", active ? "bg-blue-400" : done ? "bg-emerald-300 dark:bg-emerald-700" : "bg-zinc-200 dark:bg-zinc-700")}>
+        {active && direction === "forward" && (
+          <span className="absolute top-1/2 -translate-y-1/2 size-2 rounded-full bg-blue-500 dns-dot-forward" />
+        )}
+        {active && direction === "back" && (
+          <span className="absolute top-1/2 -translate-y-1/2 size-2 rounded-full bg-emerald-500 dns-dot-back" />
+        )}
+      </div>
     </div>
   );
 }
@@ -123,7 +125,6 @@ export function DnsLookup({
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const explanations = buildExplanations(domain, result, ttl);
-  const HOP_MS = [0, 1, 8, 22, 38, 39];
   const TOTAL_MS = 39;
 
   function resolve() {
@@ -143,7 +144,7 @@ export function DnsLookup({
       } else {
         setActiveHop(hop);
       }
-    }, 1000);
+    }, 1200);
   }
 
   function reset() {
@@ -158,7 +159,19 @@ export function DnsLookup({
   const currentExplanation = activeHop >= 0 && activeHop < explanations.length ? explanations[activeHop] : null;
 
   return (
-    <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 overflow-hidden">
+    <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden">
+      <style>{`
+        @keyframes dns-forward {
+          from { left: 0; opacity: 1; }
+          to   { left: calc(100% - 8px); opacity: 0.8; }
+        }
+        @keyframes dns-back {
+          from { left: calc(100% - 8px); opacity: 1; }
+          to   { left: 0; opacity: 0.8; }
+        }
+        .dns-dot-forward { animation: dns-forward 800ms ease-in-out infinite; }
+        .dns-dot-back { animation: dns-back 800ms ease-in-out infinite; }
+      `}</style>
       {/* Header */}
       <div className="flex items-center gap-3 px-4 h-12 border-b border-zinc-100 dark:border-zinc-900 bg-zinc-50 dark:bg-zinc-900/50">
         <Globe className="size-3.5 text-zinc-400 shrink-0" />
@@ -200,17 +213,16 @@ export function DnsLookup({
             />
             {i < HOPS.length - 1 && (
               <Arrow
-                active={activeHop === i}
+                active={activeHop === i || (done && i === HOPS.length - 2)}
                 done={done || activeHop > i}
-                hopMs={activeHop === i ? HOP_MS[i] : undefined}
+                direction={activeHop === i ? "forward" : done && i >= activeHop ? "back" : "forward"}
               />
             )}
           </div>
         ))}
       </div>
 
-      {/* Explanation panel — fixed height */}
-      <div className="mx-4 mb-4 min-h-[80px] rounded-lg border border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/40 px-4 py-3 flex flex-col justify-center transition-all duration-500">
+      <div className="mx-4 mb-4 min-h-[100px] rounded-lg border border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/50 px-4 py-3 flex flex-col justify-center transition-all duration-500">
         {!currentExplanation && !done && (
           <p className="text-xs text-zinc-400 text-center">
             {interactive ? 'Click "Resolve" to trace the DNS resolution chain' : "DNS resolution chain diagram"}

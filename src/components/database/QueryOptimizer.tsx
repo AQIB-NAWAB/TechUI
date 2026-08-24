@@ -71,7 +71,7 @@ export function QueryOptimizer({
     timerRef.current = setTimeout(() => {
       setRunning(false);
       setRevealed(true);
-    }, 900);
+    }, 1200);
   }
 
   function handleReset() {
@@ -91,28 +91,36 @@ export function QueryOptimizer({
   return (
     <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden">
       {/* Header */}
-      <div className="flex items-center gap-2 px-4 py-2.5 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/60">
-        <Zap className="size-3.5 text-amber-500 shrink-0" />
-        <span className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 flex-1">Query Optimizer</span>
-        <div className="flex gap-1">
-          {(["no-index", "index"] as const).map((tab) => (
-            <button
-              key={tab}
-              onClick={() => { setActiveTab(tab); setRevealed(true); }}
-              className={cn(
-                "px-3 py-1 rounded-md text-[11px] font-semibold transition-all duration-300",
-                activeTab === tab
-                  ? "bg-zinc-900 dark:bg-white text-white dark:text-zinc-900"
-                  : "bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700"
-              )}
-            >
-              {tab === "no-index" ? "No Index" : "With Index"}
-            </button>
-          ))}
-        </div>
-        <button onClick={handleReset} className="p-1 rounded text-zinc-400 hover:text-zinc-600 transition-colors">
+      <div className="flex items-center gap-2 px-4 h-12 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/60">
+        <Zap className="size-4 text-amber-500 shrink-0" />
+        <span className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 flex-1">Query Optimizer</span>
+        <button onClick={handleReset} className="p-1 rounded text-zinc-400 hover:text-zinc-600 transition-all duration-500">
           <RotateCcw className="size-3.5" />
         </button>
+      </div>
+
+      {/* Tabs */}
+      <div className="flex gap-1 px-4 py-2 border-b border-zinc-100 dark:border-zinc-800">
+        {(["no-index", "index"] as const).map((tab) => (
+          <button
+            key={tab}
+            onClick={() => { setActiveTab(tab); setRevealed(true); }}
+            className={cn(
+              "px-3 py-1 rounded-md text-[11px] font-semibold transition-all duration-500",
+              activeTab === tab
+                ? "bg-zinc-900 dark:bg-white text-white dark:text-zinc-900"
+                : "bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700"
+            )}
+          >
+            {tab === "no-index" ? "No Index" : "With Index"}
+          </button>
+        ))}
+      </div>
+
+      <div className="px-4 py-2 border-b border-zinc-100 dark:border-zinc-800">
+        <p className="text-sm text-zinc-500 dark:text-zinc-400">
+          The database planner picks how to find rows. An index lets it skip millions of rows and jump straight to matches.
+        </p>
       </div>
 
       {/* Body */}
@@ -236,35 +244,38 @@ export function QueryOptimizer({
             </p>
           </div>
         </div>
+      </div>
 
-        {/* Run button */}
-        <div className="flex justify-center pt-1">
-          <button
-            onClick={handleRun}
-            disabled={running}
-            className={cn(
-              "flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-300",
-              running
-                ? "bg-zinc-200 dark:bg-zinc-800 text-zinc-400 cursor-not-allowed"
-                : "bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 hover:opacity-90"
-            )}
-          >
-            {running ? (
-              <>
-                <svg className="size-3.5 animate-spin" viewBox="0 0 24 24" fill="none">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                </svg>
-                Planning…
-              </>
-            ) : (
-              <>
-                <Play className="size-3.5" />
-                Run EXPLAIN
-              </>
-            )}
-          </button>
-        </div>
+      {/* Footer */}
+      <div className="px-4 py-3 border-t border-zinc-100 dark:border-zinc-800 flex items-center gap-3 bg-zinc-50 dark:bg-zinc-900/30">
+        <span className="text-xs text-zinc-500 flex-1">
+          {running ? "Analyzing query plan…" : revealed ? `${currentPlan.type} · ~${currentPlan.timeMs}ms` : "Ready to explain"}
+        </span>
+        <button
+          onClick={handleRun}
+          disabled={running}
+          className={cn(
+            "flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-500",
+            running
+              ? "bg-zinc-200 dark:bg-zinc-800 text-zinc-400 cursor-not-allowed"
+              : "bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 hover:opacity-90"
+          )}
+        >
+          {running ? (
+            <>
+              <svg className="size-3.5 animate-spin" viewBox="0 0 24 24" fill="none">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+              </svg>
+              Planning…
+            </>
+          ) : (
+            <>
+              <Play className="size-3.5" />
+              Run EXPLAIN
+            </>
+          )}
+        </button>
       </div>
     </div>
   );

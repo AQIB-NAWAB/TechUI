@@ -72,15 +72,15 @@ export function OAuthScopes({
   return (
     <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden">
       {/* Header */}
-      <div className="flex items-center gap-2 px-4 py-3 border-b border-zinc-100 dark:border-zinc-800">
-        <Key className="w-4 h-4 text-amber-500" />
-        <span className="font-semibold text-sm text-zinc-900 dark:text-zinc-100">OAuth Scopes</span>
+      <div className="h-12 px-4 flex items-center gap-2 border-b border-zinc-100 dark:border-zinc-800">
+        <Key className="size-4 text-zinc-400 shrink-0" />
+        <span className="text-sm font-semibold text-zinc-800 dark:text-zinc-200 flex-1">OAuth Scopes</span>
       </div>
 
       {/* Body */}
       <div className="px-4 py-4 min-h-[280px] flex flex-col gap-3">
         {/* Consent heading */}
-        <p className="text-sm text-zinc-700 dark:text-zinc-300 font-medium">
+        <p className="text-sm text-zinc-500 dark:text-zinc-400">
           <span className="font-bold text-zinc-900 dark:text-zinc-100">{appName}</span> wants access to your{" "}
           <span className="font-bold text-zinc-900 dark:text-zinc-100">{provider}</span> account
         </p>

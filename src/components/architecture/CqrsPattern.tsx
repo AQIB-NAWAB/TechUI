@@ -3,7 +3,7 @@
 import { useState, useRef } from "react";
 import { z } from "zod";
 import { cn } from "@/lib/utils";
-import { ArrowLeftRight, ChevronDown } from "lucide-react";
+import { ArrowLeftRight } from "lucide-react";
 
 export const CqrsPatternSchema = z.object({
   entityName: z.string().default("Order"),
@@ -91,18 +91,19 @@ export function CqrsPattern({
 
   return (
     <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden">
-      {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-100 dark:border-zinc-800">
-        <div className="flex items-center gap-2">
-          <ArrowLeftRight className="size-4 text-violet-500" />
-          <span className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">CQRS Pattern</span>
-        </div>
-        <span className="text-xs font-mono text-zinc-400 border border-zinc-200 dark:border-zinc-700 px-2 py-0.5 rounded">
+      <div className="flex items-center gap-3 px-4 h-12 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50">
+        <ArrowLeftRight className="size-4 text-zinc-400 shrink-0" />
+        <span className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 flex-1">CQRS Pattern</span>
+        <span className="text-[10px] font-mono text-zinc-400 border border-zinc-200 dark:border-zinc-700 px-2 py-0.5 rounded">
           {entityName}
         </span>
       </div>
 
-      <div className="min-h-[280px] p-4">
+      <p className="text-sm text-zinc-500 dark:text-zinc-400 px-4 py-2 border-b border-zinc-100 dark:border-zinc-800">
+        Separate write and read paths — commands change data, queries read from an optimized copy.
+      </p>
+
+      <div className="min-h-[220px] p-4">
         {/* Two columns: Commands / Queries */}
         <div className="grid grid-cols-2 gap-4 mb-4">
           {/* Commands */}
@@ -207,83 +208,61 @@ export function CqrsPattern({
 
         {/* Status message */}
         <div className={cn(
-          "mt-3 px-3 py-2 rounded-lg text-[11px] text-center font-medium transition-all duration-500",
-          phase === "idle"         && "bg-zinc-50 dark:bg-zinc-800/40 text-zinc-400",
-          phase === "cmd-write"    && "bg-blue-50 dark:bg-blue-950/20 text-blue-700 dark:text-blue-300",
-          phase === "event"        && "bg-amber-50 dark:bg-amber-950/20 text-amber-700 dark:text-amber-300",
-          phase === "read-update"  && "bg-emerald-50 dark:bg-emerald-950/20 text-emerald-700 dark:text-emerald-300",
-          phase === "done-cmd"     && "bg-emerald-50 dark:bg-emerald-950/20 text-emerald-700 dark:text-emerald-300",
-          phase === "query-read"   && "bg-emerald-50 dark:bg-emerald-950/20 text-emerald-700 dark:text-emerald-300",
-          phase === "done-query"   && "bg-emerald-50 dark:bg-emerald-950/20 text-emerald-700 dark:text-emerald-300",
+          "mt-3 px-3 py-2 rounded-lg text-[11px] text-center font-medium transition-all duration-500 border",
+          phase === "idle"         && "bg-zinc-50 dark:bg-zinc-800/40 text-zinc-400 border-zinc-100 dark:border-zinc-800",
+          phase === "cmd-write"    && "bg-blue-50 dark:bg-blue-950/20 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800",
+          phase === "event"        && "bg-amber-50 dark:bg-amber-950/20 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800",
+          (phase === "read-update" || phase === "done-cmd" || phase === "query-read" || phase === "done-query") &&
+            "bg-emerald-50 dark:bg-emerald-950/20 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800",
         )}>
-          {phase === "idle"        && "Select a command or query below to simulate CQRS flow"}
-          {phase === "cmd-write"   && `→ ${commands[activeCmd]?.name ?? ""} sent to Write Store (PostgreSQL)…`}
-          {phase === "event"       && "→ Event published to stream — eventual consistency in progress…"}
-          {phase === "read-update" && "→ Read Store updated from event — Elasticsearch synced"}
-          {phase === "done-cmd"    && `✓ ${commands[activeCmd]?.name ?? ""} complete. Reads are never blocked by writes.`}
-          {phase === "query-read"  && `→ ${queries[activeQuery]?.name ?? ""} hitting Read Store directly…`}
-          {phase === "done-query"  && `✓ ${queries[activeQuery]?.name ?? ""} returned fast — no joins, pre-computed view.`}
+          {phase === "idle"        && "Send a command or run a query to see the CQRS flow"}
+          {phase === "cmd-write"   && `→ ${commands[activeCmd]?.name ?? ""} sent to Write Store…`}
+          {phase === "event"       && "→ Event published — read store syncing…"}
+          {phase === "read-update" && "→ Read Store updated from event"}
+          {phase === "done-cmd"    && `✓ ${commands[activeCmd]?.name ?? ""} complete`}
+          {phase === "query-read"  && `→ ${queries[activeQuery]?.name ?? ""} hitting Read Store…`}
+          {phase === "done-query"  && `✓ ${queries[activeQuery]?.name ?? ""} returned fast`}
         </div>
+      </div>
 
-        {/* Controls */}
-        <div className="flex gap-3 mt-3">
-          {/* Send Command dropdown */}
-          <div className="relative flex-1">
-            <button
-              onClick={() => { setCmdOpen((v) => !v); setQueryOpen(false); }}
-              className="w-full flex items-center justify-between gap-2 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-3 py-2 text-sm font-semibold hover:opacity-90 transition-opacity"
-            >
-              <span>Send Command</span>
-              <ChevronDown className={cn("size-3.5 transition-transform duration-300", cmdOpen && "rotate-180")} />
-            </button>
-            {cmdOpen && (
-              <div className="absolute top-full mt-1 left-0 right-0 z-10 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 shadow-lg overflow-hidden">
-                {commands.map((cmd, i) => (
-                  <button
-                    key={i}
-                    onClick={() => sendCommand(i)}
-                    className="w-full text-left px-3 py-2 text-xs hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors"
-                  >
-                    <span className="font-semibold font-mono text-zinc-800 dark:text-zinc-200">{cmd.name}</span>
-                    <span className="text-zinc-400 ml-1.5">{cmd.description}</span>
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Run Query dropdown */}
-          <div className="relative flex-1">
-            <button
-              onClick={() => { setQueryOpen((v) => !v); setCmdOpen(false); }}
-              className="w-full flex items-center justify-between gap-2 rounded-lg border border-emerald-300 dark:border-emerald-700 px-3 py-2 text-sm font-semibold text-emerald-700 dark:text-emerald-300 hover:bg-emerald-50 dark:hover:bg-emerald-950/20 transition-colors"
-            >
-              <span>Run Query</span>
-              <ChevronDown className={cn("size-3.5 transition-transform duration-300", queryOpen && "rotate-180")} />
-            </button>
-            {queryOpen && (
-              <div className="absolute top-full mt-1 left-0 right-0 z-10 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 shadow-lg overflow-hidden">
+      <div className="border-t border-zinc-100 dark:border-zinc-800 px-4 py-3 flex items-center gap-3 bg-zinc-50 dark:bg-zinc-900/30">
+        <span className="text-sm text-zinc-500 dark:text-zinc-400 flex-1">
+          {phase === "idle"
+            ? "Commands write · queries read from a separate optimized store"
+            : "Reads are never blocked by writes"}
+        </span>
+        <div className="relative">
+          <button
+            onClick={() => { setCmdOpen((v) => !v); setQueryOpen(false); }}
+            className="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-opacity"
+          >
+            Send Command
+          </button>
+          {cmdOpen && (
+            <div className="absolute bottom-full mb-1 right-0 z-10 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 shadow-lg overflow-hidden min-w-[180px]">
+              {commands.map((cmd, i) => (
+                <button
+                  key={i}
+                  onClick={() => sendCommand(i)}
+                  className="w-full text-left px-3 py-2 text-xs hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all duration-500"
+                >
+                  <span className="font-semibold font-mono">{cmd.name}</span>
+                </button>
+              ))}
+              <div className="border-t border-zinc-100 dark:border-zinc-800">
                 {queries.map((q, i) => (
                   <button
                     key={i}
                     onClick={() => runQuery(i)}
-                    className="w-full text-left px-3 py-2 text-xs hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors"
+                    className="w-full text-left px-3 py-2 text-xs hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all duration-500 text-emerald-700 dark:text-emerald-300"
                   >
-                    <span className="font-semibold font-mono text-zinc-800 dark:text-zinc-200">{q.name}</span>
-                    <span className="text-zinc-400 ml-1.5">{q.description}</span>
+                    Query: {q.name}
                   </button>
                 ))}
               </div>
-            )}
-          </div>
+            </div>
+          )}
         </div>
-      </div>
-
-      {/* Insight footer */}
-      <div className="px-4 py-2.5 border-t border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/40">
-        <p className="text-[11px] text-zinc-500 dark:text-zinc-400">
-          <strong className="text-zinc-700 dark:text-zinc-300">Key insight:</strong> Commands and queries use different optimized stores — reads are never blocked by writes.
-        </p>
       </div>
     </div>
   );

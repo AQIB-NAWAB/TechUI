@@ -21,16 +21,8 @@ export const TerminalSchema = z.object({
 export type TerminalProps = z.infer<typeof TerminalSchema>;
 type TerminalLine = z.infer<typeof TerminalLineSchema>;
 
-const SHELL_PROMPT: Record<string, string> = {
-  bash: "$",
-  zsh: "%",
-  sh: "$",
-  fish: "›",
-  powershell: "PS>",
-  cmd: ">",
-};
-
-function TerminalLineView({ line }: { line: TerminalLine }) {
+function TerminalLineView({ line, theme }: { line: TerminalLine; theme: TerminalProps["theme"] }) {
+  const isLight = theme === "light";
   if (line.type === "comment") {
     return (
       <div className="flex items-start gap-2 opacity-40">
@@ -43,14 +35,12 @@ function TerminalLineView({ line }: { line: TerminalLine }) {
     return (
       <div className="flex items-start gap-2">
         <span className="text-emerald-400 select-none shrink-0">$</span>
-        <span className="text-zinc-100">{line.content}</span>
+        <span className={isLight ? "text-zinc-900" : "text-zinc-100"}>{line.content}</span>
       </div>
     );
   }
   if (line.type === "error") {
-    return (
-      <div className="text-red-400">{line.content}</div>
-    );
+    return <div className="text-red-400">{line.content}</div>;
   }
   if (line.type === "prompt") {
     return (
@@ -60,7 +50,6 @@ function TerminalLineView({ line }: { line: TerminalLine }) {
       </div>
     );
   }
-  // output
   return <div className="text-zinc-400">{line.content}</div>;
 }
 
@@ -69,14 +58,11 @@ export function Terminal({ title, shell = "bash", lines, theme = "dark", interac
   const [input, setInput] = useState("");
   const [extraLines, setExtraLines] = useState<TerminalLine[]>([]);
 
-  const commandLines = lines.filter(l => l.type === "command").map(l => l.content);
-  const allText = [...lines, ...extraLines].map(l =>
-    l.type === "command" ? `$ ${l.content}` : l.content
-  ).join("\n");
+  const commandLines = lines.filter((l) => l.type === "command").map((l) => l.content);
 
   function handleEnter(e: React.KeyboardEvent) {
     if (e.key === "Enter" && input.trim()) {
-      setExtraLines(prev => [
+      setExtraLines((prev) => [
         ...prev,
         { type: "command", content: input },
         { type: "output", content: `zsh: command not found: ${input.split(" ")[0]}` },
@@ -86,48 +72,36 @@ export function Terminal({ title, shell = "bash", lines, theme = "dark", interac
   }
 
   const themeClasses = {
-    dark: "bg-zinc-950 border-zinc-800",
-    light: "bg-white border-zinc-200",
-    github: "bg-[#0d1117] border-[#30363d]",
+    dark: "bg-zinc-950",
+    light: "bg-white",
+    github: "bg-[#0d1117]",
   };
 
-  const textClasses = {
-    dark: "text-zinc-100",
-    light: "text-zinc-900",
-    github: "text-[#c9d1d9]",
+  const headerBg = {
+    dark: "bg-zinc-900 border-zinc-800",
+    light: "bg-zinc-100 border-zinc-200",
+    github: "bg-[#161b22] border-[#30363d]",
   };
 
   return (
-    <div className={cn("rounded-xl border overflow-hidden font-mono text-sm", themeClasses[theme])}>
-      {/* Title bar */}
-      <div className={cn(
-        "flex items-center px-4 py-3 border-b",
-        theme === "dark" ? "bg-zinc-900 border-zinc-800" : theme === "github" ? "bg-[#161b22] border-[#30363d]" : "bg-zinc-100 border-zinc-200"
-      )}>
+    <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden">
+      <div className={cn("flex items-center gap-3 px-4 h-12 border-b", headerBg[theme])}>
         <div className="flex items-center gap-1.5">
-          <span className="size-3 rounded-full bg-red-500/70" />
-          <span className="size-3 rounded-full bg-amber-500/70" />
-          <span className="size-3 rounded-full bg-emerald-500/70" />
+          <span className="size-2.5 rounded-full bg-red-500/70" />
+          <span className="size-2.5 rounded-full bg-amber-500/70" />
+          <span className="size-2.5 rounded-full bg-emerald-500/70" />
         </div>
-        <div className="flex-1 flex items-center justify-center gap-2">
-          <TerminalIcon className="size-3 text-zinc-500" />
-          <span className="text-xs text-zinc-500">{title ?? shell}</span>
-        </div>
-        <button
-          onClick={() => { navigator.clipboard.writeText(commandLines.join("\n")); setCopied(true); setTimeout(() => setCopied(false), 1500); }}
-          className="p-1 rounded text-zinc-600 hover:text-zinc-400 transition-colors"
-        >
-          {copied ? <Check className="size-3.5 text-emerald-400" /> : <Copy className="size-3.5" />}
-        </button>
+        <TerminalIcon className="size-4 text-zinc-400 shrink-0" />
+        <span className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 flex-1">{title ?? shell}</span>
+        <span className="text-[10px] font-semibold uppercase tracking-widest text-zinc-400">{shell}</span>
       </div>
 
-      {/* Content */}
-      <div className="p-4 space-y-1 text-[13px] leading-relaxed min-h-[80px]">
+      <div className={cn("min-h-[220px] p-4 space-y-1 font-mono text-[13px] leading-relaxed", themeClasses[theme])}>
         {lines.map((line, i) => (
-          <TerminalLineView key={i} line={line} />
+          <TerminalLineView key={i} line={line} theme={theme} />
         ))}
         {extraLines.map((line, i) => (
-          <TerminalLineView key={`extra-${i}`} line={line} />
+          <TerminalLineView key={`extra-${i}`} line={line} theme={theme} />
         ))}
         {interactive && (
           <div className="flex items-center gap-2">
@@ -142,6 +116,23 @@ export function Terminal({ title, shell = "bash", lines, theme = "dark", interac
             />
           </div>
         )}
+      </div>
+
+      <div className="border-t border-zinc-100 dark:border-zinc-800 px-4 py-3 flex items-center gap-3">
+        <span className="text-sm text-zinc-500 dark:text-zinc-400 flex-1">
+          {commandLines.length} command{commandLines.length !== 1 ? "s" : ""} · {lines.length + extraLines.length} lines
+        </span>
+        <button
+          onClick={() => {
+            navigator.clipboard.writeText(commandLines.join("\n"));
+            setCopied(true);
+            setTimeout(() => setCopied(false), 1500);
+          }}
+          className="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg px-4 py-2 text-sm font-semibold hover:opacity-90 transition-opacity flex items-center gap-1.5"
+        >
+          {copied ? <Check className="size-3.5" /> : <Copy className="size-3.5" />}
+          Copy commands
+        </button>
       </div>
     </div>
   );
